@@ -1,0 +1,35 @@
+[package]
+authors = ["zegevlier <iamascratcher@gmail.com>"]
+edition = "2018"
+name = "mc-proxy-v2"
+version = "0.1.0"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+aes = "0.6.0"
+base64 = "0.13.0"
+cfb8 = "0.6.0"
+colored = "2.0.0"
+rust-crypto = "0.2.36"
+# config = "0.11.0"
+async-trait = "0.1.50"
+deadqueue = {version = "0.2.0", features = ["unlimited"]}
+dyn-clone = "1.0.4"
+env_logger = "0.8.3"
+hex = "0.4.3"
+log = "0.4.14"
+maplit = "1.0.2"
+miniz_oxide = "0.4.4"
+num-bigint = "0.4.0"
+parking_lot = "0.11.1"
+regex = "1.4.5"
+rustc-serialize = "0.3.24"
+# serde = {version = "1.0.125", features = ["derive"]}
+num-bigint-dig = "0.7.0"
+rand = "0.8.3"
+reqwest = {version = "0.11.3", features = ["json", "blocking"]}
+rsa = "0.4.0"
+rsa-der = "0.2.1"
+sha1 = "0.6.0"
+tokio = {version = "1.5.0", features = ["net", "rt-multi-thread", "macros", "io-util"]}
