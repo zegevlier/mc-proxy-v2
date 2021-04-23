@@ -67,21 +67,21 @@ impl Parsable for EncResponse {
         )
     }
 
-    fn packet_editing(&self) -> bool {
-        true
-    }
+    // fn packet_editing(&self) -> bool {
+    //     true
+    // }
 
-    async fn edit_packet(
-        &self,
-        state: SharedState,
-    ) -> Result<(Packet, Direction, SharedState), ()> {
-        let mut state = state;
-        state.ps_cipher.enable(&decode(&state.secret_key).unwrap());
-        state.sp_cipher.enable(&decode(&state.secret_key).unwrap());
+    // async fn edit_packet(
+    //     &self,
+    //     state: SharedState,
+    // ) -> Result<(Packet, Direction, SharedState), ()> {
+    //     let mut state = state;
+    //     state.ps_cipher.enable(&decode(&state.secret_key).unwrap());
+    //     state.sp_cipher.enable(&decode(&state.secret_key).unwrap());
 
-        log::debug!("Updated cipher with secret key");
-        Ok((Packet::new(), Direction::Serverbound, state))
-    }
+    //     log::debug!("Updated cipher with secret key");
+    //     Ok((Packet::new(), Direction::Serverbound, state))
+    // }
 }
 
 #[derive(Clone)]

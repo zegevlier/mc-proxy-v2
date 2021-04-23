@@ -108,7 +108,7 @@ impl Parsable for EncRequest {
         };
 
         let mut req_map = HashMap::new();
-        req_map.insert("accessToken", "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI2NTY0M2EzYmU0NGY4NmVlODE4OWEwMDllMGNlYTNmYSIsInlnZ3QiOiJmYjQzODI4MTY5YTg0ZGY5ODY5ZDc4NjIwODU4YmQyMyIsInNwciI6ImY1NGM3NGRkMzM2MjQyMmM4MGY5ZGE3MWVjYTRhYWEzIiwiaXNzIjoiWWdnZHJhc2lsLUF1dGgiLCJleHAiOjE2MTg5Mzg3NzMsImlhdCI6MTYxODc2NTk3M30.dDItlFrl4BuLXQV4ZBYgRa0jMsjZm2jEqM3dzd2kHRA");
+        req_map.insert("accessToken", "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI2NTY0M2EzYmU0NGY4NmVlODE4OWEwMDllMGNlYTNmYSIsInlnZ3QiOiIxZDFjNDhjOWE1Yzg0MWU3OTFmOTc0MjY3ZTEyYjVkNiIsInNwciI6ImY1NGM3NGRkMzM2MjQyMmM4MGY5ZGE3MWVjYTRhYWEzIiwiaXNzIjoiWWdnZHJhc2lsLUF1dGgiLCJleHAiOjE2MTkyNzQ3NDksImlhdCI6MTYxOTEwMTk0OX0.NmxfpIlmXiEn22KP74JIkrEhQOi1VqQgLqD37afbiH4");
         req_map.insert("selectedProfile", "f54c74dd3362422c80f9da71eca4aaa3");
         req_map.insert("serverId", &result_hash);
 
@@ -176,6 +176,7 @@ impl Parsable for EncRequest {
     fn post_send_update(&self, status: &mut SharedState) -> Result<(), ()> {
         status.ps_cipher.enable(&status.secret_key);
         status.sp_cipher.enable(&status.secret_key);
+        log::debug!("Enabled ciphers");
         Ok(())
     }
 }

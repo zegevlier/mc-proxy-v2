@@ -9,6 +9,7 @@ use std::collections::HashMap;
 
 #[derive(Hash, Eq, PartialEq, Debug)]
 pub enum Fid {
+    Unparsable,
     Handshake,
     StatusResponse,
     StatusPong,
@@ -22,6 +23,12 @@ pub enum Fid {
     LoginStart,
     EncResponse,
     PluginResponse,
+    SpawnEntity,
+    SpawnXpOrb,
+    SpawnLivingEntity,
+    SpawnPainting,
+    SpawnPlayer,
+    AckPlayerDigging,
 }
 
 impl Fid {
@@ -176,6 +183,38 @@ pub fn get_functions() -> Functions {
     functions.add(
         Fid::PluginResponse,
         Box::new(serverbound::login::PluginResponse::empty()),
+    );
+
+    // Play
+    // Clientbound
+    functions.add(
+        Fid::SpawnEntity,
+        Box::new(clientbound::play::SpawnEntity::empty()),
+    );
+
+    functions.add(
+        Fid::SpawnXpOrb,
+        Box::new(clientbound::play::SpawnXpOrb::empty()),
+    );
+
+    functions.add(
+        Fid::SpawnLivingEntity,
+        Box::new(clientbound::play::SpawnLivingEntity::empty()),
+    );
+
+    functions.add(
+        Fid::SpawnPainting,
+        Box::new(clientbound::play::SpawnPainting::empty()),
+    );
+
+    functions.add(
+        Fid::SpawnPlayer,
+        Box::new(clientbound::play::SpawnPlayer::empty()),
+    );
+
+    functions.add(
+        Fid::AckPlayerDigging,
+        Box::new(clientbound::play::AckPlayerDigging::empty()),
     );
 
     functions

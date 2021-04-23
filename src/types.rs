@@ -29,11 +29,11 @@ impl SharedState {
     }
 
     pub fn set(&mut self, new_state: SharedState) {
-        self.ps_cipher = new_state.ps_cipher;
-        self.sp_cipher = new_state.sp_cipher;
-        self.compress = new_state.compress;
-        self.state = new_state.state;
-        self.secret_key = new_state.secret_key;
+        self.ps_cipher = new_state.ps_cipher.clone();
+        self.sp_cipher = new_state.sp_cipher.clone();
+        self.compress = new_state.compress.clone();
+        self.state = new_state.state.clone();
+        self.secret_key = new_state.secret_key.clone();
     }
 }
 

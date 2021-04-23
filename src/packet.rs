@@ -312,9 +312,9 @@ pub trait Parsable: DynClone {
 
     async fn edit_packet(
         &self,
-        _status: SharedState,
+        status: SharedState,
     ) -> Result<(Packet, Direction, SharedState), ()> {
-        Ok((Packet::new(), Direction::Clientbound, SharedState::new()))
+        Ok((Packet::new(), Direction::Clientbound, status))
     }
 
     fn post_send_updating(&self) -> bool {

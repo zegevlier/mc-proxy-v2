@@ -1,0 +1,24 @@
+[dependencies.cipher]
+version = "0.2"
+[dev-dependencies.aes]
+version = "0.6"
+
+[dev-dependencies.cipher]
+features = ["dev"]
+version = "0.2"
+
+[dev-dependencies.hex-literal]
+version = "0.2"
+
+[package]
+authors = ["RustCrypto Developers"]
+categories = ["cryptography", "no-std"]
+description = "Generic 8-bit Cipher Feedback (CFB8) mode implementation."
+documentation = "https://docs.rs/cfb8"
+edition = "2018"
+keywords = ["crypto", "stream-cipher", "block-mode"]
+license = "MIT OR Apache-2.0"
+name = "cfb8"
+readme = "README.md"
+repository = "https://github.com/RustCrypto/stream-ciphers"
+version = "0.6.0"

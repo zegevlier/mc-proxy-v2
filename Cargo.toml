@@ -9,7 +9,7 @@ version = "0.1.0"
 [dependencies]
 aes = "0.6.0"
 base64 = "0.13.0"
-cfb8 = "0.6.0"
+cfb8 = {path = "./cfb8"}#"0.6.0"
 colored = "2.0.0"
 rust-crypto = "0.2.36"
 # config = "0.11.0"
