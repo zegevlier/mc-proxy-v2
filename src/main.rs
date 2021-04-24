@@ -241,7 +241,7 @@ async fn handle_connection(client_stream: TcpStream) -> std::io::Result<()> {
     let proxy_server_queue = Arc::new(DataQueue::new());
     let shared_status: Arc<Mutex<SharedState>> = Arc::new(Mutex::new(SharedState::new()));
 
-    let server_stream = TcpStream::connect("127.0.0.1:25565").await?;
+    let server_stream = TcpStream::connect("192.168.178.25:25565").await?;
 
     let (srx, stx) = server_stream.into_split();
     let (crx, ctx) = client_stream.into_split();

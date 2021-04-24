@@ -28,16 +28,16 @@ pub struct EncRequest {
 
 const LEADING_ZERO_REGEX: &str = r#"^0+"#;
 
-// fn two_complement(bytes: &mut Vec<u8>) {
-//     let mut carry = true;
-//     for i in (0..bytes.len()).rev() {
-//         bytes[i] = !bytes[i];
-//         if carry {
-//             carry = bytes[i] == 0xff;
-//             bytes[i] + 1;
-//         }
-//     }
-// }
+fn two_complement(bytes: &mut Vec<u8>) {
+    let mut carry = true;
+    for i in (0..bytes.len()).rev() {
+        bytes[i] = !bytes[i];
+        if carry {
+            carry = bytes[i] == 0xff;
+            bytes[i] += 1;
+        }
+    }
+}
 
 #[async_trait::async_trait]
 impl Parsable for EncRequest {
@@ -94,7 +94,7 @@ impl Parsable for EncRequest {
         let regex = Regex::new(LEADING_ZERO_REGEX).unwrap();
 
         let result_hash = if (hex[0] & 0x80) == 0x80 {
-            // two_complement(&mut hex);
+            two_complement(&mut hex);
             format!(
                 "-{}",
                 regex
@@ -108,7 +108,7 @@ impl Parsable for EncRequest {
         };
 
         let mut req_map = HashMap::new();
-        req_map.insert("accessToken", "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI2NTY0M2EzYmU0NGY4NmVlODE4OWEwMDllMGNlYTNmYSIsInlnZ3QiOiIxZDFjNDhjOWE1Yzg0MWU3OTFmOTc0MjY3ZTEyYjVkNiIsInNwciI6ImY1NGM3NGRkMzM2MjQyMmM4MGY5ZGE3MWVjYTRhYWEzIiwiaXNzIjoiWWdnZHJhc2lsLUF1dGgiLCJleHAiOjE2MTkyNzQ3NDksImlhdCI6MTYxOTEwMTk0OX0.NmxfpIlmXiEn22KP74JIkrEhQOi1VqQgLqD37afbiH4");
+        req_map.insert("accessToken", "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI2NTY0M2EzYmU0NGY4NmVlODE4OWEwMDllMGNlYTNmYSIsInlnZ3QiOiI3NjQ5MTI3Y2Q5ODg0NjRmYmZkOTdlMDgwZWZkZGFlOCIsInNwciI6ImY1NGM3NGRkMzM2MjQyMmM4MGY5ZGE3MWVjYTRhYWEzIiwiaXNzIjoiWWdnZHJhc2lsLUF1dGgiLCJleHAiOjE2MTk0NTk3MzYsImlhdCI6MTYxOTI4NjkzNn0.zzo8jICv3fQLWpM5jHbLvK_iw_DDvqETLZHA_pJxRxg");
         req_map.insert("selectedProfile", "f54c74dd3362422c80f9da71eca4aaa3");
         req_map.insert("serverId", &result_hash);
 
