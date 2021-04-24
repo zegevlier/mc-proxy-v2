@@ -193,13 +193,13 @@ async fn parser(
                 }
                 // let mut shared_status_c = shared_status.lock().clone();
                 if success && parsed_packet.post_send_updating() {
-                        println!("{:?}", shared_status.lock().ps_cipher.encryptor.is_some());
-                        match parsed_packet.post_send_update(&mut shared_status.lock()) {
-                            Ok(_) => {
-                                log::debug!("Ran post send update")
-                            }
-                            Err(_) => {}
-                        };
+                    println!("{:?}", shared_status.lock().ps_cipher.encryptor.is_some());
+                    match parsed_packet.post_send_update(&mut shared_status.lock()) {
+                        Ok(_) => {
+                            log::debug!("Ran post send update")
+                        }
+                        Err(_) => {}
+                    };
                 }
                 println!("{:?}", shared_status.lock().ps_cipher.encryptor.is_some());
                 out_data
