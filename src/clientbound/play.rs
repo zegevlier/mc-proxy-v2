@@ -48,7 +48,7 @@ impl Parsable for SpawnEntity {
         self.velocity_x = packet.decode_short()?;
         self.velocity_y = packet.decode_short()?;
         self.velocity_z = packet.decode_short()?;
-        return Ok(());
+        Ok(())
     }
 
     fn get_printable(&self) -> String {
@@ -97,7 +97,7 @@ impl Parsable for SpawnXpOrb {
         self.y = packet.decode_double()?;
         self.z = packet.decode_double()?;
         self.count = packet.decode_short()?;
-        return Ok(());
+        Ok(())
     }
 
     fn get_printable(&self) -> String {
@@ -156,7 +156,7 @@ impl Parsable for SpawnLivingEntity {
         self.velocity_x = packet.decode_short()?;
         self.velocity_y = packet.decode_short()?;
         self.velocity_z = packet.decode_short()?;
-        return Ok(());
+        Ok(())
     }
 
     fn get_printable(&self) -> String {
@@ -225,7 +225,7 @@ impl Parsable for SpawnPainting {
             0x03 => self.direction = FacingDirection::East,
             _ => return Err(()),
         }
-        return Ok(());
+        Ok(())
     }
 
     fn get_printable(&self) -> String {
@@ -269,7 +269,7 @@ impl Parsable for SpawnPlayer {
         self.z = packet.decode_double()?;
         self.yaw = packet.read(1)?[0];
         self.pitch = packet.read(1)?[0];
-        return Ok(());
+        Ok(())
     }
 
     fn get_printable(&self) -> String {
@@ -322,7 +322,7 @@ impl Parsable for AckPlayerDigging {
             _ => return Err(()),
         };
         self.successful = packet.decode_bool()?;
-        return Ok(());
+        Ok(())
     }
 
     fn get_printable(&self) -> String {

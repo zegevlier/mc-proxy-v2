@@ -5,7 +5,7 @@ use crate::{
     types::{Direction, State},
 };
 use maplit::hashmap;
-use std::collections::HashMap;
+use std::{collections::HashMap, fmt};
 
 #[derive(Hash, Eq, PartialEq, Debug)]
 pub enum Fid {
@@ -31,9 +31,9 @@ pub enum Fid {
     AckPlayerDigging,
 }
 
-impl Fid {
-    pub fn to_string(&self) -> String {
-        format!("{:?}", self)
+impl fmt::Display for Fid {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
     }
 }
 
@@ -64,11 +64,11 @@ impl Functions {
                 },
                 Direction::Serverbound => hashmap! {
                     State::Handshaking => hashmap! {
-                        0x00 => Fid::Handshake.into(),
+                        0x00 => Fid::Handshake,
                     },
                     State::Status => hashmap! {
-                        0x00 => Fid::StatusRequest.into(),
-                        0x01 => Fid::StatusPing.into(),
+                        0x00 => Fid::StatusRequest,
+                        0x01 => Fid::StatusPing,
                     },
                     State::Login => hashmap! {
                         0x00 => Fid::LoginStart,
@@ -101,9 +101,9 @@ impl Functions {
         }
     }
 
-    pub fn get(&self, id: &Fid) -> Option<&Box<dyn Parsable + Send + Sync>> {
+    pub fn get(&self, id: &Fid) -> Option<Box<dyn Parsable + Send + Sync>> {
         match self.list.get(id) {
-            Some(func) => Some(func),
+            Some(func) => Some(func.clone()),
             None => None,
         }
     }

@@ -1,4 +1,5 @@
 use crate::cipher::Cipher;
+use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub enum State {
@@ -31,9 +32,15 @@ impl SharedState {
     pub fn set(&mut self, new_state: SharedState) {
         self.ps_cipher = new_state.ps_cipher.clone();
         self.sp_cipher = new_state.sp_cipher.clone();
-        self.compress = new_state.compress.clone();
+        self.compress = new_state.compress;
         self.state = new_state.state.clone();
-        self.secret_key = new_state.secret_key.clone();
+        self.secret_key = new_state.secret_key;
+    }
+}
+
+impl Default for SharedState {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -43,8 +50,8 @@ pub enum Direction {
     Clientbound,
 }
 
-impl Direction {
-    pub fn to_string(&self) -> String {
-        format!("{:?}", self)
+impl fmt::Display for Direction {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
     }
 }

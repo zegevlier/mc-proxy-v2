@@ -28,7 +28,7 @@ impl Parsable for Handshake {
             2 => State::Login,
             _ => return Err(()),
         };
-        return Ok(());
+        Ok(())
     }
 
     fn get_printable(&self) -> String {

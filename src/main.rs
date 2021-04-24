@@ -145,7 +145,7 @@ async fn parser(
             // let mut shared_status_c = shared_status.lock().clone();
             let out_data = if !not_processed {
                 let mut parsed_packet = match functions.get(func_id) {
-                    Some(func) => func.clone(),
+                    Some(func) => func,
                     None => panic!("Oof"),
                 };
 
@@ -182,7 +182,9 @@ async fn parser(
                                 out_data = packet.get_vec();
                                 shared_status.lock().set(new_shared_status);
                             }
-                            Err(_) => {}
+                            Err(_) => {
+                                panic!("This should never happen");
+                            }
                         };
                     }
                 }
@@ -198,7 +200,9 @@ async fn parser(
                         Ok(_) => {
                             log::debug!("Ran post send update")
                         }
-                        Err(_) => {}
+                        Err(_) => {
+                            panic!("This should never happen")
+                        }
                     };
                 }
                 println!("{:?}", shared_status.lock().ps_cipher.encryptor.is_some());

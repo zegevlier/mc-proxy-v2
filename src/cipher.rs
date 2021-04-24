@@ -44,3 +44,9 @@ impl Cipher {
     //     self.encryptor = None;
     // }
 }
+
+impl Default for Cipher {
+    fn default() -> Self {
+        Self::new()
+    }
+}

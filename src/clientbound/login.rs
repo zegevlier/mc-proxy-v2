@@ -28,16 +28,16 @@ pub struct EncRequest {
 
 const LEADING_ZERO_REGEX: &str = r#"^0+"#;
 
-fn two_complement(bytes: &mut Vec<u8>) {
-    let mut carry = true;
-    for i in (0..bytes.len()).rev() {
-        bytes[i] = !bytes[i] & 0xff;
-        if carry {
-            carry = bytes[i] == 0xff;
-            bytes[i] = bytes[i] + 1;
-        }
-    }
-}
+// fn two_complement(bytes: &mut Vec<u8>) {
+//     let mut carry = true;
+//     for i in (0..bytes.len()).rev() {
+//         bytes[i] = !bytes[i];
+//         if carry {
+//             carry = bytes[i] == 0xff;
+//             bytes[i] + 1;
+//         }
+//     }
+// }
 
 #[async_trait::async_trait]
 impl Parsable for EncRequest {
@@ -57,7 +57,7 @@ impl Parsable for EncRequest {
         self.public_key = packet.read(self.public_key_length as usize)?;
         self.verify_token_length = packet.decode_varint()?;
         self.verify_token = packet.read(self.verify_token_length as usize)?;
-        return Ok(());
+        Ok(())
     }
 
     fn get_printable(&self) -> String {
@@ -94,7 +94,7 @@ impl Parsable for EncRequest {
         let regex = Regex::new(LEADING_ZERO_REGEX).unwrap();
 
         let result_hash = if (hex[0] & 0x80) == 0x80 {
-            two_complement(&mut hex);
+            // two_complement(&mut hex);
             format!(
                 "-{}",
                 regex
@@ -193,7 +193,7 @@ impl Parsable for SetCompression {
 
     fn parse_packet(&mut self, mut packet: Packet) -> Result<(), ()> {
         self.threshold = packet.decode_varint()?;
-        return Ok(());
+        Ok(())
     }
 
     fn get_printable(&self) -> String {
@@ -227,7 +227,7 @@ impl Parsable for LoginSuccess {
     fn parse_packet(&mut self, mut packet: Packet) -> Result<(), ()> {
         self.uuid = packet.decode_uuid()?;
         self.username = packet.decode_string()?;
-        return Ok(());
+        Ok(())
     }
 
     fn get_printable(&self) -> String {
@@ -257,11 +257,11 @@ impl Parsable for Disconnect {
 
     fn parse_packet(&mut self, mut packet: Packet) -> Result<(), ()> {
         self.reason = packet.decode_string()?;
-        return Ok(());
+        Ok(())
     }
 
     fn get_printable(&self) -> String {
-        format!("{}", self.reason)
+        self.reason.to_string()
     }
 
     fn status_updating(&self) -> bool {
@@ -295,7 +295,7 @@ impl Parsable for PluginRequest {
         self.message_id = packet.decode_varint()?;
         self.channel = packet.decode_string()?;
         self.data = packet.get_vec();
-        return Ok(());
+        Ok(())
     }
 
     fn get_printable(&self) -> String {

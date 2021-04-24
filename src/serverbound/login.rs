@@ -17,11 +17,11 @@ impl Parsable for LoginStart {
 
     fn parse_packet(&mut self, mut packet: Packet) -> Result<(), ()> {
         self.username = packet.decode_string()?;
-        return Ok(());
+        Ok(())
     }
 
     fn get_printable(&self) -> String {
-        format!("{}", self.username,)
+        self.username.to_string()
     }
 }
 
@@ -49,7 +49,7 @@ impl Parsable for EncResponse {
         self.shared_secret = packet.read(self.shared_secret_length as usize)?;
         self.verify_token_length = packet.decode_varint()?;
         self.verify_token = packet.read(self.verify_token_length as usize)?;
-        return Ok(());
+        Ok(())
     }
 
     fn get_printable(&self) -> String {
@@ -99,7 +99,7 @@ impl Parsable for PluginResponse {
         self.message_id = packet.decode_varint()?;
         self.success = packet.decode_bool()?;
         self.data = packet.get_vec();
-        return Ok(());
+        Ok(())
     }
 
     fn get_printable(&self) -> String {

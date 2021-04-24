@@ -2,7 +2,7 @@
 // alongstringlikethis would become alongs...kethis
 pub fn make_string_fixed_length(string: String, length: usize) -> String {
     if string.len() <= length {
-        return string;
+        string
     } else {
         let part_size = length - 3 / 2;
         format!(

@@ -22,8 +22,8 @@ impl Packet {
         self.data.push(data)
     }
 
-    pub fn push_vec(&mut self, data: Vec<u8>) {
-        self.data.append(&mut data.to_owned())
+    pub fn push_vec(&mut self, mut data: Vec<u8>) {
+        self.data.append(&mut data)
     }
 
     pub fn len(&self) -> usize {
@@ -98,15 +98,15 @@ impl Packet {
 
     pub fn decode_string(&mut self) -> Result<String, ()> {
         let string_length = self.decode_varint()?;
-        return Ok(String::from_utf8(self.read(string_length.try_into().unwrap())?).unwrap());
+        Ok(String::from_utf8(self.read(string_length.try_into().unwrap())?).unwrap())
     }
 
     pub fn decode_chat(&mut self) -> Result<String, ()> {
-        Ok(self.decode_string()?)
+        self.decode_string()
     }
 
     pub fn decode_identifier(&mut self) -> Result<String, ()> {
-        Ok(self.decode_string()?)
+        self.decode_string()
     }
 
     // no touchies
@@ -127,7 +127,7 @@ impl Packet {
                 break;
             }
         }
-        return Ok(result);
+        Ok(result)
     }
 
     pub fn encode_varint(&mut self, v: i32) -> Result<(), ()> {
@@ -164,7 +164,7 @@ impl Packet {
                 break;
             }
         }
-        return Ok(result);
+        Ok(result)
     }
 
     // Entity Metadata
@@ -198,6 +198,12 @@ impl Packet {
 
     pub fn decode_uuid(&mut self) -> Result<u128, ()> {
         Ok(u128::from_be_bytes(self.read(16)?.try_into().unwrap()))
+    }
+}
+
+impl Default for Packet {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

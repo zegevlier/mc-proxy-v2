@@ -9,7 +9,7 @@ impl Parsable for StatusRequest {
     }
 
     fn parse_packet(&mut self, mut _packet: Packet) -> Result<(), ()> {
-        return Ok(());
+        Ok(())
     }
 
     fn get_printable(&self) -> String {
@@ -29,7 +29,7 @@ impl Parsable for StatusPing {
 
     fn parse_packet(&mut self, mut packet: Packet) -> Result<(), ()> {
         self.payload = packet.decode_long()?;
-        return Ok(());
+        Ok(())
     }
 
     fn get_printable(&self) -> String {

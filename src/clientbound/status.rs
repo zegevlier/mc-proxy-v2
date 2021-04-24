@@ -15,11 +15,11 @@ impl Parsable for StatusResponse {
 
     fn parse_packet(&mut self, mut packet: Packet) -> Result<(), ()> {
         self.json_response = packet.decode_string()?;
-        return Ok(());
+        Ok(())
     }
 
     fn get_printable(&self) -> String {
-        format!("{}", self.json_response)
+        self.json_response.to_string()
     }
 }
 
@@ -35,7 +35,7 @@ impl Parsable for StatusPong {
 
     fn parse_packet(&mut self, mut packet: Packet) -> Result<(), ()> {
         self.payload = packet.decode_long()?;
-        return Ok(());
+        Ok(())
     }
 
     fn get_printable(&self) -> String {
