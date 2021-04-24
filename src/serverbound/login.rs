@@ -1,10 +1,5 @@
 use crate::packet::{Packet, Parsable};
-use crate::{Direction, SharedState};
-use base64::decode;
 use hex::encode;
-// use std::fs::File;
-// use std::io::{prelude::*, BufReader};
-// use std::path::Path;
 
 use crate::utils;
 

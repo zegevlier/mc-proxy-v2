@@ -108,22 +108,22 @@ async fn parser(
             original_packet.encode_varint(packet_length)?;
             original_packet.push_vec(packet.get_vec());
 
-            // if direction == Direction::Clientbound {
-            //     // Uncompress if needed
-            //     if shared_status.lock().compress > 0 {
-            //         let data_length = packet.decode_varint()?;
-            //         if data_length > 0 {
-            //             let decompressed_packet = match decompress_to_vec_zlib(&packet.get_vec()) {
-            //                 Ok(decompressed_packet) => decompressed_packet,
-            //                 Err(why) => {
-            //                     log::error!("Decompress error: {:?}", why);
-            //                     break;
-            //                 }
-            //             };
-            //             packet.set(decompressed_packet);
-            //         }
-            //     }
-            // }
+            if direction == Direction::Clientbound {
+                // Uncompress if needed
+                if shared_status.lock().compress > 0 {
+                    let data_length = packet.decode_varint()?;
+                    if data_length > 0 {
+                        let decompressed_packet = match decompress_to_vec_zlib(&packet.get_vec()) {
+                            Ok(decompressed_packet) => decompressed_packet,
+                            Err(why) => {
+                                log::error!("Decompress error: {:?}", why);
+                                break;
+                            }
+                        };
+                        packet.set(decompressed_packet);
+                    }
+                }
+            }
 
             let packet_id = packet.decode_varint()?;
 
