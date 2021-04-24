@@ -192,8 +192,7 @@ async fn parser(
                     out_data = shared_status.lock().ps_cipher.encrypt(out_data)
                 }
                 // let mut shared_status_c = shared_status.lock().clone();
-                if success {
-                    if parsed_packet.post_send_updating() {
+                if success && parsed_packet.post_send_updating() {
                         println!("{:?}", shared_status.lock().ps_cipher.encryptor.is_some());
                         match parsed_packet.post_send_update(&mut shared_status.lock()) {
                             Ok(_) => {
@@ -201,7 +200,6 @@ async fn parser(
                             }
                             Err(_) => {}
                         };
-                    }
                 }
                 println!("{:?}", shared_status.lock().ps_cipher.encryptor.is_some());
                 out_data

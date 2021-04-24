@@ -12,7 +12,7 @@ use std::collections::HashMap;
 use std::iter;
 
 use num_bigint_dig::BigUint;
-use reqwest;
+use reqwest::Client;
 use rsa::{PaddingScheme, PublicKey, RSAPublicKey};
 use rsa_der::public_key_from_der;
 use rustc_serialize::hex::ToHex;
@@ -112,7 +112,7 @@ impl Parsable for EncRequest {
         req_map.insert("selectedProfile", "f54c74dd3362422c80f9da71eca4aaa3");
         req_map.insert("serverId", &result_hash);
 
-        let client = reqwest::Client::new();
+        let client = Client::new();
         let response = client
             .post("https://sessionserver.mojang.com/session/minecraft/join")
             .json(&req_map)
