@@ -17,7 +17,6 @@ impl Cipher {
     pub fn decrypt(&mut self, mut data: Vec<u8>) -> Vec<u8> {
         match &mut self.encryptor {
             Some(encryptor) => {
-                // let enc = encryptor.clone();
                 encryptor.decrypt(data.as_mut_slice());
                 data
             }
@@ -40,13 +39,9 @@ impl Cipher {
         self.encryptor = Some(cipher);
     }
 
-    pub fn noop(&mut self) {
-        ()
+    pub fn disable(&mut self) {
+        self.encryptor = None;
     }
-
-    // pub fn disable(&mut self) {
-    //     self.encryptor = None;
-    // }
 }
 
 impl Default for Cipher {

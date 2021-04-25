@@ -66,15 +66,10 @@ async fn parser(
     let mut unprocessed_data = Packet::new();
     let functions = functions::get_functions();
     loop {
-        // if let Some(copied_state) = shared_status.lock().ps_cipher.encryptor.clone() {
-        //     log::debug!("{:?}", copied_state.iv);
-        // };
-
         let new_data = match direction {
             Direction::Serverbound => client_proxy_queue.pop().await,
             Direction::Clientbound => server_proxy_queue.pop().await,
         };
-        // log::debug!("{}", direction.to_string());
 
         let new_data = if direction == Direction::Clientbound {
             shared_status.lock().sp_cipher.decrypt(new_data)
@@ -98,8 +93,6 @@ async fn parser(
                 unprocessed_data.set(o_data);
                 break;
             }
-            // log::debug!("new loop");
-            // log::debug!("{}", packet_length);
 
             let mut packet =
                 packet::Packet::from(unprocessed_data.read(packet_length as usize).unwrap());
@@ -127,7 +120,6 @@ async fn parser(
 
             let packet_id = packet.decode_varint()?;
 
-            // log::debug!("{}", packet_id);
             let mut not_processed = false;
 
             let func_id =
@@ -142,11 +134,10 @@ async fn parser(
             let mut to_direction = direction;
             let mut out_data = original_packet.get_vec();
 
-            // let mut shared_status_c = shared_status.lock().clone();
             let out_data = if !not_processed {
                 let mut parsed_packet = match functions.get(func_id) {
                     Some(func) => func,
-                    None => panic!("Oof"),
+                    None => panic!("This should never happen, if it does: crash"),
                 };
 
                 let success = match parsed_packet.parse_packet(packet) {
@@ -180,7 +171,7 @@ async fn parser(
                             Ok((packet, new_direction, new_shared_status)) => {
                                 to_direction = new_direction;
                                 out_data = packet.get_vec();
-                                shared_status.lock().set(new_shared_status);
+                                shared_status.lock().set(new_shared_status.clone());
                             }
                             Err(_) => {
                                 panic!("This should never happen");
@@ -195,7 +186,6 @@ async fn parser(
                 }
                 // let mut shared_status_c = shared_status.lock().clone();
                 if success && parsed_packet.post_send_updating() {
-                    println!("{:?}", shared_status.lock().ps_cipher.encryptor.is_some());
                     match parsed_packet.post_send_update(&mut shared_status.lock()) {
                         Ok(_) => {
                             log::debug!("Ran post send update")
@@ -205,32 +195,23 @@ async fn parser(
                         }
                     };
                 }
-                println!("{:?}", shared_status.lock().ps_cipher.encryptor.is_some());
                 out_data
             } else {
                 let out_data = if to_direction == Direction::Serverbound {
-                    println!("{:?}", out_data);
-                    // Compress data if needed
-                    println!("{:?}", shared_status.lock().ps_cipher.encryptor.is_some());
+                    // Compress data if needed, then encrypt
                     shared_status.lock().ps_cipher.encrypt(out_data)
                 } else {
                     out_data
                 };
-                // shared_status.lock().set(shared_status_c);
-                if direction == Direction::Serverbound {
-                    println!("{:?}", out_data);
-                }
 
                 out_data
             };
-            // shared_status.lock().set(shared_status_c);
 
             match to_direction {
                 Direction::Serverbound => proxy_server_queue.push(out_data),
                 Direction::Clientbound => proxy_client_queue.push(out_data),
             }
         }
-        // let out_data = unprocessed_data.read(unprocessed_data.len())?;
     }
 }
 
