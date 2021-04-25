@@ -26,7 +26,7 @@ impl Cipher {
     }
 
     pub fn encrypt(&mut self, mut data: Vec<u8>) -> Vec<u8> {
-        match &mut self.encryptor.take() {
+        match &mut self.encryptor {
             Some(encryptor) => {
                 encryptor.encrypt(data.as_mut_slice());
                 data
@@ -38,6 +38,10 @@ impl Cipher {
     pub fn enable(&mut self, key: &[u8]) {
         let cipher = AesCfb8::new_var(key, key).unwrap();
         self.encryptor = Some(cipher);
+    }
+
+    pub fn noop(&mut self) {
+        ()
     }
 
     // pub fn disable(&mut self) {
