@@ -1,7 +1,7 @@
 #![allow(where_clauses_object_safety)]
 use miniz_oxide::inflate::decompress_to_vec_zlib;
 use parking_lot::Mutex;
-use std::{io::Write, sync::Arc};
+use std::{io::Write, sync::Arc, time::Duration};
 
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
@@ -9,6 +9,7 @@ use tokio::{
         tcp::{OwnedReadHalf, OwnedWriteHalf},
         TcpListener, TcpStream,
     },
+    time::timeout,
 };
 
 use colored::*;
@@ -49,8 +50,20 @@ async fn reciever(mut rx: OwnedReadHalf, queue: Arc<DataQueue>) {
 
 async fn sender(mut tx: OwnedWriteHalf, queue: Arc<DataQueue>) {
     loop {
-        if let Err(e) = tx.write_all(&queue.pop().await).await {
+        if let Err(e) = tx
+            .write_all(
+                &(match timeout(Duration::from_secs(60), queue.pop()).await {
+                    Ok(b) => b,
+                    Err(_) => {
+                        log::warn!("Did not recieve new data in 60 seconds, assuming shutdown");
+                        return;
+                    }
+                }),
+            )
+            .await
+        {
             log::error!("Failed to write to socket: {}", e);
+            break;
         };
     }
 }
@@ -66,9 +79,20 @@ async fn parser(
     let mut unprocessed_data = Packet::new();
     let functions = functions::get_functions();
     loop {
-        let new_data = match direction {
-            Direction::Serverbound => client_proxy_queue.pop().await,
-            Direction::Clientbound => server_proxy_queue.pop().await,
+        let new_data = match timeout(
+            Duration::from_secs(60),
+            match direction {
+                Direction::Serverbound => client_proxy_queue.pop(),
+                Direction::Clientbound => server_proxy_queue.pop(),
+            },
+        )
+        .await
+        {
+            Ok(new_data) => new_data,
+            Err(_) => {
+                log::warn!("Did not recieve new data in 60 seconds, assuming shutdown");
+                break;
+            }
         };
 
         let new_data = if direction == Direction::Clientbound {
@@ -213,6 +237,7 @@ async fn parser(
             }
         }
     }
+    Ok(())
 }
 
 async fn handle_connection(client_stream: TcpStream) -> std::io::Result<()> {
@@ -288,7 +313,10 @@ async fn main() -> std::io::Result<()> {
 
     log::info!("Starting listener...");
     // Start listening on `BIND_ADDRESS` for new connections
-    let mc_client_listener = TcpListener::bind("127.0.0.1:25555").await?;
+    let mc_client_listener = match TcpListener::bind("127.0.0.1:25555").await {
+        Ok(listener) => listener,
+        Err(err) => panic!("Could not connect to server: {}", err),
+    };
 
     loop {
         // If this continues, a new client is connected.
