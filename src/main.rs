@@ -30,6 +30,8 @@ pub use types::{Direction, SharedState, State};
 
 type DataQueue = deadqueue::unlimited::Queue<Vec<u8>>;
 
+// This function puts all recieved packets (in chunks of 4096 bytes) in the recieving queue.
+// TODO: Add a timeout, I think this might be the last memory leak
 async fn reciever(mut rx: OwnedReadHalf, queue: Arc<DataQueue>) {
     let mut buf = [0; 4096];
     loop {
@@ -48,6 +50,7 @@ async fn reciever(mut rx: OwnedReadHalf, queue: Arc<DataQueue>) {
     }
 }
 
+// This sends the data in the respective queues to the tx.
 async fn sender(mut tx: OwnedWriteHalf, queue: Arc<DataQueue>) {
     loop {
         if let Err(e) = tx
@@ -68,6 +71,7 @@ async fn sender(mut tx: OwnedWriteHalf, queue: Arc<DataQueue>) {
     }
 }
 
+// TODO: Add comments to this function
 async fn parser(
     client_proxy_queue: Arc<DataQueue>,
     server_proxy_queue: Arc<DataQueue>,
@@ -205,10 +209,9 @@ async fn parser(
                 }
 
                 if to_direction == Direction::Serverbound {
-                    // Compress data if needed
+                    //TODO Add data compression, but this needs to be done with the packet type.
                     out_data = shared_status.lock().ps_cipher.encrypt(out_data)
                 }
-                // let mut shared_status_c = shared_status.lock().clone();
                 if success && parsed_packet.post_send_updating() {
                     match parsed_packet.post_send_update(&mut shared_status.lock()) {
                         Ok(_) => {
@@ -241,27 +244,34 @@ async fn parser(
 }
 
 async fn handle_connection(client_stream: TcpStream) -> std::io::Result<()> {
+    // Make a new  a new queue for all the directions to the proxy
     let client_proxy_queue = Arc::new(DataQueue::new());
     let proxy_client_queue = Arc::new(DataQueue::new());
     let server_proxy_queue = Arc::new(DataQueue::new());
     let proxy_server_queue = Arc::new(DataQueue::new());
+    // It then makes a shared state to share amongst all the threads
     let shared_status: Arc<Mutex<SharedState>> = Arc::new(Mutex::new(SharedState::new()));
 
+    // It connects to the new IP, if it fails just error.
     let server_stream = TcpStream::connect("192.168.178.25:25565").await?;
 
+    // It then splits both TCP streams up in rx and tx
     let (srx, stx) = server_stream.into_split();
     let (crx, ctx) = client_stream.into_split();
 
+    // It then starts multiple threads to put all the recieved data into the previously created queues
     let cp_queue = client_proxy_queue.clone();
     tokio::spawn(async move { reciever(crx, cp_queue).await });
     let sp_queue = server_proxy_queue.clone();
     tokio::spawn(async move { reciever(srx, sp_queue).await });
 
+    // And it also starts two to put the send data in the tx's
     let pc_queue = proxy_client_queue.clone();
     tokio::spawn(async move { sender(ctx, pc_queue).await });
     let ps_queue = proxy_server_queue.clone();
     tokio::spawn(async move { sender(stx, ps_queue).await });
 
+    // It then starts a parser for both of the directions. It's a bit annoying to have to make so many clones but I can't think of a better way.
     let sb_shared_status = shared_status.clone();
     let sb_cp_queue = client_proxy_queue.clone();
     let sb_sp_queue = server_proxy_queue.clone();
@@ -302,6 +312,7 @@ async fn handle_connection(client_stream: TcpStream) -> std::io::Result<()> {
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
     // Load the logger, it has a fancy format with colours and it's spaced.
+    // TODO: Add  file logging
     Builder::from_default_env()
         .format(|buf, record| {
             let formatted_level = buf.default_styled_level(record.level());
@@ -312,7 +323,7 @@ async fn main() -> std::io::Result<()> {
         .init();
 
     log::info!("Starting listener...");
-    // Start listening on `BIND_ADDRESS` for new connections
+    // Start listening on the ip waiting for new connections
     let mc_client_listener = match TcpListener::bind("127.0.0.1:25555").await {
         Ok(listener) => listener,
         Err(err) => panic!("Could not connect to server: {}", err),
