@@ -9,6 +9,7 @@ pub struct Packet {
     data: Vec<u8>,
 }
 
+// TODO: Make this type also hold a packet ID, and be able to generate packets.
 impl Packet {
     pub fn new() -> Packet {
         Packet { data: Vec::new() }
@@ -42,7 +43,6 @@ impl Packet {
         self.data = Vec::new();
     }
 
-    // This should never fail unless a wrong packet was delivered.
     pub fn read(&mut self, amount: usize) -> Result<Vec<u8>, ()> {
         if self.data.len() < amount {
             return Err(());
@@ -109,7 +109,6 @@ impl Packet {
         self.decode_string()
     }
 
-    // no touchies
     pub fn decode_varint(&mut self) -> Result<i32, ()> {
         let mut num_read = 0;
         let mut result: i32 = 0;
@@ -130,23 +129,6 @@ impl Packet {
         Ok(result)
     }
 
-    pub fn encode_varint(&mut self, v: i32) -> Result<(), ()> {
-        let mut value = u32::from_le_bytes(v.to_le_bytes());
-        loop {
-            let mut temp: u8 = (value & 0b01111111) as u8;
-            value >>= 7;
-            if value != 0 {
-                temp |= 0b10000000;
-            }
-            self.push(temp);
-            if value == 0 {
-                break;
-            }
-        }
-        Ok(())
-    }
-
-    // no touchies either
     pub fn decode_varlong(&mut self) -> Result<i64, ()> {
         let mut num_read = 0;
         let mut result: i64 = 0;
@@ -167,11 +149,20 @@ impl Packet {
         Ok(result)
     }
 
-    // Entity Metadata
+    pub fn decode_entity_metadata(&mut self) -> Result<(), ()> {
+        // varies, not yet needed so not yet implemented.
+        todo!()
+    }
 
-    // Slot
+    pub fn decode_slot(&mut self) -> Result<(), ()> {
+        // requires NTB parsing
+        todo!()
+    }
 
-    // NBT Tag
+    pub fn decode_nbt_tag(&mut self) -> Result<(), ()> {
+        // Requires a *lot* of work and is not yet needed, so TODO.
+        todo!()
+    }
 
     pub fn decode_position(&mut self) -> Result<(i64, i64, i64), ()> {
         let val = i64::from_be_bytes(self.read(8)?.try_into().unwrap());
@@ -199,6 +190,22 @@ impl Packet {
     pub fn decode_uuid(&mut self) -> Result<u128, ()> {
         Ok(u128::from_be_bytes(self.read(16)?.try_into().unwrap()))
     }
+
+    pub fn encode_varint(&mut self, v: i32) -> Result<(), ()> {
+        let mut value = u32::from_le_bytes(v.to_le_bytes());
+        loop {
+            let mut temp: u8 = (value & 0b01111111) as u8;
+            value >>= 7;
+            if value != 0 {
+                temp |= 0b10000000;
+            }
+            self.push(temp);
+            if value == 0 {
+                break;
+            }
+        }
+        Ok(())
+    }
 }
 
 impl Default for Packet {
@@ -207,7 +214,7 @@ impl Default for Packet {
     }
 }
 
-// More tests still need to be added (preferebly for everything that the packet can parse).
+// TODO: Add a test for all the types a packet can parse.
 #[cfg(test)]
 mod tests {
     use super::*;
