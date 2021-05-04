@@ -1,6 +1,6 @@
 use crate::{
     clientbound,
-    packet::Parsable,
+    parsable::Parsable,
     serverbound,
     types::{Direction, State},
 };

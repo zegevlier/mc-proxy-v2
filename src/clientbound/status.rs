@@ -1,4 +1,4 @@
-use crate::packet::{Packet, Parsable};
+use crate::{packet::Packet, parsable::Parsable};
 use crate::{SharedState, State};
 
 #[derive(Clone)]

@@ -1,4 +1,4 @@
-use crate::packet::{Packet, Parsable};
+use crate::{packet::Packet, parsable::Parsable};
 
 // 0x00
 #[derive(Clone)]

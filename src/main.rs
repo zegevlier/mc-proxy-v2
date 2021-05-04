@@ -18,6 +18,7 @@ use log::LevelFilter;
 
 mod cipher;
 mod packet;
+mod parsable;
 mod types;
 mod utils;
 
@@ -253,7 +254,7 @@ async fn handle_connection(client_stream: TcpStream) -> std::io::Result<()> {
     let shared_status: Arc<Mutex<SharedState>> = Arc::new(Mutex::new(SharedState::new()));
 
     // It connects to the new IP, if it fails just error.
-    let server_stream = TcpStream::connect("192.168.178.25:25565").await?;
+    let server_stream = TcpStream::connect("127.0.0.1:25565").await?;
 
     // It then splits both TCP streams up in rx and tx
     let (srx, stx) = server_stream.into_split();

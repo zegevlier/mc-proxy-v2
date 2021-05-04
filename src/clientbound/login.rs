@@ -1,5 +1,5 @@
-use crate::packet::{Packet, Parsable};
 use crate::utils;
+use crate::{packet::Packet, parsable::Parsable};
 use crate::{Direction, SharedState, State};
 use hex::encode;
 use rand::Rng;
@@ -108,7 +108,7 @@ impl Parsable for EncRequest {
         };
 
         let mut req_map = HashMap::new();
-        req_map.insert("accessToken", "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI2NTY0M2EzYmU0NGY4NmVlODE4OWEwMDllMGNlYTNmYSIsInlnZ3QiOiI3NjQ5MTI3Y2Q5ODg0NjRmYmZkOTdlMDgwZWZkZGFlOCIsInNwciI6ImY1NGM3NGRkMzM2MjQyMmM4MGY5ZGE3MWVjYTRhYWEzIiwiaXNzIjoiWWdnZHJhc2lsLUF1dGgiLCJleHAiOjE2MTk0NTk3MzYsImlhdCI6MTYxOTI4NjkzNn0.zzo8jICv3fQLWpM5jHbLvK_iw_DDvqETLZHA_pJxRxg");
+        req_map.insert("accessToken", "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI2NTY0M2EzYmU0NGY4NmVlODE4OWEwMDllMGNlYTNmYSIsInlnZ3QiOiI2MTRiNWZhZDhiYjk0NTdmYWRhNmZjZjViZTMyNWI5MyIsInNwciI6ImY1NGM3NGRkMzM2MjQyMmM4MGY5ZGE3MWVjYTRhYWEzIiwiaXNzIjoiWWdnZHJhc2lsLUF1dGgiLCJleHAiOjE2MjAzMDc4OTYsImlhdCI6MTYyMDEzNTA5Nn0.kgj_mf_sZhR1WRcwiOnZ300NZG9jKTMv1DLybiwvoq8");
         req_map.insert("selectedProfile", "f54c74dd3362422c80f9da71eca4aaa3");
         req_map.insert("serverId", &result_hash);
 
