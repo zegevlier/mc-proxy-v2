@@ -1,6 +1,9 @@
+// use aes::cipher::AsyncStreamCipher;
 use aes::Aes128;
-use cfb8::cipher::{NewStreamCipher, StreamCipher};
-use cfb8::Cfb8;
+use cfb8::{
+    cipher::{AsyncStreamCipher, NewCipher},
+    Cfb8,
+};
 
 type AesCfb8 = Cfb8<Aes128>;
 
@@ -35,7 +38,7 @@ impl Cipher {
     }
 
     pub fn enable(&mut self, key: &[u8]) {
-        let cipher = AesCfb8::new_var(key, key).unwrap();
+        let cipher = AesCfb8::new_from_slices(key, key).unwrap();
         self.encryptor = Some(cipher);
     }
 

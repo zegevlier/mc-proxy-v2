@@ -10,7 +10,7 @@
 //! ```
 //! use aes::Aes128;
 //! use cfb8::Cfb8;
-//! use cfb8::cipher::{NewStreamCipher, StreamCipher};
+//! use cfb8::cipher::{NewCipher, AsyncStreamCipher};
 //! use hex_literal::hex;
 //!
 //! type AesCfb8 = Cfb8<Aes128>;
@@ -26,14 +26,14 @@
 //!
 //! let mut data = plaintext.to_vec();
 //! // encrypt plaintext
-//! AesCfb8::new_var(key, iv).unwrap().encrypt(&mut data);
+//! AesCfb8::new_from_slices(key, iv).unwrap().encrypt(&mut data);
 //! assert_eq!(data, &ciphertext[..]);
 //! // and decrypt it back
-//! AesCfb8::new_var(key, iv).unwrap().decrypt(&mut data);
+//! AesCfb8::new_from_slices(key, iv).unwrap().decrypt(&mut data);
 //! assert_eq!(data, &plaintext[..]);
 //!
 //! // CFB mode can be used with streaming messages
-//! let mut cipher = AesCfb8::new_var(key, iv).unwrap();
+//! let mut cipher = AesCfb8::new_from_slices(key, iv).unwrap();
 //! for chunk in data.chunks_mut(3) {
 //!     cipher.encrypt(chunk);
 //! }
@@ -54,26 +54,21 @@
 pub use cipher;
 
 use cipher::{
-    block::{BlockCipher, NewBlockCipher},
-    generic_array::GenericArray,
-    stream::{FromBlockCipher, Nonce, StreamCipher},
+    generic_array::GenericArray, AsyncStreamCipher, BlockCipher, BlockEncrypt, FromBlockCipher,
 };
 
 /// CFB self-synchronizing stream cipher instance.
 #[derive(Clone)]
-pub struct Cfb8<C: BlockCipher> {
+pub struct Cfb8<C: BlockCipher + BlockEncrypt> {
     cipher: C,
     iv: GenericArray<u8, C::BlockSize>,
 }
 
-impl<C> FromBlockCipher for Cfb8<C>
-where
-    C: BlockCipher + NewBlockCipher,
-{
+impl<C: BlockCipher + BlockEncrypt> FromBlockCipher for Cfb8<C> {
     type BlockCipher = C;
     type NonceSize = C::BlockSize;
 
-    fn from_block_cipher(cipher: C, iv: &Nonce<Self>) -> Self {
+    fn from_block_cipher(cipher: C, iv: &GenericArray<u8, Self::NonceSize>) -> Self {
         Self {
             cipher,
             iv: iv.clone(),
@@ -81,7 +76,7 @@ where
     }
 }
 
-impl<C: BlockCipher> StreamCipher for Cfb8<C> {
+impl<C: BlockCipher + BlockEncrypt> AsyncStreamCipher for Cfb8<C> {
     fn encrypt(&mut self, data: &mut [u8]) {
         let mut iv = self.iv.clone();
         let n = iv.len();
