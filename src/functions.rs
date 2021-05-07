@@ -94,24 +94,16 @@ impl Functions {
     }
 
     pub fn get_name(&self, direction: &Direction, state: &State, pid: &i32) -> Option<&Fid> {
-        match self
-            .map
+        self.map
             .get(direction)
             .unwrap()
             .get(state)
             .unwrap()
             .get(pid)
-        {
-            Some(id) => Some(id),
-            None => None,
-        }
     }
 
     pub fn get(&self, id: &Fid) -> Option<Box<dyn Parsable + Send + Sync>> {
-        match self.list.get(id) {
-            Some(func) => Some(func.clone()),
-            None => None,
-        }
+        self.list.get(id).cloned()
     }
 }
 
