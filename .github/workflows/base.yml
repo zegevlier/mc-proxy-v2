@@ -22,12 +22,12 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
+      - uses: Swatinem/rust-cache@v1.2.0
 
       - name: Run cargo check
         uses: actions-rs/cargo@v1
         with:
           command: check
-      - uses: Swatinem/rust-cache@v1.2.0
 
   test:
     name: Test
@@ -42,14 +42,13 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
+      - uses: Swatinem/rust-cache@v1.2.0
 
       - name: Run cargo test
         uses: actions-rs/cargo@v1
         with:
           command: test
       
-      - uses: Swatinem/rust-cache@v1.2.0
-
   lints:
     name: Lints
     runs-on: ubuntu-latest
@@ -64,6 +63,7 @@ jobs:
           toolchain: stable
           override: true
           components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v1.2.0
 
       - name: Run cargo fmt
         uses: actions-rs/cargo@v1
@@ -77,4 +77,3 @@ jobs:
           command: clippy
           args: -- -D warnings
       
-      - uses: Swatinem/rust-cache@v1.2.0
