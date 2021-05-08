@@ -27,6 +27,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: check
+      - uses: Swatinem/rust-cache@v1.2.0
 
   test:
     name: Test
@@ -46,6 +47,8 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: test
+      
+      - uses: Swatinem/rust-cache@v1.2.0
 
   lints:
     name: Lints
@@ -73,3 +76,5 @@ jobs:
         with:
           command: clippy
           args: -- -D warnings
+      
+      - uses: Swatinem/rust-cache@v1.2.0
