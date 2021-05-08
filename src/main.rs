@@ -234,7 +234,7 @@ async fn parser(
                 }
                 out_data
             };
-            
+
             match to_direction {
                 Direction::Serverbound => proxy_server_queue.push(out_data),
                 Direction::Clientbound => proxy_client_queue.push(out_data),
