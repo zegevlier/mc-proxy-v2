@@ -163,7 +163,16 @@ async fn parser(
             let mut to_direction = direction;
             let mut out_data = original_packet.get_vec();
 
-            let out_data = if !not_processed {
+            let out_data = if not_processed {
+                let out_data = if to_direction == Direction::Serverbound {
+                    // Compress data if needed, then encrypt
+                    shared_status.lock().ps_cipher.encrypt(out_data)
+                } else {
+                    out_data
+                };
+
+                out_data
+            } else {
                 let mut parsed_packet = match functions.get(func_id) {
                     Some(func) => func,
                     None => panic!("This should never happen, if it does: crash"),
@@ -224,17 +233,8 @@ async fn parser(
                     };
                 }
                 out_data
-            } else {
-                let out_data = if to_direction == Direction::Serverbound {
-                    // Compress data if needed, then encrypt
-                    shared_status.lock().ps_cipher.encrypt(out_data)
-                } else {
-                    out_data
-                };
-
-                out_data
             };
-
+            
             match to_direction {
                 Direction::Serverbound => proxy_server_queue.push(out_data),
                 Direction::Clientbound => proxy_client_queue.push(out_data),
