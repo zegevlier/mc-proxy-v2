@@ -203,6 +203,22 @@ impl Packet {
         }
         Ok(())
     }
+
+    pub fn encode_varlong(&mut self, v: i64) -> Result<(), ()> {
+        let mut value = u64::from_le_bytes(v.to_le_bytes());
+        loop {
+            let mut temp: u8 = (value & 0b01111111) as u8;
+            value >>= 7;
+            if value != 0 {
+                temp |= 0b10000000;
+            }
+            self.push(temp);
+            if value == 0 {
+                break;
+            }
+        }
+        Ok(())
+    }
 }
 
 impl Default for Packet {
@@ -293,6 +309,42 @@ mod tests {
         for (p, v) in values {
             packet.set(p);
             assert_eq!(packet.decode_varlong().unwrap(), v);
+            packet.clear()
+        }
+    }
+
+    #[test]
+    fn test_varlong_writing() {
+        let mut packet = Packet::new();
+        let values = vec![
+            // Gotten from wiki.vg
+            (vec![0x00], 0),
+            (vec![0x01], 1),
+            (vec![0x02], 2),
+            (vec![0x7f], 127),
+            (vec![0x80, 0x01], 128),
+            (vec![0xff, 0x01], 255),
+            (vec![0xff, 0xff, 0xff, 0xff, 0x07], 2147483647),
+            (
+                vec![0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f],
+                9223372036854775807,
+            ),
+            (
+                vec![0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x01],
+                -1,
+            ),
+            (
+                vec![0x80, 0x80, 0x80, 0x80, 0xf8, 0xff, 0xff, 0xff, 0xff, 0x01],
+                -2147483648,
+            ),
+            (
+                vec![0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x01],
+                -9223372036854775808,
+            ),
+        ];
+        for (p, v) in values {
+            packet.encode_varlong(v).unwrap();
+            assert_eq!(packet.get_vec(), p);
             packet.clear()
         }
     }
