@@ -24,6 +24,7 @@ mod utils;
 
 mod clientbound;
 mod functions;
+mod packet;
 mod serverbound;
 
 use raw_packet::RawPacket;
