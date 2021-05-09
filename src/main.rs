@@ -268,50 +268,57 @@ async fn handle_connection(client_stream: TcpStream) -> std::io::Result<()> {
     let (crx, ctx) = client_stream.into_split();
 
     // It then starts multiple threads to put all the recieved data into the previously created queues
-    let cp_queue = client_proxy_queue.clone();
-    tokio::spawn(async move { reciever(crx, cp_queue).await });
-    let sp_queue = server_proxy_queue.clone();
-    tokio::spawn(async move { reciever(srx, sp_queue).await });
-
-    // And it also starts two to put the send data in the tx's
-    let pc_queue = proxy_client_queue.clone();
-    tokio::spawn(async move { sender(ctx, pc_queue).await });
-    let ps_queue = proxy_server_queue.clone();
-    tokio::spawn(async move { sender(stx, ps_queue).await });
-
-    // It then starts a parser for both of the directions. It's a bit annoying to have to make so many clones but I can't think of a better way.
-    let sb_shared_status = shared_status.clone();
-    let sb_cp_queue = client_proxy_queue.clone();
-    let sb_sp_queue = server_proxy_queue.clone();
-    let sb_pc_queue = proxy_client_queue.clone();
-    let sb_ps_queue = proxy_server_queue.clone();
-    tokio::spawn(async move {
-        parser(
-            sb_cp_queue,
-            sb_sp_queue,
-            sb_pc_queue,
-            sb_ps_queue,
-            sb_shared_status,
-            Direction::Serverbound,
-        )
-        .await
+    tokio::spawn({
+        let client_proxy_queue = client_proxy_queue.clone();
+        async move { reciever(crx, client_proxy_queue).await }
+    });
+    tokio::spawn({
+        let server_proxy_queue = server_proxy_queue.clone();
+        async move { reciever(srx, server_proxy_queue).await }
     });
 
-    let cb_shared_status = shared_status.clone();
-    let cb_cp_queue = client_proxy_queue.clone();
-    let cb_sp_queue = server_proxy_queue.clone();
-    let cb_pc_queue = proxy_client_queue.clone();
-    let cb_ps_queue = proxy_server_queue.clone();
-    tokio::spawn(async move {
-        parser(
-            cb_cp_queue,
-            cb_sp_queue,
-            cb_pc_queue,
-            cb_ps_queue,
-            cb_shared_status,
-            Direction::Clientbound,
-        )
-        .await
+    // And it also starts two to put the send data in the tx's
+    tokio::spawn({
+        let proxy_client_queue = proxy_client_queue.clone();
+        async move { sender(ctx, proxy_client_queue).await }
+    });
+    tokio::spawn({
+        let proxy_server_queue = proxy_server_queue.clone();
+        async move { sender(stx, proxy_server_queue).await }
+    });
+
+    // It then starts a parser for both of the directions. It's a bit annoying to have to make so many clones but I can't think of a better way.
+    tokio::spawn({
+        let shared_status = shared_status.clone();
+        let client_proxy_queue = client_proxy_queue.clone();
+        let server_proxy_queue = server_proxy_queue.clone();
+        let proxy_client_queue = proxy_client_queue.clone();
+        let proxy_server_queue = proxy_server_queue.clone();
+        async move {
+            parser(
+                client_proxy_queue,
+                server_proxy_queue,
+                proxy_client_queue,
+                proxy_server_queue,
+                shared_status,
+                Direction::Serverbound,
+            )
+            .await
+        }
+    });
+
+    tokio::spawn({
+        async move {
+            parser(
+                client_proxy_queue,
+                server_proxy_queue,
+                proxy_client_queue,
+                proxy_server_queue,
+                shared_status,
+                Direction::Clientbound,
+            )
+            .await
+        }
     });
 
     Ok(())
