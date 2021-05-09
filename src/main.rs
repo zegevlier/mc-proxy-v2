@@ -32,18 +32,23 @@ pub use types::{Direction, SharedState, State};
 type DataQueue = deadqueue::unlimited::Queue<Vec<u8>>;
 
 // This function puts all recieved packets (in chunks of 4096 bytes) in the recieving queue.
-// TODO: Add a timeout, I think this might be the last memory leak
 async fn reciever(mut rx: OwnedReadHalf, queue: Arc<DataQueue>) {
     let mut buf = [0; 4096];
     loop {
-        let n = match rx.read(&mut buf).await {
-            Ok(n) if n == 0 => {
-                log::warn!("Socket closed");
-                return;
-            }
-            Ok(n) => n,
-            Err(e) => {
-                log::error!("Failed to read from socket: {}", e);
+        let n = match timeout(Duration::from_secs(60), rx.read(&mut buf)).await {
+            Ok(v) => match v {
+                Ok(n) if n == 0 => {
+                    log::warn!("Socket closed");
+                    return;
+                }
+                Ok(n) => n,
+                Err(e) => {
+                    log::error!("Failed to read from socket: {}", e);
+                    return;
+                }
+            },
+            Err(_) => {
+                log::warn!("Did not recieve new data in 60 seconds, assuming shutdown");
                 return;
             }
         };
@@ -254,7 +259,9 @@ async fn handle_connection(client_stream: TcpStream) -> std::io::Result<()> {
     let shared_status: Arc<Mutex<SharedState>> = Arc::new(Mutex::new(SharedState::new()));
 
     // It connects to the new IP, if it fails just error.
-    let server_stream = TcpStream::connect("127.0.0.1:25565").await?;
+    let ip = "127.0.0.1:25565";
+    log::info!("Connecting to IP {}", ip);
+    let server_stream = TcpStream::connect(ip).await?;
 
     // It then splits both TCP streams up in rx and tx
     let (srx, stx) = server_stream.into_split();
