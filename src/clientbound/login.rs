@@ -1,5 +1,5 @@
 use crate::utils;
-use crate::{packet::Packet, parsable::Parsable};
+use crate::{parsable::Parsable, raw_packet::RawPacket};
 use crate::{Direction, SharedState, State};
 use hex::encode;
 use rand::Rng;
@@ -51,7 +51,7 @@ impl Parsable for EncRequest {
         }
     }
 
-    fn parse_packet(&mut self, mut packet: Packet) -> Result<(), ()> {
+    fn parse_packet(&mut self, mut packet: RawPacket) -> Result<(), ()> {
         self.server_id = packet.decode_string()?;
         self.public_key_length = packet.decode_varint()?;
         self.public_key = packet.read(self.public_key_length as usize)?;
@@ -78,7 +78,7 @@ impl Parsable for EncRequest {
     async fn edit_packet(
         &self,
         status: SharedState,
-    ) -> Result<(Packet, Direction, SharedState), ()> {
+    ) -> Result<(RawPacket, Direction, SharedState), ()> {
         let mut status = status;
         status.secret_key = rand::thread_rng().gen::<[u8; 16]>();
 
@@ -138,7 +138,7 @@ impl Parsable for EncRequest {
             RSAPublicKey::new(BigUint::from_bytes_be(&n), BigUint::from_bytes_be(&e)).unwrap();
         let padding = PaddingScheme::new_pkcs1v15_encrypt();
 
-        let mut unformatted_packet = crate::Packet::new();
+        let mut unformatted_packet = crate::RawPacket::new();
         unformatted_packet.encode_varint(1)?;
         unformatted_packet.encode_varint(128)?;
         unformatted_packet.push_vec(
@@ -154,7 +154,7 @@ impl Parsable for EncRequest {
                 .encrypt(&mut rng, padding, &self.verify_token[..])
                 .unwrap(),
         );
-        let mut response_packet = Packet::new();
+        let mut response_packet = RawPacket::new();
         response_packet.encode_varint(unformatted_packet.len() as i32)?;
         response_packet.push_vec(unformatted_packet.get_vec());
         // log::debug!("{:?}", response_packet.get_vec());
@@ -191,7 +191,7 @@ impl Parsable for SetCompression {
         Self { threshold: 0 }
     }
 
-    fn parse_packet(&mut self, mut packet: Packet) -> Result<(), ()> {
+    fn parse_packet(&mut self, mut packet: RawPacket) -> Result<(), ()> {
         self.threshold = packet.decode_varint()?;
         Ok(())
     }
@@ -224,7 +224,7 @@ impl Parsable for LoginSuccess {
         }
     }
 
-    fn parse_packet(&mut self, mut packet: Packet) -> Result<(), ()> {
+    fn parse_packet(&mut self, mut packet: RawPacket) -> Result<(), ()> {
         self.uuid = packet.decode_uuid()?;
         self.username = packet.decode_string()?;
         Ok(())
@@ -255,7 +255,7 @@ impl Parsable for Disconnect {
         Self { reason: "".into() }
     }
 
-    fn parse_packet(&mut self, mut packet: Packet) -> Result<(), ()> {
+    fn parse_packet(&mut self, mut packet: RawPacket) -> Result<(), ()> {
         self.reason = packet.decode_string()?;
         Ok(())
     }
@@ -291,7 +291,7 @@ impl Parsable for PluginRequest {
         }
     }
 
-    fn parse_packet(&mut self, mut packet: Packet) -> Result<(), ()> {
+    fn parse_packet(&mut self, mut packet: RawPacket) -> Result<(), ()> {
         self.message_id = packet.decode_varint()?;
         self.channel = packet.decode_string()?;
         self.data = packet.get_vec();

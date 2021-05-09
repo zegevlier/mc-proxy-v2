@@ -1,4 +1,4 @@
-use crate::{packet::Packet, parsable::Parsable};
+use crate::{parsable::Parsable, raw_packet::RawPacket};
 use hex::encode;
 
 use crate::utils;
@@ -15,7 +15,7 @@ impl Parsable for LoginStart {
         }
     }
 
-    fn parse_packet(&mut self, mut packet: Packet) -> Result<(), ()> {
+    fn parse_packet(&mut self, mut packet: RawPacket) -> Result<(), ()> {
         self.username = packet.decode_string()?;
         Ok(())
     }
@@ -44,7 +44,7 @@ impl Parsable for EncResponse {
         }
     }
 
-    fn parse_packet(&mut self, mut packet: Packet) -> Result<(), ()> {
+    fn parse_packet(&mut self, mut packet: RawPacket) -> Result<(), ()> {
         self.shared_secret_length = packet.decode_varint()?;
         self.shared_secret = packet.read(self.shared_secret_length as usize)?;
         self.verify_token_length = packet.decode_varint()?;
@@ -95,7 +95,7 @@ impl Parsable for PluginResponse {
         }
     }
 
-    fn parse_packet(&mut self, mut packet: Packet) -> Result<(), ()> {
+    fn parse_packet(&mut self, mut packet: RawPacket) -> Result<(), ()> {
         self.message_id = packet.decode_varint()?;
         self.success = packet.decode_bool()?;
         self.data = packet.get_vec();

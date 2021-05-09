@@ -1,4 +1,4 @@
-use crate::{packet::Packet, Direction, SharedState};
+use crate::{raw_packet::RawPacket, Direction, SharedState};
 use async_trait::async_trait;
 use dyn_clone::DynClone;
 
@@ -8,7 +8,7 @@ pub trait Parsable: DynClone {
     where
         Self: Sized;
 
-    fn parse_packet(&mut self, packet: Packet) -> Result<(), ()>;
+    fn parse_packet(&mut self, packet: RawPacket) -> Result<(), ()>;
 
     fn get_printable(&self) -> String;
 
@@ -27,8 +27,8 @@ pub trait Parsable: DynClone {
     async fn edit_packet(
         &self,
         status: SharedState,
-    ) -> Result<(Packet, Direction, SharedState), ()> {
-        Ok((Packet::new(), Direction::Clientbound, status))
+    ) -> Result<(RawPacket, Direction, SharedState), ()> {
+        Ok((RawPacket::new(), Direction::Clientbound, status))
     }
 
     fn post_send_updating(&self) -> bool {

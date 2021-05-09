@@ -1,4 +1,4 @@
-use crate::{packet::Packet, parsable::Parsable};
+use crate::{parsable::Parsable, raw_packet::RawPacket};
 
 #[derive(Clone)]
 pub struct StatusRequest {}
@@ -8,7 +8,7 @@ impl Parsable for StatusRequest {
         Self {}
     }
 
-    fn parse_packet(&mut self, mut _packet: Packet) -> Result<(), ()> {
+    fn parse_packet(&mut self, mut _packet: RawPacket) -> Result<(), ()> {
         Ok(())
     }
 
@@ -27,7 +27,7 @@ impl Parsable for StatusPing {
         Self { payload: 0 }
     }
 
-    fn parse_packet(&mut self, mut packet: Packet) -> Result<(), ()> {
+    fn parse_packet(&mut self, mut packet: RawPacket) -> Result<(), ()> {
         self.payload = packet.decode_long()?;
         Ok(())
     }

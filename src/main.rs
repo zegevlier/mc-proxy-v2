@@ -17,8 +17,8 @@ use env_logger::Builder;
 use log::LevelFilter;
 
 mod cipher;
-mod packet;
 mod parsable;
+mod raw_packet;
 mod types;
 mod utils;
 
@@ -26,7 +26,7 @@ mod clientbound;
 mod functions;
 mod serverbound;
 
-use packet::Packet;
+use raw_packet::RawPacket;
 pub use types::{Direction, SharedState, State};
 
 type DataQueue = deadqueue::unlimited::Queue<Vec<u8>>;
@@ -86,7 +86,7 @@ async fn parser(
     shared_status: Arc<Mutex<SharedState>>,
     direction: Direction,
 ) -> Result<(), ()> {
-    let mut unprocessed_data = Packet::new();
+    let mut unprocessed_data = RawPacket::new();
     let functions = functions::get_functions();
     loop {
         let new_data = match timeout(
@@ -129,9 +129,9 @@ async fn parser(
             }
 
             let mut packet =
-                packet::Packet::from(unprocessed_data.read(packet_length as usize).unwrap());
+                raw_packet::RawPacket::from(unprocessed_data.read(packet_length as usize).unwrap());
 
-            let mut original_packet = Packet::new();
+            let mut original_packet = RawPacket::new();
             original_packet.encode_varint(packet_length)?;
             original_packet.push_vec(packet.get_vec());
 

@@ -1,4 +1,4 @@
-use crate::{packet::Packet, parsable::Parsable};
+use crate::{parsable::Parsable, raw_packet::RawPacket};
 use crate::{SharedState, State};
 
 #[derive(Clone)]
@@ -19,7 +19,7 @@ impl Parsable for Handshake {
         }
     }
 
-    fn parse_packet(&mut self, mut packet: Packet) -> Result<(), ()> {
+    fn parse_packet(&mut self, mut packet: RawPacket) -> Result<(), ()> {
         self.protocol_version = packet.decode_varint()?;
         self.server_address = packet.decode_string()?;
         self.server_port = packet.decode_ushort()?;

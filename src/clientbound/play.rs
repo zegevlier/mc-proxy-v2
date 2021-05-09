@@ -1,4 +1,4 @@
-use crate::{packet::Packet, parsable::Parsable};
+use crate::{parsable::Parsable, raw_packet::RawPacket};
 
 // 0x00
 #[derive(Clone)]
@@ -35,7 +35,7 @@ impl Parsable for SpawnEntity {
         }
     }
 
-    fn parse_packet(&mut self, mut packet: Packet) -> Result<(), ()> {
+    fn parse_packet(&mut self, mut packet: RawPacket) -> Result<(), ()> {
         self.entity_id = packet.decode_varint()?;
         self.object_uuid = packet.decode_uuid()?;
         self.r#type = packet.decode_varint()?;
@@ -91,7 +91,7 @@ impl Parsable for SpawnXpOrb {
         }
     }
 
-    fn parse_packet(&mut self, mut packet: Packet) -> Result<(), ()> {
+    fn parse_packet(&mut self, mut packet: RawPacket) -> Result<(), ()> {
         self.entity_id = packet.decode_varint()?;
         self.x = packet.decode_double()?;
         self.y = packet.decode_double()?;
@@ -143,7 +143,7 @@ impl Parsable for SpawnLivingEntity {
         }
     }
 
-    fn parse_packet(&mut self, mut packet: Packet) -> Result<(), ()> {
+    fn parse_packet(&mut self, mut packet: RawPacket) -> Result<(), ()> {
         self.entity_id = packet.decode_varint()?;
         self.object_uuid = packet.decode_uuid()?;
         self.r#type = packet.decode_varint()?;
@@ -210,7 +210,7 @@ impl Parsable for SpawnPainting {
         }
     }
 
-    fn parse_packet(&mut self, mut packet: Packet) -> Result<(), ()> {
+    fn parse_packet(&mut self, mut packet: RawPacket) -> Result<(), ()> {
         self.entity_id = packet.decode_varint()?;
         self.object_uuid = packet.decode_uuid()?;
         self.motive = packet.decode_varint()?;
@@ -261,7 +261,7 @@ impl Parsable for SpawnPlayer {
         }
     }
 
-    fn parse_packet(&mut self, mut packet: Packet) -> Result<(), ()> {
+    fn parse_packet(&mut self, mut packet: RawPacket) -> Result<(), ()> {
         self.entity_id = packet.decode_varint()?;
         self.player_uuid = packet.decode_uuid()?;
         self.x = packet.decode_double()?;
@@ -309,7 +309,7 @@ impl Parsable for AckPlayerDigging {
         }
     }
 
-    fn parse_packet(&mut self, mut packet: Packet) -> Result<(), ()> {
+    fn parse_packet(&mut self, mut packet: RawPacket) -> Result<(), ()> {
         let position = packet.decode_position()?;
         self.x = position.0;
         self.y = position.1;

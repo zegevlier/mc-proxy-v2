@@ -2,18 +2,18 @@ use std::convert::TryInto;
 
 // Pakcet holds a raw (unparsed) packet.
 #[derive(Debug)]
-pub struct Packet {
+pub struct RawPacket {
     data: Vec<u8>,
 }
 
 // TODO: Make this type also hold a packet ID, and be able to generate packets.
-impl Packet {
-    pub fn new() -> Packet {
-        Packet { data: Vec::new() }
+impl RawPacket {
+    pub fn new() -> RawPacket {
+        RawPacket { data: Vec::new() }
     }
 
-    pub fn from(packet_data: Vec<u8>) -> Packet {
-        Packet { data: packet_data }
+    pub fn from(packet_data: Vec<u8>) -> RawPacket {
+        RawPacket { data: packet_data }
     }
 
     pub fn push(&mut self, data: u8) {
@@ -305,7 +305,7 @@ impl Packet {
     }
 }
 
-impl Default for Packet {
+impl Default for RawPacket {
     fn default() -> Self {
         Self::new()
     }
@@ -318,7 +318,7 @@ mod tests {
 
     #[test]
     fn test_varint() {
-        let mut packet = Packet::new();
+        let mut packet = RawPacket::new();
         let values = vec![
             // Gotten from wiki.vg
             (vec![0x00], 0),
@@ -341,7 +341,7 @@ mod tests {
 
     #[test]
     fn test_varint_writing() {
-        let mut packet = Packet::new();
+        let mut packet = RawPacket::new();
         let values = vec![
             // Gotten from wiki.vg
             (vec![0x00], 0),
@@ -364,7 +364,7 @@ mod tests {
 
     #[test]
     fn test_varlong() {
-        let mut packet = Packet::new();
+        let mut packet = RawPacket::new();
         let values = vec![
             (vec![0x00], 0),
             (vec![0x01], 1),
@@ -399,7 +399,7 @@ mod tests {
 
     #[test]
     fn test_varlong_writing() {
-        let mut packet = Packet::new();
+        let mut packet = RawPacket::new();
         let values = vec![
             // Gotten from wiki.vg
             (vec![0x00], 0),
@@ -435,7 +435,7 @@ mod tests {
 
     #[test]
     fn test_bool() {
-        let mut packet = Packet::new();
+        let mut packet = RawPacket::new();
         let values = vec![true, false];
         for v in values {
             packet.encode_bool(v).unwrap();
@@ -446,7 +446,7 @@ mod tests {
 
     #[test]
     fn test_byte() {
-        let mut packet = Packet::new();
+        let mut packet = RawPacket::new();
         let values = vec![0, 1, -1, -128, 127];
         for v in values {
             packet.encode_byte(v).unwrap();

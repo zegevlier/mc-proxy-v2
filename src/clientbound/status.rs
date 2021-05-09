@@ -1,4 +1,4 @@
-use crate::{packet::Packet, parsable::Parsable};
+use crate::{parsable::Parsable, raw_packet::RawPacket};
 use crate::{SharedState, State};
 
 #[derive(Clone)]
@@ -13,7 +13,7 @@ impl Parsable for StatusResponse {
         }
     }
 
-    fn parse_packet(&mut self, mut packet: Packet) -> Result<(), ()> {
+    fn parse_packet(&mut self, mut packet: RawPacket) -> Result<(), ()> {
         self.json_response = packet.decode_string()?;
         Ok(())
     }
@@ -33,7 +33,7 @@ impl Parsable for StatusPong {
         Self { payload: 0 }
     }
 
-    fn parse_packet(&mut self, mut packet: Packet) -> Result<(), ()> {
+    fn parse_packet(&mut self, mut packet: RawPacket) -> Result<(), ()> {
         self.payload = packet.decode_long()?;
         Ok(())
     }
