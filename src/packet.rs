@@ -24,6 +24,10 @@ impl Packet {
         self.data.append(&mut data)
     }
 
+    pub fn push_slice(&mut self, data: &[u8]) {
+        self.data.extend_from_slice(data)
+    }
+
     pub fn len(&self) -> usize {
         self.data.len()
     }
@@ -188,6 +192,59 @@ impl Packet {
         Ok(u128::from_be_bytes(self.read(16)?.try_into().unwrap()))
     }
 
+    pub fn encode_bool(&mut self, value: bool) -> Result<(), ()> {
+        self.push(match value {
+            true => 0x01,
+            false => 0x00,
+        });
+        Ok(())
+    }
+
+    pub fn encode_byte(&mut self, value: i8) -> Result<(), ()> {
+        self.push_slice(&value.to_be_bytes());
+        Ok(())
+    }
+
+    pub fn encode_ubyte(&mut self) -> Result<u8, ()> {
+        todo!()
+    }
+
+    pub fn encode_short(&mut self) -> Result<i16, ()> {
+        todo!()
+    }
+
+    pub fn encode_ushort(&mut self) -> Result<u16, ()> {
+        todo!()
+    }
+
+    pub fn encode_int(&mut self) -> Result<i32, ()> {
+        todo!()
+    }
+
+    pub fn encode_long(&mut self) -> Result<i64, ()> {
+        todo!()
+    }
+
+    pub fn encode_float(&mut self) -> Result<f32, ()> {
+        todo!()
+    }
+
+    pub fn encode_double(&mut self) -> Result<f64, ()> {
+        todo!()
+    }
+
+    pub fn encode_string(&mut self) -> Result<String, ()> {
+        todo!()
+    }
+
+    pub fn encode_chat(&mut self) -> Result<String, ()> {
+        todo!()
+    }
+
+    pub fn encode_identifier(&mut self) -> Result<String, ()> {
+        todo!()
+    }
+
     pub fn encode_varint(&mut self, v: i32) -> Result<(), ()> {
         let mut value = u32::from_le_bytes(v.to_le_bytes());
         loop {
@@ -218,6 +275,33 @@ impl Packet {
             }
         }
         Ok(())
+    }
+
+    pub fn encode_entity_metadata(&mut self) -> Result<(), ()> {
+        // varies, not yet needed so not yet implemented.
+        todo!()
+    }
+
+    pub fn encode_slot(&mut self) -> Result<(), ()> {
+        // requires NTB parsing
+        todo!()
+    }
+
+    pub fn encode_nbt_tag(&mut self) -> Result<(), ()> {
+        // Requires a *lot* of work and is not yet needed, so TODO.
+        todo!()
+    }
+
+    pub fn encode_position(&mut self) -> Result<(i64, i64, i64), ()> {
+        todo!()
+    }
+
+    pub fn encode_angle(&mut self) -> Result<u8, ()> {
+        todo!()
+    }
+
+    pub fn encode_uuid(&mut self) -> Result<u128, ()> {
+        todo!()
     }
 }
 
@@ -345,6 +429,28 @@ mod tests {
         for (p, v) in values {
             packet.encode_varlong(v).unwrap();
             assert_eq!(packet.get_vec(), p);
+            packet.clear()
+        }
+    }
+
+    #[test]
+    fn test_bool() {
+        let mut packet = Packet::new();
+        let values = vec![true, false];
+        for v in values {
+            packet.encode_bool(v).unwrap();
+            assert_eq!(packet.decode_bool().unwrap(), v);
+            packet.clear()
+        }
+    }
+
+    #[test]
+    fn test_byte() {
+        let mut packet = Packet::new();
+        let values = vec![0, 1, -1, -128, 127];
+        for v in values {
+            packet.encode_byte(v).unwrap();
+            assert_eq!(packet.decode_byte().unwrap(), v);
             packet.clear()
         }
     }
