@@ -193,7 +193,7 @@ async fn parser(
                             func_id.to_string().blue(),
                             packet_info,
                             "",
-                            20 - func_id.to_string().len()
+                            22 - func_id.to_string().len()
                         );
                         true
                     }
@@ -260,7 +260,7 @@ async fn handle_connection(client_stream: TcpStream) -> std::io::Result<()> {
     let shared_status: Arc<Mutex<SharedState>> = Arc::new(Mutex::new(SharedState::new()));
 
     // It connects to the new IP, if it fails just error.
-    let ip = "127.0.0.1:25565";
+    let ip = "213.73.232.248:25565";
     log::info!("Connecting to IP {}", ip);
     let server_stream = TcpStream::connect(ip).await?;
 
