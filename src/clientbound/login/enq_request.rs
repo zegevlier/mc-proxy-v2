@@ -1,5 +1,5 @@
 use crate::utils;
-use crate::{parsable::Parsable, raw_packet::RawPacket};
+use crate::{packet::Packet, parsable::Parsable, raw_packet::RawPacket};
 use crate::{Direction, SharedState};
 use hex::encode;
 use rand::Rng;
@@ -78,7 +78,7 @@ impl Parsable for EncRequest {
     async fn edit_packet(
         &self,
         status: SharedState,
-    ) -> Result<(RawPacket, Direction, SharedState), ()> {
+    ) -> Result<(Packet, Direction, SharedState), ()> {
         let mut status = status;
         status.secret_key = rand::thread_rng().gen::<[u8; 16]>();
 
@@ -139,7 +139,6 @@ impl Parsable for EncRequest {
         let padding = PaddingScheme::new_pkcs1v15_encrypt();
 
         let mut unformatted_packet = crate::RawPacket::new();
-        unformatted_packet.encode_varint(1)?;
         unformatted_packet.encode_varint(128)?;
         unformatted_packet.push_vec(
             public_key
@@ -154,9 +153,7 @@ impl Parsable for EncRequest {
                 .encrypt(&mut rng, padding, &self.verify_token[..])
                 .unwrap(),
         );
-        let mut response_packet = RawPacket::new();
-        response_packet.encode_varint(unformatted_packet.len() as i32)?;
-        response_packet.push_vec(unformatted_packet.get_vec());
+        let response_packet = Packet::from(unformatted_packet, 0x01);
         // log::debug!("{:?}", response_packet.get_vec());
         log::debug!("Sending serverbound enc response");
 
