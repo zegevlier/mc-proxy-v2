@@ -264,7 +264,7 @@ async fn handle_connection(client_stream: TcpStream) -> std::io::Result<()> {
     let shared_status: Arc<Mutex<SharedState>> = Arc::new(Mutex::new(SharedState::new()));
 
     // It connects to the new IP, if it fails just error.
-    let ip = "play.schoolrp.net:25565";
+    let ip = "213.73.232.248:25565";
     log::info!("Connecting to IP {}", ip);
     let server_stream = TcpStream::connect(ip).await?;
 

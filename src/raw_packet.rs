@@ -233,8 +233,10 @@ impl RawPacket {
         todo!()
     }
 
-    pub fn encode_string(&mut self) -> Result<String, ()> {
-        todo!()
+    pub fn encode_string(&mut self, message: String) -> Result<(), ()> {
+        self.encode_varint(message.len() as i32)?;
+        self.push_slice(message.as_bytes());
+        Ok(())
     }
 
     pub fn encode_chat(&mut self) -> Result<String, ()> {
