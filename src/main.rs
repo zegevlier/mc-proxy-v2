@@ -136,20 +136,18 @@ async fn parser(
             original_packet.encode_varint(packet_length)?;
             original_packet.push_vec(packet.get_vec());
 
-            if direction == Direction::Clientbound {
-                // Uncompress if needed
-                if shared_status.lock().compress > 0 {
-                    let data_length = packet.decode_varint()?;
-                    if data_length > 0 {
-                        let decompressed_packet = match decompress_to_vec_zlib(&packet.get_vec()) {
-                            Ok(decompressed_packet) => decompressed_packet,
-                            Err(why) => {
-                                log::error!("Decompress error: {:?}", why);
-                                break;
-                            }
-                        };
-                        packet.set(decompressed_packet);
-                    }
+            // Uncompress if needed
+            if shared_status.lock().compress > 0 {
+                let data_length = packet.decode_varint()?;
+                if data_length > 0 {
+                    let decompressed_packet = match decompress_to_vec_zlib(&packet.get_vec()) {
+                        Ok(decompressed_packet) => decompressed_packet,
+                        Err(why) => {
+                            log::error!("Decompress error: {:?}", why);
+                            break;
+                        }
+                    };
+                    packet.set(decompressed_packet);
                 }
             }
 
@@ -214,7 +212,13 @@ async fn parser(
                         match parsed_packet.edit_packet(shared_status_c).await {
                             Ok((packet, new_direction, new_shared_status)) => {
                                 to_direction = new_direction;
-                                out_data = packet.get_data_uncompressed().unwrap();
+                                out_data = if new_shared_status.compress == 0 {
+                                    packet.get_data_uncompressed().unwrap()
+                                } else {
+                                    packet
+                                        .get_data_compressed(new_shared_status.compress as i32)
+                                        .unwrap()
+                                };
                                 shared_status.lock().set(new_shared_status.clone());
                             }
                             Err(_) => {

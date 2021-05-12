@@ -1,6 +1,7 @@
 // For now, I don't want the cd to fail because of this. Should be removed later
 #![allow(dead_code)]
 use crate::RawPacket;
+use miniz_oxide::deflate::compress_to_vec_zlib;
 
 pub struct Packet {
     raw_packet: RawPacket,
@@ -35,6 +36,36 @@ impl Packet {
         data.push_vec(self.raw_packet.get_vec());
 
         Ok(data.get_vec())
+    }
+
+    pub fn get_data_compressed(&self, compression_threshold: i32) -> Result<Vec<u8>, ()> {
+        let mut pid_encoded = RawPacket::new();
+        match self.pid {
+            Some(pid) => pid_encoded.encode_varint(pid)?,
+            None => return Err(()),
+        }
+
+        let mut data = RawPacket::new();
+        data.push_vec(pid_encoded.get_vec());
+        data.push_vec(self.raw_packet.get_vec());
+
+        let data_length = if data.len() >= compression_threshold as usize {
+            let dl = data.len();
+            data.set(compress_to_vec_zlib(data.get_slice(), 5));
+            dl
+        } else {
+            0
+        };
+
+        let mut data_length_encoded = RawPacket::new();
+        data_length_encoded.encode_varint(data_length as i32)?;
+
+        let mut return_data = RawPacket::new();
+        return_data.encode_varint((data_length_encoded.len() + data.len()) as i32)?;
+        return_data.push_vec(data_length_encoded.get_vec());
+        return_data.push_vec(data.get_vec());
+
+        Ok(return_data.get_vec())
     }
 }
 
