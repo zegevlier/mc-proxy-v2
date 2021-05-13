@@ -302,8 +302,9 @@ impl RawPacket {
         todo!()
     }
 
-    pub fn encode_uuid(&mut self) -> Result<u128, ()> {
-        todo!()
+    pub fn encode_uuid(&mut self, value: u128) -> Result<(), ()> {
+        self.push_slice(&value.to_be_bytes());
+        Ok(())
     }
 }
 
