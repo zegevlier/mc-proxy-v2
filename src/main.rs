@@ -1,8 +1,12 @@
 #![allow(where_clauses_object_safety)]
-use miniz_oxide::inflate::decompress_to_vec_zlib;
-use parking_lot::Mutex;
+
 use std::{io::Write, sync::Arc, time::Duration};
 
+use colored::*;
+use env_logger::Builder;
+use log::LevelFilter;
+use miniz_oxide::inflate::decompress_to_vec_zlib;
+use parking_lot::Mutex;
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
     net::{
@@ -12,9 +16,8 @@ use tokio::{
     time::timeout,
 };
 
-use colored::*;
-use env_logger::Builder;
-use log::LevelFilter;
+use raw_packet::RawPacket;
+pub use types::{Direction, SharedState, State};
 
 mod cipher;
 mod parsable;
@@ -27,13 +30,10 @@ mod functions;
 mod packet;
 mod serverbound;
 
-use raw_packet::RawPacket;
-pub use types::{Direction, SharedState, State};
-
 type DataQueue = deadqueue::unlimited::Queue<Vec<u8>>;
 
-// This function puts all recieved packets (in chunks of 4096 bytes) in the recieving queue.
-async fn reciever(mut rx: OwnedReadHalf, queue: Arc<DataQueue>) {
+// This function puts all received packets (in chunks of 4096 bytes) in the receiving queue.
+async fn receiver(mut rx: OwnedReadHalf, queue: Arc<DataQueue>) {
     let mut buf = [0; 4096];
     loop {
         let n = match timeout(Duration::from_secs(60), rx.read(&mut buf)).await {
@@ -49,7 +49,7 @@ async fn reciever(mut rx: OwnedReadHalf, queue: Arc<DataQueue>) {
                 }
             },
             Err(_) => {
-                log::warn!("Did not recieve new data in 60 seconds, assuming shutdown");
+                log::warn!("Did not receive new data in 60 seconds, assuming shutdown");
                 return;
             }
         };
@@ -65,7 +65,7 @@ async fn sender(mut tx: OwnedWriteHalf, queue: Arc<DataQueue>) {
                 &(match timeout(Duration::from_secs(60), queue.pop()).await {
                     Ok(b) => b,
                     Err(_) => {
-                        log::warn!("Did not recieve new data in 60 seconds, assuming shutdown");
+                        log::warn!("Did not receive new data in 60 seconds, assuming shutdown");
                         return;
                     }
                 }),
@@ -97,11 +97,11 @@ async fn parser(
                 Direction::Clientbound => server_proxy_queue.pop(),
             },
         )
-        .await
+            .await
         {
             Ok(new_data) => new_data,
             Err(_) => {
-                log::warn!("Did not recieve new data in 60 seconds, assuming shutdown");
+                log::warn!("Did not receive new data in 60 seconds, assuming shutdown");
                 break;
             }
         };
@@ -301,14 +301,14 @@ async fn handle_connection(client_stream: TcpStream) -> std::io::Result<()> {
     let (srx, stx) = server_stream.into_split();
     let (crx, ctx) = client_stream.into_split();
 
-    // It then starts multiple threads to put all the recieved data into the previously created queues
+    // It then starts multiple threads to put all the received data into the previously created queues
     tokio::spawn({
         let client_proxy_queue = client_proxy_queue.clone();
-        async move { reciever(crx, client_proxy_queue).await }
+        async move { receiver(crx, client_proxy_queue).await }
     });
     tokio::spawn({
         let server_proxy_queue = server_proxy_queue.clone();
-        async move { reciever(srx, server_proxy_queue).await }
+        async move { receiver(srx, server_proxy_queue).await }
     });
 
     // And it also starts two to put the send data in the tx's
@@ -337,7 +337,7 @@ async fn handle_connection(client_stream: TcpStream) -> std::io::Result<()> {
                 shared_status,
                 Direction::Serverbound,
             )
-            .await
+                .await
         }
     });
 
@@ -351,7 +351,7 @@ async fn handle_connection(client_stream: TcpStream) -> std::io::Result<()> {
                 shared_status,
                 Direction::Clientbound,
             )
-            .await
+                .await
         }
     });
 
@@ -382,7 +382,7 @@ async fn main() -> std::io::Result<()> {
         // If this continues, a new client is connected.
         let (socket, _) = mc_client_listener.accept().await?;
         log::info!("Client connected...");
-        // Start the client-handeling thread (this will complete quickly)
+        // Start the client-handling thread (this will complete quickly)
         handle_connection(socket).await?;
     }
 }

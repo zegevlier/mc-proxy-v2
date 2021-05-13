@@ -1,7 +1,6 @@
-// For now, I don't want the cd to fail because of this. Should be removed later
-#![allow(dead_code)]
-use crate::RawPacket;
 use miniz_oxide::deflate::compress_to_vec_zlib;
+
+use crate::RawPacket;
 
 pub struct Packet {
     raw_packet: RawPacket,

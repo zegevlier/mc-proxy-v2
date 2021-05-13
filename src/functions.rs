@@ -1,11 +1,13 @@
+use std::{collections::HashMap, fmt};
+
+use maplit::hashmap;
+
 use crate::{
     clientbound,
     parsable::Parsable,
     serverbound,
     types::{Direction, State},
 };
-use maplit::hashmap;
-use std::{collections::HashMap, fmt};
 
 #[derive(Hash, Eq, PartialEq, Debug)]
 pub enum Fid {

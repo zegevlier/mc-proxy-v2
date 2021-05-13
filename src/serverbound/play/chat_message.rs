@@ -48,7 +48,7 @@ impl Parsable for ChatMessageServerbound {
         if message.starts_with('.') {
             if message == ".test" {
                 return_packet_vec.push((
-                    generate_message_packet("Test packet recieved!").unwrap(),
+                    generate_message_packet("Test packet received!").unwrap(),
                     Direction::Clientbound,
                 ));
             }

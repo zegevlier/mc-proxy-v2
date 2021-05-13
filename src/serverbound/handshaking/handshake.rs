@@ -38,13 +38,13 @@ impl Parsable for Handshake {
         )
     }
 
-    fn status_updating(&self) -> bool {
-        true
-    }
-
     fn update_status(&self, status: &mut SharedState) -> Result<(), ()> {
         status.state = self.next_state.clone();
         log::debug!("State updated to {:?}", status.state);
         Ok(())
+    }
+
+    fn status_updating(&self) -> bool {
+        true
     }
 }
