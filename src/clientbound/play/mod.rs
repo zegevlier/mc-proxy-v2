@@ -21,3 +21,6 @@ pub use chat_message::*;
 
 mod tab_complete;
 pub use tab_complete::*;
+
+mod resource_pack_send;
+pub use resource_pack_send::*;

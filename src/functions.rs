@@ -32,6 +32,7 @@ pub enum Fid {
     ChatMessageClientbound,
     TabCompleteClientbound,
     ChatMessageServerbound,
+    ResourcePackSend,
 }
 
 impl fmt::Display for Fid {
@@ -71,6 +72,7 @@ impl Functions {
                         0x07 => Fid::AckPlayerDigging,
                         0x0E => Fid::ChatMessageClientbound,
                         0x0F => Fid::TabCompleteClientbound,
+                        0x38 => Fid::ResourcePackSend,
                     },
                 },
                 Direction::Serverbound => hashmap! {
@@ -230,6 +232,11 @@ pub fn get_functions() -> Functions {
     functions.add(
         Fid::TabCompleteClientbound,
         Box::new(clientbound::play::TabCompleteClientbound::empty()),
+    );
+
+    functions.add(
+        Fid::ResourcePackSend,
+        Box::new(clientbound::play::ResourcePackSend::empty()),
     );
 
     // Serverbound
