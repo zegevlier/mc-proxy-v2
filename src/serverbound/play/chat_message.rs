@@ -44,21 +44,25 @@ impl Parsable for ChatMessageServerbound {
     ) -> Result<(Vec<(Packet, Direction)>, SharedState), ()> {
         let mut return_packet_vec = Vec::new();
         let message = &self.message.clone();
-        let mut raw_packet = RawPacket::new();
-        raw_packet.encode_string(message.to_string())?;
 
-        if self.message.starts_with('.') {
+        if message.starts_with('.') {
             if message == ".test" {
                 return_packet_vec.push((
                     generate_message_packet("Test packet recieved!").unwrap(),
                     Direction::Clientbound,
                 ));
             }
+            if message.starts_with(".say ") {
+                let mut raw_packet = RawPacket::new();
+                raw_packet.encode_string(message.strip_prefix(".say ").unwrap().to_string())?;
+                return_packet_vec.push((Packet::from(raw_packet, 0x03), Direction::Serverbound));
+            }
         } else {
+            let mut raw_packet = RawPacket::new();
+            raw_packet.encode_string(message.to_string())?;
             return_packet_vec.push((Packet::from(raw_packet, 0x03), Direction::Serverbound));
         }
 
         Ok((return_packet_vec, status))
     }
 }
-//
