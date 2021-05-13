@@ -78,7 +78,7 @@ impl Parsable for EncRequest {
     async fn edit_packet(
         &self,
         status: SharedState,
-    ) -> Result<(Packet, Direction, SharedState), ()> {
+    ) -> Result<(Vec<(Packet, Direction)>, SharedState), ()> {
         let mut status = status;
         status.secret_key = rand::thread_rng().gen::<[u8; 16]>();
 
@@ -108,7 +108,7 @@ impl Parsable for EncRequest {
         };
 
         let mut req_map = HashMap::new();
-        req_map.insert("accessToken", "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI2NTY0M2EzYmU0NGY4NmVlODE4OWEwMDllMGNlYTNmYSIsInlnZ3QiOiI1ZDQ5MzgyZDU4Nzk0NDE1OTg2MDU3Y2E3Njk4MWFjYSIsInNwciI6ImY1NGM3NGRkMzM2MjQyMmM4MGY5ZGE3MWVjYTRhYWEzIiwiaXNzIjoiWWdnZHJhc2lsLUF1dGgiLCJleHAiOjE2MjA4NDgwMTIsImlhdCI6MTYyMDY3NTIxMn0.TVkYMXHA3kuvHB1AE7oRXd6ojUd-cKnWLWZOkaxs520");
+        req_map.insert("accessToken", "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI2NTY0M2EzYmU0NGY4NmVlODE4OWEwMDllMGNlYTNmYSIsInlnZ3QiOiJmMDMxNDdjZGEzYjA0NTYyOTEzNzQ3MTExMmVmMWM4NyIsInNwciI6ImY1NGM3NGRkMzM2MjQyMmM4MGY5ZGE3MWVjYTRhYWEzIiwiaXNzIjoiWWdnZHJhc2lsLUF1dGgiLCJleHAiOjE2MjEwMjE1OTksImlhdCI6MTYyMDg0ODc5OX0.h6_9zo16jHsvk6Mqx4dZGinhBrVz76nqLCM0KxODheU");
         req_map.insert("selectedProfile", "f54c74dd3362422c80f9da71eca4aaa3");
         req_map.insert("serverId", &result_hash);
 
@@ -163,7 +163,7 @@ impl Parsable for EncRequest {
         // Verify token length (varint)
         // Verify token encrypted with public key (byte array)
 
-        Ok((response_packet, Direction::Serverbound, status))
+        Ok((vec![(response_packet, Direction::Serverbound)], status))
     }
 
     fn post_send_updating(&self) -> bool {

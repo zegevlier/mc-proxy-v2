@@ -51,7 +51,7 @@ impl Packet {
 
         let data_length = if data.len() >= compression_threshold as usize {
             let dl = data.len();
-            data.set(compress_to_vec_zlib(data.get_slice(), 5));
+            data.set(compress_to_vec_zlib(data.get_slice(), 6));
             dl
         } else {
             0

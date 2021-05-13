@@ -1,7 +1,7 @@
 use std::convert::TryInto;
 
 // Pakcet holds a raw (unparsed) packet.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct RawPacket {
     data: Vec<u8>,
 }

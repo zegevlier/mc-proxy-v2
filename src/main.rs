@@ -210,15 +210,44 @@ async fn parser(
                     if parsed_packet.packet_editing() {
                         let shared_status_c = shared_status.lock().clone();
                         match parsed_packet.edit_packet(shared_status_c).await {
-                            Ok((packet, new_direction, new_shared_status)) => {
-                                to_direction = new_direction;
-                                out_data = if new_shared_status.compress == 0 {
-                                    packet.get_data_uncompressed().unwrap()
+                            Ok((packet_vec, new_shared_status)) => {
+                                let mut new_shared_status = new_shared_status;
+                                if packet_vec.len() > 1 {
+                                    for packet in packet_vec {
+                                        let out_d = if new_shared_status.compress == 0 {
+                                            packet.0.get_data_uncompressed().unwrap()
+                                        } else {
+                                            packet
+                                                .0
+                                                .get_data_compressed(
+                                                    new_shared_status.compress as i32,
+                                                )
+                                                .unwrap()
+                                        };
+                                        match packet.1 {
+                                            Direction::Serverbound => {
+                                                let out_d =
+                                                    new_shared_status.ps_cipher.encrypt(out_d);
+                                                proxy_server_queue.push(out_d);
+                                            }
+                                            Direction::Clientbound => {
+                                                proxy_client_queue.push(out_d)
+                                            }
+                                        }
+                                    }
+                                    out_data.clear();
                                 } else {
-                                    packet
-                                        .get_data_compressed(new_shared_status.compress as i32)
-                                        .unwrap()
-                                };
+                                    let packet = &packet_vec[0];
+                                    to_direction = packet.1;
+                                    out_data = if new_shared_status.compress == 0 {
+                                        packet.0.get_data_uncompressed().unwrap()
+                                    } else {
+                                        packet
+                                            .0
+                                            .get_data_compressed(new_shared_status.compress as i32)
+                                            .unwrap()
+                                    };
+                                }
                                 shared_status.lock().set(new_shared_status.clone());
                             }
                             Err(_) => {
@@ -229,7 +258,6 @@ async fn parser(
                 }
 
                 if to_direction == Direction::Serverbound {
-                    //TODO Add data compression, but this needs to be done with the packet type.
                     out_data = shared_status.lock().ps_cipher.encrypt(out_data)
                 }
                 if success && parsed_packet.post_send_updating() {
@@ -264,7 +292,7 @@ async fn handle_connection(client_stream: TcpStream) -> std::io::Result<()> {
     let shared_status: Arc<Mutex<SharedState>> = Arc::new(Mutex::new(SharedState::new()));
 
     // It connects to the new IP, if it fails just error.
-    let ip = "213.73.232.248:25565";
+    let ip = "127.0.0.1:25565";
     log::info!("Connecting to IP {}", ip);
     let server_stream = TcpStream::connect(ip).await?;
 

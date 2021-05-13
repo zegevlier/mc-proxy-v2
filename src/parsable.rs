@@ -27,8 +27,8 @@ pub trait Parsable: DynClone {
     async fn edit_packet(
         &self,
         status: SharedState,
-    ) -> Result<(Packet, Direction, SharedState), ()> {
-        Ok((Packet::new(), Direction::Clientbound, status))
+    ) -> Result<(Vec<(Packet, Direction)>, SharedState), ()> {
+        Ok((Vec::new(), status))
     }
 
     fn post_send_updating(&self) -> bool {

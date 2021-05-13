@@ -30,14 +30,23 @@ impl Parsable for ChatMessageServerbound {
     async fn edit_packet(
         &self,
         status: SharedState,
-    ) -> Result<(Packet, Direction, SharedState), ()> {
+    ) -> Result<(Vec<(Packet, Direction)>, SharedState), ()> {
+        let mut return_packet_vec = Vec::new();
         let message = self.message.clone();
         let mut raw_packet = RawPacket::new();
         raw_packet.encode_string(message)?;
-        Ok((
-            Packet::from(raw_packet, 0x03),
-            Direction::Serverbound,
-            status,
-        ))
+
+        if self.message.contains("test") {
+            let mut raw_packet = RawPacket::new();
+            raw_packet.encode_string("{\"extra\":[{\"text\":\"<\"},{\"color\":\"red\",\"text\":\"proxy\"},{\"text\":\"> test recieved!\"}],\"text\":\"\"}".into())?;
+            raw_packet.encode_byte(1)?;
+            raw_packet.encode_uuid(0)?;
+            return_packet_vec.push((Packet::from(raw_packet, 0x0E), Direction::Clientbound));
+        } else {
+            return_packet_vec.push((Packet::from(raw_packet, 0x03), Direction::Serverbound));
+        }
+
+        Ok((return_packet_vec, status))
     }
 }
+//
