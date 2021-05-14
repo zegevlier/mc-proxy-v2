@@ -3,9 +3,9 @@ use std::{collections::HashMap, fmt};
 use maplit::hashmap;
 
 use crate::{
-    clientbound,
+    clientbound as cb,
     parsable::Parsable,
-    serverbound,
+    serverbound as sb,
     types::{Direction, State},
 };
 
@@ -125,126 +125,99 @@ pub fn get_functions() -> Functions {
     // Serverbound
     functions.add(
         Fid::Handshake,
-        Box::new(serverbound::handshaking::Handshake::empty()),
+        Box::new(sb::handshaking::Handshake::empty()),
     );
 
     // Status
     // Clientbound
     functions.add(
         Fid::StatusResponse,
-        Box::new(clientbound::status::StatusResponse::empty()),
+        Box::new(cb::status::StatusResponse::empty()),
     );
 
-    functions.add(
-        Fid::StatusPong,
-        Box::new(clientbound::status::StatusPong::empty()),
-    );
+    functions.add(Fid::StatusPong, Box::new(cb::status::StatusPong::empty()));
 
     // Serverbound
     functions.add(
         Fid::StatusRequest,
-        Box::new(serverbound::status::StatusRequest::empty()),
+        Box::new(sb::status::StatusRequest::empty()),
     );
 
-    functions.add(
-        Fid::StatusPing,
-        Box::new(serverbound::status::StatusPing::empty()),
-    );
+    functions.add(Fid::StatusPing, Box::new(sb::status::StatusPing::empty()));
 
     // Login
     // Clientbound
-    functions.add(
-        Fid::Disconnect,
-        Box::new(clientbound::login::Disconnect::empty()),
-    );
+    functions.add(Fid::Disconnect, Box::new(cb::login::Disconnect::empty()));
 
-    functions.add(
-        Fid::EncRequest,
-        Box::new(clientbound::login::EncRequest::empty()),
-    );
+    functions.add(Fid::EncRequest, Box::new(cb::login::EncRequest::empty()));
 
     functions.add(
         Fid::LoginSuccess,
-        Box::new(clientbound::login::LoginSuccess::empty()),
+        Box::new(cb::login::LoginSuccess::empty()),
     );
 
     functions.add(
         Fid::SetCompression,
-        Box::new(clientbound::login::SetCompression::empty()),
+        Box::new(cb::login::SetCompression::empty()),
     );
 
     functions.add(
         Fid::PluginRequest,
-        Box::new(clientbound::login::PluginRequest::empty()),
+        Box::new(cb::login::PluginRequest::empty()),
     );
 
     // Serverbound
-    functions.add(
-        Fid::LoginStart,
-        Box::new(serverbound::login::LoginStart::empty()),
-    );
+    functions.add(Fid::LoginStart, Box::new(sb::login::LoginStart::empty()));
 
-    functions.add(
-        Fid::EncResponse,
-        Box::new(serverbound::login::EncResponse::empty()),
-    );
+    functions.add(Fid::EncResponse, Box::new(sb::login::EncResponse::empty()));
 
     functions.add(
         Fid::PluginResponse,
-        Box::new(serverbound::login::PluginResponse::empty()),
+        Box::new(sb::login::PluginResponse::empty()),
     );
 
     // Play
     // Clientbound
-    functions.add(
-        Fid::SpawnEntity,
-        Box::new(clientbound::play::SpawnEntity::empty()),
-    );
+    functions.add(Fid::SpawnEntity, Box::new(cb::play::SpawnEntity::empty()));
 
-    functions.add(
-        Fid::SpawnXpOrb,
-        Box::new(clientbound::play::SpawnXpOrb::empty()),
-    );
+    functions.add(Fid::SpawnXpOrb, Box::new(cb::play::SpawnXpOrb::empty()));
 
     functions.add(
         Fid::SpawnLivingEntity,
-        Box::new(clientbound::play::SpawnLivingEntity::empty()),
+        Box::new(cb::play::SpawnLivingEntity::empty()),
     );
 
     functions.add(
         Fid::SpawnPainting,
-        Box::new(clientbound::play::SpawnPainting::empty()),
+        Box::new(cb::play::SpawnPainting::empty()),
     );
 
-    functions.add(
-        Fid::SpawnPlayer,
-        Box::new(clientbound::play::SpawnPlayer::empty()),
-    );
+    functions.add(Fid::SpawnPlayer, Box::new(cb::play::SpawnPlayer::empty()));
 
     functions.add(
         Fid::AckPlayerDigging,
-        Box::new(clientbound::play::AckPlayerDigging::empty()),
+        Box::new(cb::play::AckPlayerDigging::empty()),
     );
 
     functions.add(
         Fid::ChatMessageClientbound,
-        Box::new(clientbound::play::ChatMessageClientbound::empty()),
+        Box::new(cb::play::ChatMessageClientbound::empty()),
     );
 
     functions.add(
         Fid::TabCompleteClientbound,
-        Box::new(clientbound::play::TabCompleteClientbound::empty()),
+        Box::new(cb::play::TabCompleteClientbound::empty()),
     );
 
     functions.add(
         Fid::ResourcePackSend,
-        Box::new(clientbound::play::ResourcePackSend::empty()),
+        Box::new(cb::play::ResourcePackSend::empty()),
     );
 
     // Serverbound
     functions.add(
         Fid::ChatMessageServerbound,
-        Box::new(serverbound::play::ChatMessageServerbound::empty()),
+        Box::new(sb::play::ChatMessageServerbound::empty()),
     );
 
     functions
