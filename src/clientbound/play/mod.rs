@@ -24,3 +24,6 @@ pub use tab_complete::*;
 
 mod resource_pack_send;
 pub use resource_pack_send::*;
+
+mod update_health;
+pub use update_health::*;

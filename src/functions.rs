@@ -36,6 +36,7 @@ pub enum Fid {
     ChatMessageServerbound,
     ResourcePackSend,
     ClientSettings,
+    UpdateHealth,
 }
 
 impl fmt::Display for Fid {
@@ -76,6 +77,7 @@ impl Functions {
                         0x0E => Fid::ChatMessageClientbound,
                         0x0F => Fid::TabCompleteClientbound,
                         0x38 => Fid::ResourcePackSend,
+                        0x49 => Fid::UpdateHealth,
                     },
                 },
                 Direction::Serverbound => hashmap! {
@@ -216,6 +218,7 @@ pub fn get_functions() -> Functions {
         Box::new(cb::play::ResourcePackSend::empty()),
     );
 
+    functions.add(Fid::UpdateHealth, Box::new(cb::play::UpdateHealth::empty()));
     // Serverbound
     functions.add(
         Fid::ChatMessageServerbound,
