@@ -35,6 +35,7 @@ pub enum Fid {
     TabCompleteClientbound,
     ChatMessageServerbound,
     ResourcePackSend,
+    ClientSettings,
 }
 
 impl fmt::Display for Fid {
@@ -92,6 +93,7 @@ impl Functions {
                     },
                     State::Play => hashmap! {
                         0x03 => Fid::ChatMessageServerbound,
+                        0x05 => Fid::ClientSettings,
                     },
                 },
 
@@ -218,6 +220,11 @@ pub fn get_functions() -> Functions {
     functions.add(
         Fid::ChatMessageServerbound,
         Box::new(sb::play::ChatMessageServerbound::empty()),
+    );
+
+    functions.add(
+        Fid::ClientSettings,
+        Box::new(sb::play::ClientSettings::empty()),
     );
 
     functions
