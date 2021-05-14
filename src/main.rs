@@ -97,7 +97,7 @@ async fn parser(
                 Direction::Clientbound => server_proxy_queue.pop(),
             },
         )
-            .await
+        .await
         {
             Ok(new_data) => new_data,
             Err(_) => {
@@ -337,7 +337,7 @@ async fn handle_connection(client_stream: TcpStream) -> std::io::Result<()> {
                 shared_status,
                 Direction::Serverbound,
             )
-                .await
+            .await
         }
     });
 
@@ -351,7 +351,7 @@ async fn handle_connection(client_stream: TcpStream) -> std::io::Result<()> {
                 shared_status,
                 Direction::Clientbound,
             )
-                .await
+            .await
         }
     });
 
