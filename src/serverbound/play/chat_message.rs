@@ -1,16 +1,6 @@
+use crate::utils::generate_message_packet;
 use crate::{packet::Packet, parsable::Parsable, raw_packet::RawPacket};
 use crate::{Direction, SharedState};
-
-fn generate_message_packet(text: &str) -> Result<Packet, ()> {
-    let mut raw_packet = RawPacket::new();
-    raw_packet.encode_string(format!(
-        "{{\"extra\":[{{\"color\":\"red\",\"text\":\"proxy\"}},{{\"text\":\"> {}\"}}],\"text\":\"\"}}",
-        text
-    ))?;
-    raw_packet.encode_byte(1)?;
-    raw_packet.encode_uuid(0)?;
-    Ok(Packet::from(raw_packet, 0x0E))
-}
 
 #[derive(Clone)]
 pub struct ChatMessageServerbound {
