@@ -205,8 +205,9 @@ impl RawPacket {
         Ok(())
     }
 
-    pub fn encode_ubyte(&mut self) -> Result<u8, ()> {
-        todo!()
+    pub fn encode_ubyte(&mut self, value: u8) -> Result<(), ()> {
+        self.push_slice(&value.to_be_bytes());
+        Ok(())
     }
 
     pub fn encode_short(&mut self) -> Result<i16, ()> {

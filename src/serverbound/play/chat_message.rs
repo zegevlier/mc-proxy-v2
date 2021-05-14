@@ -51,11 +51,30 @@ impl Parsable for ChatMessageServerbound {
                     generate_message_packet("Test packet received!").unwrap(),
                     Direction::Clientbound,
                 ));
-            }
-            if message.starts_with(".say ") {
+            } else if message.starts_with(".say ") {
                 let mut raw_packet = RawPacket::new();
                 raw_packet.encode_string(message.strip_prefix(".say ").unwrap().to_string())?;
                 return_packet_vec.push((Packet::from(raw_packet, 0x03), Direction::Serverbound));
+            } else if message.starts_with(".o ") {
+                let mut raw_packet = RawPacket::new();
+                raw_packet.encode_string("en_us".to_string())?;
+                raw_packet.encode_byte(15)?;
+                raw_packet.encode_varint(0)?;
+                raw_packet.encode_bool(true)?;
+
+                if message.contains("off") {
+                    raw_packet.encode_ubyte(65)?;
+                } else {
+                    raw_packet.encode_ubyte(127)?;
+                }
+                raw_packet.encode_varint(1)?;
+
+                return_packet_vec.push((Packet::from(raw_packet, 0x05), Direction::Serverbound));
+            } else {
+                return_packet_vec.push((
+                    generate_message_packet("Command not found!").unwrap(),
+                    Direction::Clientbound,
+                ));
             }
         } else {
             let mut raw_packet = RawPacket::new();
