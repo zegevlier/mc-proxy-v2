@@ -226,8 +226,9 @@ impl RawPacket {
         todo!()
     }
 
-    pub fn encode_float(&mut self) -> Result<f32, ()> {
-        todo!()
+    pub fn encode_float(&mut self, value: f32) -> Result<(), ()> {
+        self.push_slice(&value.to_be_bytes());
+        Ok(())
     }
 
     pub fn encode_double(&mut self) -> Result<f64, ()> {
