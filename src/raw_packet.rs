@@ -57,6 +57,14 @@ impl RawPacket {
         self.data = value;
     }
 
+    pub fn prepend_length(&mut self) -> Result<(), ()> {
+        let mut prepending = Self::new();
+        prepending.encode_varint(self.data.len() as i32)?;
+        prepending.push_vec(self.data.clone());
+        self.set(prepending.get_vec());
+        Ok(())
+    }
+
     pub fn decode_bool(&mut self) -> Result<bool, ()> {
         Ok(match self.read(1)?[0] {
             0x00 => false,
@@ -214,8 +222,9 @@ impl RawPacket {
         todo!()
     }
 
-    pub fn encode_ushort(&mut self) -> Result<u16, ()> {
-        todo!()
+    pub fn encode_ushort(&mut self, value: u16) -> Result<(), ()> {
+        self.push_slice(&value.to_be_bytes());
+        Ok(())
     }
 
     pub fn encode_int(&mut self) -> Result<i32, ()> {

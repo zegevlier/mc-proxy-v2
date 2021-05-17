@@ -33,13 +33,15 @@ mod serverbound;
 type DataQueue = deadqueue::unlimited::Queue<Vec<u8>>;
 
 // This function puts all received packets (in chunks of 4096 bytes) in the receiving queue.
-async fn receiver(mut rx: OwnedReadHalf, queue: Arc<DataQueue>) {
+async fn receiver(mut rx: OwnedReadHalf, queue: Arc<DataQueue>, socket_name: &str) {
     let mut buf = [0; 4096];
     loop {
+        log::debug!("Looping in {}", socket_name);
+
         let n = match timeout(Duration::from_secs(60), rx.read(&mut buf)).await {
             Ok(v) => match v {
                 Ok(n) if n == 0 => {
-                    log::warn!("Socket closed");
+                    log::warn!("Socket closed: {}", socket_name);
                     return;
                 }
                 Ok(n) => n,
@@ -283,7 +285,7 @@ async fn parser(
     Ok(())
 }
 
-async fn handle_connection(client_stream: TcpStream) -> std::io::Result<()> {
+async fn handle_connection(mut client_stream: TcpStream) -> std::io::Result<()> {
     // Make a new  a new queue for all the directions to the proxy
     let client_proxy_queue = Arc::new(DataQueue::new());
     let proxy_client_queue = Arc::new(DataQueue::new());
@@ -292,23 +294,47 @@ async fn handle_connection(client_stream: TcpStream) -> std::io::Result<()> {
     // It then makes a shared state to share amongst all the threads
     let shared_status: Arc<Mutex<SharedState>> = Arc::new(Mutex::new(SharedState::new()));
 
+    let mut buffer = Vec::new();
+    client_stream.read_buf(&mut buffer).await.unwrap();
+    let mut raw_first_packet = RawPacket::from(buffer);
+    let _packet_length = raw_first_packet.decode_varint().unwrap();
+    let packet_id = raw_first_packet.decode_varint().unwrap();
+    assert_eq!(packet_id, 0);
+    let protocol_version = raw_first_packet.decode_varint().unwrap();
+    let server_address = &raw_first_packet.decode_string().unwrap();
+    let _server_port = raw_first_packet.decode_ushort().unwrap();
+    let next_state = raw_first_packet.decode_varint().unwrap();
+
+    let mut ip = server_address.strip_suffix(".proxy").unwrap().to_string();
+
+    let mut new_packet = RawPacket::new();
+    new_packet.encode_varint(0).unwrap();
+    new_packet.encode_varint(protocol_version).unwrap();
+    new_packet.encode_string(ip.clone()).unwrap();
+    new_packet.encode_ushort(25565).unwrap();
+    new_packet.encode_varint(next_state).unwrap();
+    new_packet.prepend_length().unwrap();
+    new_packet.push_vec(raw_first_packet.get_vec());
+    client_proxy_queue.push(new_packet.get_vec());
+
     // It connects to the new IP, if it fails just error.
-    let ip = "play.schoolrp.net:25565";
+    ip.push_str(":25565");
     log::info!("Connecting to IP {}", ip);
     let server_stream = TcpStream::connect(ip).await?;
+    log::info!("Connected...");
 
     // It then splits both TCP streams up in rx and tx
-    let (srx, stx) = server_stream.into_split();
     let (crx, ctx) = client_stream.into_split();
+    let (srx, stx) = server_stream.into_split();
 
     // It then starts multiple threads to put all the received data into the previously created queues
     tokio::spawn({
         let client_proxy_queue = client_proxy_queue.clone();
-        async move { receiver(crx, client_proxy_queue).await }
+        async move { receiver(crx, client_proxy_queue, "client").await }
     });
     tokio::spawn({
         let server_proxy_queue = server_proxy_queue.clone();
-        async move { receiver(srx, server_proxy_queue).await }
+        async move { receiver(srx, server_proxy_queue, "server").await }
     });
 
     // And it also starts two to put the send data in the tx's
