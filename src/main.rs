@@ -135,7 +135,7 @@ async fn parser(
                 raw_packet::RawPacket::from(unprocessed_data.read(packet_length as usize).unwrap());
 
             let mut original_packet = RawPacket::new();
-            original_packet.encode_varint(packet_length)?;
+            original_packet.encode_varint(packet_length);
             original_packet.push_vec(packet.get_vec());
 
             // Uncompress if needed
@@ -285,7 +285,7 @@ async fn parser(
     Ok(())
 }
 
-async fn handle_connection(mut client_stream: TcpStream) -> std::io::Result<()> {
+async fn handle_connection(mut client_stream: TcpStream) -> Result<(), ()> {
     // Make a new  a new queue for all the directions to the proxy
     let client_proxy_queue = Arc::new(DataQueue::new());
     let proxy_client_queue = Arc::new(DataQueue::new());
@@ -297,30 +297,36 @@ async fn handle_connection(mut client_stream: TcpStream) -> std::io::Result<()> 
     let mut buffer = Vec::new();
     client_stream.read_buf(&mut buffer).await.unwrap();
     let mut raw_first_packet = RawPacket::from(buffer);
-    let _packet_length = raw_first_packet.decode_varint().unwrap();
-    let packet_id = raw_first_packet.decode_varint().unwrap();
+    let _packet_length = raw_first_packet.decode_varint()?;
+    let packet_id = raw_first_packet.decode_varint()?;
     assert_eq!(packet_id, 0);
-    let protocol_version = raw_first_packet.decode_varint().unwrap();
-    let server_address = &raw_first_packet.decode_string().unwrap();
-    let _server_port = raw_first_packet.decode_ushort().unwrap();
-    let next_state = raw_first_packet.decode_varint().unwrap();
+    let protocol_version = raw_first_packet.decode_varint()?;
+    let server_address = &raw_first_packet.decode_string()?;
+    let _server_port = raw_first_packet.decode_ushort()?;
+    let next_state = raw_first_packet.decode_varint()?;
 
     let mut ip = server_address.strip_suffix(".proxy").unwrap().to_string();
 
     let mut new_packet = RawPacket::new();
-    new_packet.encode_varint(0).unwrap();
-    new_packet.encode_varint(protocol_version).unwrap();
-    new_packet.encode_string(ip.clone()).unwrap();
-    new_packet.encode_ushort(25565).unwrap();
-    new_packet.encode_varint(next_state).unwrap();
-    new_packet.prepend_length().unwrap();
+    new_packet.encode_varint(0);
+    new_packet.encode_varint(protocol_version);
+    new_packet.encode_string(ip.clone());
+    new_packet.encode_ushort(25565);
+    new_packet.encode_varint(next_state);
+    new_packet.prepend_length();
     new_packet.push_vec(raw_first_packet.get_vec());
     client_proxy_queue.push(new_packet.get_vec());
 
     // It connects to the new IP, if it fails just error.
     ip.push_str(":25565");
     log::info!("Connecting to IP {}", ip);
-    let server_stream = TcpStream::connect(ip).await?;
+    let server_stream = match TcpStream::connect(ip).await {
+        Ok(stream) => stream,
+        Err(err) => {
+            log::error!("Could nto connect ot ip: {}", err);
+            return Ok(());
+        }
+    };
     log::info!("Connected...");
 
     // It then splits both TCP streams up in rx and tx
@@ -409,6 +415,6 @@ async fn main() -> std::io::Result<()> {
         let (socket, _) = mc_client_listener.accept().await?;
         log::info!("Client connected...");
         // Start the client-handling thread (this will complete quickly)
-        handle_connection(socket).await?;
+        handle_connection(socket).await.unwrap();
     }
 }

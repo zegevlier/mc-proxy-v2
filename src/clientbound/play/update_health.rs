@@ -40,7 +40,7 @@ impl Parsable for UpdateHealth {
     ) -> Result<(Vec<(Packet, Direction)>, SharedState), ()> {
         let mut return_packet_vec = Vec::new();
         let mut raw_packet = RawPacket::new();
-        raw_packet.encode_float(self.health)?;
+        raw_packet.encode_float(self.health);
         raw_packet.encode_varint({
             match self.food {
                 c if c > 6 => self.food,
@@ -53,8 +53,8 @@ impl Parsable for UpdateHealth {
                 }
                 _ => 7,
             }
-        })?;
-        raw_packet.encode_float(self.food_saturation)?;
+        });
+        raw_packet.encode_float(self.food_saturation);
         return_packet_vec.push((Packet::from(raw_packet, 0x49), Direction::Clientbound));
         Ok((return_packet_vec, status))
     }

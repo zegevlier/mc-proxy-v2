@@ -108,7 +108,7 @@ impl Parsable for EncRequest {
         };
 
         let mut req_map = HashMap::new();
-        req_map.insert("accessToken", "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI2NTY0M2EzYmU0NGY4NmVlODE4OWEwMDllMGNlYTNmYSIsInlnZ3QiOiJmMDMxNDdjZGEzYjA0NTYyOTEzNzQ3MTExMmVmMWM4NyIsInNwciI6ImY1NGM3NGRkMzM2MjQyMmM4MGY5ZGE3MWVjYTRhYWEzIiwiaXNzIjoiWWdnZHJhc2lsLUF1dGgiLCJleHAiOjE2MjEwMjE1OTksImlhdCI6MTYyMDg0ODc5OX0.h6_9zo16jHsvk6Mqx4dZGinhBrVz76nqLCM0KxODheU");
+        req_map.insert("accessToken", "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI2NTY0M2EzYmU0NGY4NmVlODE4OWEwMDllMGNlYTNmYSIsInlnZ3QiOiIzNzI3ZjBkN2FiOWE0MWQ2YTc2OWJkYzY0MGE4MzM3ZiIsInNwciI6ImY1NGM3NGRkMzM2MjQyMmM4MGY5ZGE3MWVjYTRhYWEzIiwiaXNzIjoiWWdnZHJhc2lsLUF1dGgiLCJleHAiOjE2MjE0NDgyNzksImlhdCI6MTYyMTI3NTQ3OX0.tPDVyJ4XAedQlmoVSHIKnyFZ_C0TsYFAGVj6SDI6kkY");
         req_map.insert("selectedProfile", "f54c74dd3362422c80f9da71eca4aaa3");
         req_map.insert("serverId", &result_hash);
 
@@ -139,13 +139,13 @@ impl Parsable for EncRequest {
         let padding = PaddingScheme::new_pkcs1v15_encrypt();
 
         let mut unformatted_packet = crate::RawPacket::new();
-        unformatted_packet.encode_varint(128)?;
+        unformatted_packet.encode_varint(128);
         unformatted_packet.push_vec(
             public_key
                 .encrypt(&mut rng, padding, &status.secret_key[..])
                 .unwrap(),
         );
-        unformatted_packet.encode_varint(128)?;
+        unformatted_packet.encode_varint(128);
         let padding = PaddingScheme::new_pkcs1v15_encrypt();
 
         unformatted_packet.push_vec(

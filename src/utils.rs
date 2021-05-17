@@ -20,8 +20,8 @@ pub fn generate_message_packet(text: &str) -> Result<Packet, ()> {
     raw_packet.encode_string(format!(
         "{{\"extra\":[{{\"color\":\"red\",\"text\":\"proxy\"}},{{\"text\":\"> {}\"}}],\"text\":\"\"}}",
         text
-    ))?;
-    raw_packet.encode_byte(1)?;
-    raw_packet.encode_uuid(0)?;
+    ));
+    raw_packet.encode_byte(1);
+    raw_packet.encode_uuid(0);
     Ok(Packet::from(raw_packet, 0x0E))
 }
