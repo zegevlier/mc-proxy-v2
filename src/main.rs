@@ -15,6 +15,8 @@ use tokio::{
     },
     time::timeout,
 };
+use trust_dns_resolver::config::*;
+use trust_dns_resolver::TokioAsyncResolver;
 
 use raw_packet::RawPacket;
 pub use types::{Direction, SharedState, State};
@@ -305,7 +307,7 @@ async fn handle_connection(mut client_stream: TcpStream) -> Result<(), ()> {
     let _server_port = raw_first_packet.decode_ushort()?;
     let next_state = raw_first_packet.decode_varint()?;
 
-    let mut ip = server_address.strip_suffix(".proxy").unwrap().to_string();
+    let ip = server_address.strip_suffix(".proxy").unwrap().to_string();
 
     let mut new_packet = RawPacket::new();
     new_packet.encode_varint(0);
@@ -318,9 +320,24 @@ async fn handle_connection(mut client_stream: TcpStream) -> Result<(), ()> {
     client_proxy_queue.push(new_packet.get_vec());
 
     // It connects to the new IP, if it fails just error.
-    ip.push_str(":25565");
-    log::info!("Connecting to IP {}", ip);
-    let server_stream = match TcpStream::connect(ip).await {
+    log::debug!("Resolving ip: {:?}", ip);
+    let resolver =
+        TokioAsyncResolver::tokio(ResolverConfig::default(), ResolverOpts::default()).unwrap();
+    let lookup = resolver.srv_lookup(format!("_minecraft._tcp.{}", ip)).await;
+
+    let address = if lookup.is_ok() {
+        let response = lookup.unwrap();
+        let record = response.iter().next().unwrap();
+
+        let ip = record.target().to_string().trim_matches('.').to_string();
+        log::debug!("ip: {:?}", ip);
+
+        record.target().to_string().trim_matches('.').to_string()
+    } else {
+        ip.to_owned()
+    };
+    log::info!("Connecting to IP {}", address);
+    let server_stream = match TcpStream::connect(&format!("{}:{}", address, 25565)).await {
         Ok(stream) => stream,
         Err(err) => {
             log::error!("Could nto connect ot ip: {}", err);

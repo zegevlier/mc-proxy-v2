@@ -29,3 +29,4 @@ rust-crypto = "0.2.36"
 rustc-serialize = "0.3.24"
 tokio = {version = "1.6.0", features = ["net", "rt-multi-thread", "macros", "io-util", "time"]}
 # config = "0.11.0"
+trust-dns-resolver = "0.20.3"
