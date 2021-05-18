@@ -36,8 +36,6 @@ type DataQueue = deadqueue::unlimited::Queue<Vec<u8>>;
 async fn receiver(mut rx: OwnedReadHalf, queue: Arc<DataQueue>, socket_name: &str) {
     let mut buf = [0; 4096];
     loop {
-        log::debug!("Looping in {}", socket_name);
-
         let n = match timeout(Duration::from_secs(60), rx.read(&mut buf)).await {
             Ok(v) => match v {
                 Ok(n) if n == 0 => {
@@ -264,13 +262,9 @@ async fn parser(
                     out_data = shared_status.lock().ps_cipher.encrypt(out_data)
                 }
                 if success && parsed_packet.post_send_updating() {
-                    match parsed_packet.post_send_update(&mut shared_status.lock()) {
-                        Ok(_) => {
-                            log::debug!("Ran post send update")
-                        }
-                        Err(_) => {
-                            panic!("This should never happen")
-                        }
+                     if let Err(_) = parsed_packet.post_send_update(&mut shared_status.lock()) {
+                            panic!("PSU failed, panicing.")
+                      
                     };
                 }
                 out_data
@@ -296,10 +290,14 @@ async fn handle_connection(mut client_stream: TcpStream) -> Result<(), ()> {
 
     let mut buffer = Vec::new();
     client_stream.read_buf(&mut buffer).await.unwrap();
-    let mut raw_first_packet = RawPacket::from(buffer);
+    let mut raw_first_packet = RawPacket::from(buffer.clone());
     let _packet_length = raw_first_packet.decode_varint()?;
     let packet_id = raw_first_packet.decode_varint()?;
-    assert_eq!(packet_id, 0);
+    if packet_id != 0 {
+        log::error!("Packet ID did not match handshaking packet, terminating connection...");
+        log::debug!("Packet: {:?}", buffer);
+        return Ok(());
+    };
     let protocol_version = raw_first_packet.decode_varint()?;
     let server_address = &raw_first_packet.decode_string()?;
     let _server_port = raw_first_packet.decode_ushort()?;

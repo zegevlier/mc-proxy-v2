@@ -154,7 +154,6 @@ impl Parsable for EncRequest {
                 .unwrap(),
         );
         let response_packet = Packet::from(unformatted_packet, 0x01);
-        // log::debug!("{:?}", response_packet.get_vec());
         log::debug!("Sending serverbound enc response");
 
         // Send to proxy_server packet:
