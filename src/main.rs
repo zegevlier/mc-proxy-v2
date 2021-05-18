@@ -261,10 +261,13 @@ async fn parser(
                 if to_direction == Direction::Serverbound {
                     out_data = shared_status.lock().ps_cipher.encrypt(out_data)
                 }
-                if success && parsed_packet.post_send_updating() {
-                    if let Err(_) = parsed_packet.post_send_update(&mut shared_status.lock()) {
-                        panic!("PSU failed, panicing.")
-                    };
+                if success
+                    && parsed_packet.post_send_updating()
+                    && parsed_packet
+                        .post_send_update(&mut shared_status.lock())
+                        .is_err()
+                {
+                    panic!("PSU failed, panicing.")
                 }
                 out_data
             };
