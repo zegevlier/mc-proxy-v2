@@ -39,23 +39,16 @@ impl Parsable for UpdateHealth {
         status: SharedState,
     ) -> Result<(Vec<(Packet, Direction)>, SharedState), ()> {
         let mut return_packet_vec = Vec::new();
-        let mut raw_packet = RawPacket::new();
-        raw_packet.encode_float(self.health);
-        raw_packet.encode_varint({
-            match self.food {
-                c if c > 6 => self.food,
-                c if c == 6 => {
-                    return_packet_vec.push((
-                        generate_message_packet("Food manipulating starting!!!").unwrap(),
-                        Direction::Clientbound,
-                    ));
-                    7
-                }
-                _ => 7,
-            }
-        });
-        raw_packet.encode_float(self.food_saturation);
-        return_packet_vec.push((Packet::from(raw_packet, 0x49), Direction::Clientbound));
+        if self.food == 7 {
+            return_packet_vec.push((
+                generate_message_packet("Sent /eat command").unwrap(),
+                Direction::Clientbound,
+            ));
+            let mut eat_command = RawPacket::new();
+            eat_command.encode_string("/eat".to_string());
+            return_packet_vec.push((Packet::from(eat_command, 0x03), Direction::Serverbound));
+        };
+
         Ok((return_packet_vec, status))
     }
 }
