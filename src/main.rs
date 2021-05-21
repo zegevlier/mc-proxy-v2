@@ -27,10 +27,10 @@ mod raw_packet;
 mod types;
 mod utils;
 
-mod clientbound;
-mod functions;
 mod packet;
-mod serverbound;
+mod protocol;
+
+use protocol::v754 as functions;
 
 type DataQueue = deadqueue::unlimited::Queue<Vec<u8>>;
 

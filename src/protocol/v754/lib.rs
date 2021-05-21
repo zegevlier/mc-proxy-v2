@@ -1,11 +1,15 @@
 use std::{collections::HashMap, fmt};
 
+mod clientbound;
+mod serverbound;
+
+use self::clientbound as cb;
+use self::serverbound as sb;
+
 use maplit::hashmap;
 
 use crate::{
-    clientbound as cb,
     parsable::Parsable,
-    serverbound as sb,
     types::{Direction, State},
 };
 
