@@ -7,6 +7,27 @@ pub struct ChatMessageServerbound {
     message: String,
 }
 
+fn rainbowfy(message: String) -> String {
+    let mut return_message = String::new();
+    let rainbow_characters = "c6eab5";
+    for (i, cha) in message.chars().enumerate() {
+        match cha {
+            ' ' => return_message.push(cha),
+            _ => {
+                return_message.push('&');
+                return_message.push(
+                    rainbow_characters
+                        .chars()
+                        .nth(i % rainbow_characters.len())
+                        .unwrap(),
+                );
+                return_message.push(cha);
+            }
+        }
+    }
+    return_message
+}
+
 #[async_trait::async_trait]
 impl Parsable for ChatMessageServerbound {
     fn empty() -> Self {
@@ -44,6 +65,31 @@ impl Parsable for ChatMessageServerbound {
             } else if message.starts_with(".say ") {
                 let mut raw_packet = RawPacket::new();
                 raw_packet.encode_string(message.strip_prefix(".say ").unwrap().to_string());
+                return_packet_vec.push((Packet::from(raw_packet, 0x03), Direction::Serverbound));
+            } else if message.starts_with(".rb ") {
+                let mut raw_packet = RawPacket::new();
+                raw_packet
+                    .encode_string(rainbowfy(message.strip_prefix(".rb ").unwrap().to_string()));
+                return_packet_vec.push((Packet::from(raw_packet, 0x03), Direction::Serverbound));
+            } else if message.starts_with(".rby ") {
+                let mut raw_packet = RawPacket::new();
+                raw_packet.encode_string(
+                    vec![
+                        "/y ",
+                        &rainbowfy(message.strip_prefix(".rby ").unwrap().to_string()),
+                    ]
+                    .concat(),
+                );
+                return_packet_vec.push((Packet::from(raw_packet, 0x03), Direction::Serverbound));
+            } else if message.starts_with(".rbm ") {
+                let mut raw_packet = RawPacket::new();
+                raw_packet.encode_string(
+                    vec![
+                        "/me ",
+                        &rainbowfy(message.strip_prefix(".rbm ").unwrap().to_string()),
+                    ]
+                    .concat(),
+                );
                 return_packet_vec.push((Packet::from(raw_packet, 0x03), Direction::Serverbound));
             } else if message.starts_with(".o ") {
                 let mut raw_packet = RawPacket::new();
