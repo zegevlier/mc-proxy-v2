@@ -43,6 +43,37 @@ pub enum Fid {
     UpdateHealth,
 }
 
+pub fn fid_to_pid(fid: Fid) -> i32 {
+    match fid {
+        Fid::Unparsable => -1,
+        Fid::Handshake => 0x00,
+        Fid::StatusResponse => 0x00,
+        Fid::StatusPong => 0x01,
+        Fid::StatusRequest => 0x00,
+        Fid::StatusPing => 0x01,
+        Fid::Disconnect => 0x00,
+        Fid::EncRequest => 0x01,
+        Fid::LoginSuccess => 0x02,
+        Fid::SetCompression => 0x03,
+        Fid::PluginRequest => 0x04,
+        Fid::LoginStart => 0x00,
+        Fid::EncResponse => 0x01,
+        Fid::PluginResponse => 0x02,
+        Fid::SpawnEntity => 0x00,
+        Fid::SpawnXpOrb => 0x01,
+        Fid::SpawnLivingEntity => 0x02,
+        Fid::SpawnPainting => 0x03,
+        Fid::SpawnPlayer => 0x04,
+        Fid::AckPlayerDigging => 0x07,
+        Fid::ChatMessageClientbound => 0x0E,
+        Fid::TabCompleteClientbound => 0x0F,
+        Fid::ChatMessageServerbound => 0x03,
+        Fid::ResourcePackSend => 0x38,
+        Fid::ClientSettings => 0x05,
+        Fid::UpdateHealth => 0x49,
+    }
+}
+
 impl fmt::Display for Fid {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{:?}", self)

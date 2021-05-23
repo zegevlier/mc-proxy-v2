@@ -1,4 +1,7 @@
-use crate::utils;
+use crate::{
+    functions::{fid_to_pid, Fid},
+    utils,
+};
 use crate::{packet::Packet, parsable::Parsable, raw_packet::RawPacket};
 use crate::{Direction, SharedState};
 use hex::encode;
@@ -154,7 +157,7 @@ impl Parsable for EncRequest {
                 .encrypt(&mut rng, padding, &self.verify_token[..])
                 .unwrap(),
         );
-        let response_packet = Packet::from(unformatted_packet, 0x01);
+        let response_packet = Packet::from(unformatted_packet, fid_to_pid(Fid::EncResponse));
         log::debug!("Sending serverbound enc response");
 
         // Send to proxy_server packet:

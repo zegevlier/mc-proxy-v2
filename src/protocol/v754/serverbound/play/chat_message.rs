@@ -1,5 +1,10 @@
 //, rainbowfy};
-use crate::{packet::Packet, parsable::Parsable, raw_packet::RawPacket};
+use crate::{
+    functions::{fid_to_pid, Fid},
+    packet::Packet,
+    parsable::Parsable,
+    raw_packet::RawPacket,
+};
 use crate::{Direction, SharedState};
 
 #[derive(Clone)]
@@ -47,7 +52,7 @@ impl Parsable for ChatMessageServerbound {
             let mut raw_packet = RawPacket::new();
             raw_packet.encode_string(self.message.to_string());
             return_vec = Some(vec![(
-                Packet::from(raw_packet, 0x03),
+                Packet::from(raw_packet, fid_to_pid(Fid::ChatMessageServerbound)),
                 Direction::Serverbound,
             )]);
         }

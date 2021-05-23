@@ -1,6 +1,5 @@
 use crate::{
-    functions::serverbound::play::ChatMessageServerbound, packet::Packet, plugin,
-    raw_packet::RawPacket, utils::rainbowfy, Direction,
+    functions, packet::Packet, plugin, raw_packet::RawPacket, utils::rainbowfy, Direction,
 };
 use regex::{Captures, Regex};
 
@@ -12,7 +11,10 @@ impl plugin::EventHandler for Rainbowify {
         Self {}
     }
 
-    fn on_message(&self, message: &ChatMessageServerbound) -> Option<Vec<(Packet, Direction)>> {
+    fn on_message(
+        &self,
+        message: &functions::serverbound::play::ChatMessageServerbound,
+    ) -> Option<Vec<(Packet, Direction)>> {
         let exp = Regex::new(r"\{([a-zA-Z0-9 _+=]*)\}").unwrap();
         let new_message = exp
             .replace_all(&message.message, |caps: &Captures| {
@@ -27,7 +29,10 @@ impl plugin::EventHandler for Rainbowify {
             let mut raw_packet = RawPacket::new();
             raw_packet.encode_string(new_message);
             Some(vec![(
-                Packet::from(raw_packet, 0x03),
+                Packet::from(
+                    raw_packet,
+                    functions::fid_to_pid(functions::Fid::ChatMessageServerbound),
+                ),
                 Direction::Serverbound,
             )])
         } else {

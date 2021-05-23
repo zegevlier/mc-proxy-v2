@@ -1,4 +1,7 @@
-use crate::utils::generate_message_packet;
+use crate::{
+    functions::{fid_to_pid, Fid},
+    utils::generate_message_packet,
+};
 use crate::{packet::Packet, parsable::Parsable, raw_packet::RawPacket};
 use crate::{Direction, SharedState};
 
@@ -47,7 +50,10 @@ impl Parsable for UpdateHealth {
             ));
             let mut eat_command = RawPacket::new();
             eat_command.encode_string("/eat".to_string());
-            return_packet_vec.push((Packet::from(eat_command, 0x03), Direction::Serverbound));
+            return_packet_vec.push((
+                Packet::from(eat_command, fid_to_pid(Fid::ChatMessageServerbound)),
+                Direction::Serverbound,
+            ));
         };
 
         Ok((return_packet_vec, status))

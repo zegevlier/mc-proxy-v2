@@ -1,4 +1,4 @@
-use crate::{packet::Packet, raw_packet::RawPacket};
+use crate::{functions, packet::Packet, raw_packet::RawPacket};
 
 // This converts a long string into one that's shortened.
 // alongstringlikethis would become alongs...kethis
@@ -23,7 +23,10 @@ pub fn generate_message_packet(text: &str) -> Result<Packet, ()> {
     ));
     raw_packet.encode_byte(1);
     raw_packet.encode_uuid(0);
-    Ok(Packet::from(raw_packet, 0x0E))
+    Ok(Packet::from(
+        raw_packet,
+        functions::fid_to_pid(functions::Fid::ChatMessageClientbound),
+    ))
 }
 
 pub fn rainbowfy(message: String) -> String {
