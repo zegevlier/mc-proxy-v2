@@ -41,6 +41,8 @@ pub enum Fid {
     ResourcePackSend,
     ClientSettings,
     UpdateHealth,
+    PlayerPosition,
+    PlayerPositionRotation,
 }
 
 pub fn fid_to_pid(fid: Fid) -> i32 {
@@ -71,6 +73,8 @@ pub fn fid_to_pid(fid: Fid) -> i32 {
         Fid::ResourcePackSend => 0x38,
         Fid::ClientSettings => 0x05,
         Fid::UpdateHealth => 0x49,
+        Fid::PlayerPosition => 0x12,
+        Fid::PlayerPositionRotation => 0x13,
     }
 }
 
@@ -131,6 +135,8 @@ impl Functions {
                     State::Play => hashmap! {
                         0x03 => Fid::ChatMessageServerbound,
                         0x05 => Fid::ClientSettings,
+                        0x12 => Fid::PlayerPosition,
+                        0x13 => Fid::PlayerPositionRotation,
                     },
                 },
 
@@ -263,6 +269,16 @@ pub fn get_functions() -> Functions {
     functions.add(
         Fid::ClientSettings,
         Box::new(sb::play::ClientSettings::empty()),
+    );
+
+    functions.add(
+        Fid::PlayerPosition,
+        Box::new(sb::play::PlayerPosition::empty()),
+    );
+
+    functions.add(
+        Fid::PlayerPositionRotation,
+        Box::new(sb::play::PlayerPositionRotation::empty()),
     );
 
     functions
