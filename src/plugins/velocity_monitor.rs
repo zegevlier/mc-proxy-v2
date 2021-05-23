@@ -1,5 +1,5 @@
 use crate::{packet::Packet, plugin, Direction};
-use std::{fs::File, time::Instant};
+use std::time::Instant;
 
 #[derive(Clone)]
 pub struct Velocity {
