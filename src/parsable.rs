@@ -1,4 +1,4 @@
-use crate::{packet::Packet, raw_packet::RawPacket, Direction, SharedState};
+use crate::{packet::Packet, plugin::EventHandler, raw_packet::RawPacket, Direction, SharedState};
 use async_trait::async_trait;
 use dyn_clone::DynClone;
 
@@ -27,6 +27,7 @@ pub trait Parsable: DynClone {
     async fn edit_packet(
         &self,
         status: SharedState,
+        _plugins: &mut Vec<Box<dyn EventHandler + Send>>,
     ) -> Result<(Vec<(Packet, Direction)>, SharedState), ()> {
         Ok((Vec::new(), status))
     }

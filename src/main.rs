@@ -18,11 +18,14 @@ use tokio::{
 use trust_dns_resolver::config::*;
 use trust_dns_resolver::TokioAsyncResolver;
 
+pub use plugin::EventHandler;
 use raw_packet::RawPacket;
 pub use types::{Direction, SharedState, State};
 
 mod cipher;
 mod parsable;
+mod plugin;
+mod plugins;
 mod raw_packet;
 mod types;
 mod utils;
@@ -30,7 +33,7 @@ mod utils;
 mod packet;
 mod protocol;
 
-use protocol::v754 as functions;
+pub use protocol::v754 as functions;
 
 type DataQueue = deadqueue::unlimited::Queue<Vec<u8>>;
 
@@ -91,6 +94,7 @@ async fn parser(
 ) -> Result<(), ()> {
     let mut unprocessed_data = RawPacket::new();
     let functions = functions::get_functions();
+    let mut plugins = plugins::get_plugins();
     loop {
         let new_data = match timeout(
             Duration::from_secs(60),
@@ -211,7 +215,10 @@ async fn parser(
                     }
                     if parsed_packet.packet_editing() {
                         let shared_status_c = shared_status.lock().clone();
-                        match parsed_packet.edit_packet(shared_status_c).await {
+                        match parsed_packet
+                            .edit_packet(shared_status_c, &mut plugins)
+                            .await
+                        {
                             Ok((packet_vec, new_shared_status)) => {
                                 let mut new_shared_status = new_shared_status;
                                 if packet_vec.len() > 1 {

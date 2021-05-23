@@ -1,7 +1,7 @@
 use std::{collections::HashMap, fmt};
 
-mod clientbound;
-mod serverbound;
+pub mod clientbound;
+pub mod serverbound;
 
 use self::clientbound as cb;
 use self::serverbound as sb;

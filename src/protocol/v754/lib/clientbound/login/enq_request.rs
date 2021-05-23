@@ -78,6 +78,7 @@ impl Parsable for EncRequest {
     async fn edit_packet(
         &self,
         status: SharedState,
+        _: &mut Vec<Box<dyn crate::plugin::EventHandler + Send>>,
     ) -> Result<(Vec<(Packet, Direction)>, SharedState), ()> {
         let mut status = status;
         status.secret_key = rand::thread_rng().gen::<[u8; 16]>();
@@ -108,7 +109,7 @@ impl Parsable for EncRequest {
         };
 
         let mut req_map = HashMap::new();
-        req_map.insert("accessToken", "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI2NTY0M2EzYmU0NGY4NmVlODE4OWEwMDllMGNlYTNmYSIsInlnZ3QiOiIwMjM5Y2NiY2QxMjY0MjViYjc0NjVjMDM4N2I2OGMxZSIsInNwciI6ImY1NGM3NGRkMzM2MjQyMmM4MGY5ZGE3MWVjYTRhYWEzIiwiaXNzIjoiWWdnZHJhc2lsLUF1dGgiLCJleHAiOjE2MjE2MTkxODgsImlhdCI6MTYyMTQ0NjM4OH0.TYANedBl7b1EJ2rvHHIsPjjgI4uqvAQ05wVYft2G3Aw");
+        req_map.insert("accessToken", "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI2NTY0M2EzYmU0NGY4NmVlODE4OWEwMDllMGNlYTNmYSIsInlnZ3QiOiI0MWZiNjlkMWJjMjQ0ODgxYTQ0NDRlY2E2YjI1MDJmOSIsInNwciI6ImY1NGM3NGRkMzM2MjQyMmM4MGY5ZGE3MWVjYTRhYWEzIiwiaXNzIjoiWWdnZHJhc2lsLUF1dGgiLCJleHAiOjE2MjE5NDIwMjUsImlhdCI6MTYyMTc2OTIyNX0.z6-iMGskQDnrhtS5fEvjYbla3lGPtqiD6GvkxuACMxo");
         req_map.insert("selectedProfile", "f54c74dd3362422c80f9da71eca4aaa3");
         req_map.insert("serverId", &result_hash);
 
