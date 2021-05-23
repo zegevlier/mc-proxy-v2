@@ -13,7 +13,7 @@ impl plugin::EventHandler for Rainbowify {
     }
 
     fn on_message(&self, message: &ChatMessageServerbound) -> Option<Vec<(Packet, Direction)>> {
-        let exp = Regex::new(r"\{(\w+)\}").unwrap();
+        let exp = Regex::new(r"\{([a-zA-Z0-9 _+=]*)\}").unwrap();
         let new_message = exp
             .replace_all(&message.message, |caps: &Captures| {
                 log::debug!(
