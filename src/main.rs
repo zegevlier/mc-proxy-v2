@@ -23,6 +23,7 @@ use raw_packet::RawPacket;
 pub use types::{Direction, SharedState, State};
 
 mod cipher;
+mod conf;
 mod parsable;
 mod plugin;
 mod plugins;
@@ -191,14 +192,22 @@ async fn parser(
                 let success = match parsed_packet.parse_packet(packet) {
                     Ok(_) => {
                         let packet_info = parsed_packet.get_printable();
-                        log::info!(
-                            "{} [{}]{3:4$} {}",
-                            direction.to_string().yellow(),
-                            func_id.to_string().blue(),
-                            packet_info,
-                            "",
-                            22 - func_id.to_string().len()
-                        );
+                        if conf::get_config()
+                            .logging_packets
+                            .contains(&func_id.to_string())
+                            || conf::get_config()
+                                .logging_packets
+                                .contains(&"*".to_string())
+                        {
+                            log::info!(
+                                "{} [{}]{3:4$} {}",
+                                direction.to_string().yellow(),
+                                func_id.to_string().blue(),
+                                packet_info,
+                                "",
+                                22 - func_id.to_string().len()
+                            );
+                        }
                         true
                     }
                     Err(_) => {
@@ -426,6 +435,9 @@ async fn main() -> std::io::Result<()> {
         .filter_level(LevelFilter::Info)
         .parse_default_env()
         .init();
+
+    // Try to load config to make sure it works
+    conf::get_config();
 
     log::info!("Starting listener...");
     // Start listening on the ip waiting for new connections

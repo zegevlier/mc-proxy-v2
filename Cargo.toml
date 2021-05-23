@@ -11,6 +11,7 @@ aes = "0.7.2"
 async-trait = "0.1.50"
 cfb8 = {path = "./cfb8"}
 colored = "2.0.0"
+config = "0.11.0"
 deadqueue = {version = "0.2.0", features = ["unlimited"]}
 dyn-clone = "1.0.4"
 env_logger = "0.8.3"
@@ -27,6 +28,6 @@ rsa = "0.4.0"
 rsa-der = "0.2.1"
 rust-crypto = "0.2.36"
 rustc-serialize = "0.3.24"
+serde = {version = "1.0.126", features = ["derive"]}
 tokio = {version = "1.6.0", features = ["net", "rt-multi-thread", "macros", "io-util", "time"]}
-# config = "0.11.0"
 trust-dns-resolver = "0.20.3"
