@@ -234,8 +234,8 @@ impl RawPacket {
         self.push_slice(&value.to_be_bytes());
     }
 
-    pub fn encode_double(&mut self) {
-        todo!()
+    pub fn encode_double(&mut self, value: f64) {
+        self.push_slice(&value.to_be_bytes());
     }
 
     pub fn encode_string(&mut self, message: String) {

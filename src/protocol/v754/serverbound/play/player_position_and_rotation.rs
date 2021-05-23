@@ -1,4 +1,10 @@
-use crate::{parsable::Parsable, raw_packet::RawPacket};
+use crate::{
+    functions::{fid_to_pid, Fid},
+    packet::Packet,
+    parsable::Parsable,
+    raw_packet::RawPacket,
+    Direction, SharedState,
+};
 
 #[derive(Clone)]
 pub struct PlayerPositionRotation {
@@ -38,5 +44,40 @@ impl Parsable for PlayerPositionRotation {
             "{} {} {} {} {} {}",
             self.x, self.feet_y, self.z, self.yaw, self.pitch, self.on_ground,
         )
+    }
+
+    fn packet_editing(&self) -> bool {
+        true
+    }
+
+    async fn edit_packet(
+        &self,
+        status: SharedState,
+        plugins: &mut Vec<Box<dyn crate::plugin::EventHandler + Send>>,
+    ) -> Result<(Vec<(Packet, Direction)>, SharedState), ()> {
+        let mut return_vec = Vec::new();
+        for plugin in plugins {
+            match plugin.on_move(self.x, self.feet_y, self.z) {
+                Some(plugin_vec) => {
+                    return_vec.extend(plugin_vec);
+                    break;
+                }
+                None => continue,
+            }
+        }
+        if !return_vec.is_empty() {
+            let mut raw_packet = RawPacket::new();
+            raw_packet.encode_double(self.x);
+            raw_packet.encode_double(self.feet_y);
+            raw_packet.encode_double(self.z);
+            raw_packet.encode_float(self.yaw);
+            raw_packet.encode_float(self.pitch);
+            raw_packet.encode_bool(self.on_ground);
+            return_vec.push((
+                Packet::from(raw_packet, fid_to_pid(Fid::PlayerPositionRotation)),
+                Direction::Serverbound,
+            ));
+        }
+        Ok((return_vec, status))
     }
 }

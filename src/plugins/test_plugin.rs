@@ -11,7 +11,7 @@ impl plugin::EventHandler for TestPlugin {
         TestPlugin {}
     }
 
-    fn on_message(&self, message: &ChatMessageServerbound) -> Option<Vec<(Packet, Direction)>> {
+    fn on_message(&mut self, message: &ChatMessageServerbound) -> Option<Vec<(Packet, Direction)>> {
         if message.message == ".test" {
             return Some(vec![(
                 generate_message_packet("Test packet received!").unwrap(),

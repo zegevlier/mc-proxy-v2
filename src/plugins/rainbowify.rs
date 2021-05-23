@@ -12,7 +12,7 @@ impl plugin::EventHandler for Rainbowify {
     }
 
     fn on_message(
-        &self,
+        &mut self,
         message: &functions::serverbound::play::ChatMessageServerbound,
     ) -> Option<Vec<(Packet, Direction)>> {
         let exp = Regex::new(r"\{([a-zA-Z0-9 _+=]*)\}").unwrap();

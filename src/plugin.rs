@@ -6,7 +6,14 @@ pub trait EventHandler: DynClone {
     where
         Self: Sized;
 
-    fn on_message(&self, _message: &ChatMessageServerbound) -> Option<Vec<(Packet, Direction)>> {
+    fn on_message(
+        &mut self,
+        _message: &ChatMessageServerbound,
+    ) -> Option<Vec<(Packet, Direction)>> {
+        None
+    }
+
+    fn on_move(&mut self, _x: f64, _y: f64, _z: f64) -> Option<Vec<(Packet, Direction)>> {
         None
     }
 }
