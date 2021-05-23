@@ -1,4 +1,4 @@
-use crate::{functions::lib::serverbound::play::ChatMessageServerbound, packet::Packet, Direction};
+use crate::{functions::serverbound::play::ChatMessageServerbound, packet::Packet, Direction};
 use dyn_clone::DynClone;
 
 pub trait EventHandler: DynClone {

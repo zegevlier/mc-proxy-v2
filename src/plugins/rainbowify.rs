@@ -1,5 +1,5 @@
 use crate::{
-    functions::lib::serverbound::play::ChatMessageServerbound, packet::Packet, plugin,
+    functions::serverbound::play::ChatMessageServerbound, packet::Packet, plugin,
     raw_packet::RawPacket, utils::rainbowfy, Direction,
 };
 use regex::{Captures, Regex};
