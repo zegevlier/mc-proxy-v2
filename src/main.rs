@@ -20,7 +20,7 @@ use trust_dns_resolver::TokioAsyncResolver;
 
 pub use plugin::EventHandler;
 use raw_packet::RawPacket;
-pub use types::{Direction, SharedState, State};
+pub use types::{Ciphers, Direction, SharedState, State};
 
 mod cipher;
 mod conf;
@@ -91,6 +91,7 @@ async fn parser(
     proxy_client_queue: Arc<DataQueue>,
     proxy_server_queue: Arc<DataQueue>,
     shared_status: Arc<Mutex<SharedState>>,
+    ciphers: Arc<Mutex<Ciphers>>,
     direction: Direction,
 ) -> Result<(), ()> {
     let mut unprocessed_data = RawPacket::new();
@@ -114,7 +115,7 @@ async fn parser(
         };
 
         let new_data = if direction == Direction::Clientbound {
-            shared_status.lock().sp_cipher.decrypt(new_data)
+            ciphers.lock().sp_cipher.decrypt(new_data)
         } else {
             new_data
         };
@@ -150,7 +151,7 @@ async fn parser(
                     let decompressed_packet = match decompress_to_vec_zlib(&packet.get_vec()) {
                         Ok(decompressed_packet) => decompressed_packet,
                         Err(why) => {
-                            log::error!("Decompress error: {:?}", why);
+                            log::error!("Decompress error: {:?} {}", why, direction);
                             break;
                         }
                     };
@@ -177,7 +178,7 @@ async fn parser(
             let out_data = if not_processed {
                 let out_data = if to_direction == Direction::Serverbound {
                     // Compress data if needed, then encrypt
-                    shared_status.lock().ps_cipher.encrypt(out_data)
+                    ciphers.lock().ps_cipher.encrypt(out_data)
                 } else {
                     out_data
                 };
@@ -229,7 +230,6 @@ async fn parser(
                             .await
                         {
                             Ok((packet_vec, new_shared_status)) => {
-                                let mut new_shared_status = new_shared_status;
                                 if packet_vec.len() > 1 {
                                     for packet in packet_vec {
                                         let out_d = if new_shared_status.compress == 0 {
@@ -244,8 +244,7 @@ async fn parser(
                                         };
                                         match packet.1 {
                                             Direction::Serverbound => {
-                                                let out_d =
-                                                    new_shared_status.ps_cipher.encrypt(out_d);
+                                                let out_d = ciphers.lock().ps_cipher.encrypt(out_d);
                                                 proxy_server_queue.push(out_d);
                                             }
                                             Direction::Clientbound => {
@@ -277,12 +276,12 @@ async fn parser(
                 }
 
                 if to_direction == Direction::Serverbound {
-                    out_data = shared_status.lock().ps_cipher.encrypt(out_data)
+                    out_data = ciphers.lock().ps_cipher.encrypt(out_data)
                 }
                 if success
                     && parsed_packet.post_send_updating()
                     && parsed_packet
-                        .post_send_update(&mut shared_status.lock())
+                        .post_send_update(&mut ciphers.lock(), &shared_status.lock())
                         .is_err()
                 {
                     panic!("PSU failed, panicing.")
@@ -307,6 +306,7 @@ async fn handle_connection(mut client_stream: TcpStream) -> Result<(), ()> {
     let proxy_server_queue = Arc::new(DataQueue::new());
     // It then makes a shared state to share amongst all the threads
     let shared_status: Arc<Mutex<SharedState>> = Arc::new(Mutex::new(SharedState::new()));
+    let shared_ciphers: Arc<Mutex<Ciphers>> = Arc::new(Mutex::new(Ciphers::new()));
 
     let mut buffer = Vec::new();
     client_stream.read_buf(&mut buffer).await.unwrap();
@@ -389,6 +389,7 @@ async fn handle_connection(mut client_stream: TcpStream) -> Result<(), ()> {
     // It then starts a parser for both of the directions. It's a bit annoying to have to make so many clones but I can't think of a better way.
     tokio::spawn({
         let shared_status = shared_status.clone();
+        let shared_ciphers = shared_ciphers.clone();
         let client_proxy_queue = client_proxy_queue.clone();
         let server_proxy_queue = server_proxy_queue.clone();
         let proxy_client_queue = proxy_client_queue.clone();
@@ -400,6 +401,7 @@ async fn handle_connection(mut client_stream: TcpStream) -> Result<(), ()> {
                 proxy_client_queue,
                 proxy_server_queue,
                 shared_status,
+                shared_ciphers,
                 Direction::Serverbound,
             )
             .await
@@ -414,6 +416,7 @@ async fn handle_connection(mut client_stream: TcpStream) -> Result<(), ()> {
                 proxy_client_queue,
                 proxy_server_queue,
                 shared_status,
+                shared_ciphers,
                 Direction::Clientbound,
             )
             .await

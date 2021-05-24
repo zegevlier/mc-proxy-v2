@@ -1,6 +1,6 @@
 use crate::{
     functions::{fid_to_pid, Fid},
-    utils,
+    utils, Ciphers,
 };
 use crate::{packet::Packet, parsable::Parsable, raw_packet::RawPacket};
 use crate::{Direction, SharedState};
@@ -173,9 +173,9 @@ impl Parsable for EncRequest {
         true
     }
 
-    fn post_send_update(&self, status: &mut SharedState) -> Result<(), ()> {
-        status.ps_cipher.enable(&status.secret_key);
-        status.sp_cipher.enable(&status.secret_key);
+    fn post_send_update(&self, ciphers: &mut Ciphers, status: &SharedState) -> Result<(), ()> {
+        ciphers.ps_cipher.enable(&status.secret_key);
+        ciphers.sp_cipher.enable(&status.secret_key);
         log::debug!("Enabled ciphers");
         Ok(())
     }

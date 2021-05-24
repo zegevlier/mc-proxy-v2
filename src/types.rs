@@ -11,8 +11,6 @@ pub enum State {
 
 #[derive(Clone)]
 pub struct SharedState {
-    pub ps_cipher: Cipher,
-    pub sp_cipher: Cipher,
     pub compress: u32,
     pub state: State,
     pub secret_key: [u8; 16],
@@ -21,8 +19,6 @@ pub struct SharedState {
 impl SharedState {
     pub fn new() -> SharedState {
         Self {
-            ps_cipher: Cipher::new(),
-            sp_cipher: Cipher::new(),
             compress: 0,
             state: State::Handshaking,
             secret_key: [0; 16],
@@ -30,8 +26,6 @@ impl SharedState {
     }
 
     pub fn set(&mut self, new_state: SharedState) {
-        self.ps_cipher = new_state.ps_cipher.clone();
-        self.sp_cipher = new_state.sp_cipher.clone();
         self.compress = new_state.compress;
         self.state = new_state.state.clone();
         self.secret_key = new_state.secret_key;
@@ -43,6 +37,27 @@ impl Default for SharedState {
         Self::new()
     }
 }
+
+pub struct Ciphers {
+    pub ps_cipher: Cipher,
+    pub sp_cipher: Cipher,
+}
+
+impl Ciphers {
+    pub fn new() -> Ciphers {
+        Ciphers {
+            ps_cipher: Cipher::new(),
+            sp_cipher: Cipher::new(),
+        }
+    }
+}
+
+impl Default for Ciphers {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 
 #[derive(Debug, PartialEq, Eq, Hash, Copy, Clone)]
 pub enum Direction {

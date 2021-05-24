@@ -1,4 +1,6 @@
-use crate::{packet::Packet, plugin::EventHandler, raw_packet::RawPacket, Direction, SharedState};
+use crate::{
+    packet::Packet, plugin::EventHandler, raw_packet::RawPacket, Ciphers, Direction, SharedState,
+};
 use async_trait::async_trait;
 use dyn_clone::DynClone;
 
@@ -36,7 +38,7 @@ pub trait Parsable: DynClone {
         false
     }
 
-    fn post_send_update(&self, _status: &mut SharedState) -> Result<(), ()> {
+    fn post_send_update(&self, _ciphers: &mut Ciphers, _status: &SharedState) -> Result<(), ()> {
         Ok(())
     }
 }
