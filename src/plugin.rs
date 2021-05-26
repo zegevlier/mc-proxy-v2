@@ -1,4 +1,7 @@
-use crate::{functions::serverbound::play::ChatMessageServerbound, packet::Packet, Direction};
+use crate::{
+    functions::clientbound::play::PlayerAbilities,
+    functions::serverbound::play::ChatMessageServerbound, packet::Packet, Direction,
+};
 use dyn_clone::DynClone;
 
 pub trait EventHandler: DynClone {
@@ -14,6 +17,13 @@ pub trait EventHandler: DynClone {
     }
 
     fn on_move(&mut self, _x: f64, _y: f64, _z: f64) -> Option<Vec<(Packet, Direction)>> {
+        None
+    }
+
+    fn on_player_abilities(
+        &mut self,
+        _player_abilities: &PlayerAbilities,
+    ) -> Option<Vec<(Packet, Direction)>> {
         None
     }
 }

@@ -27,3 +27,6 @@ pub use resource_pack_send::*;
 
 mod update_health;
 pub use update_health::*;
+
+mod player_abilities;
+pub use player_abilities::*;

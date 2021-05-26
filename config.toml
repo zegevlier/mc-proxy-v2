@@ -1,7 +1,6 @@
 logging_packets = [
   "Handshake",
-  "StatusResponse", #   "StatusPong",  #   "StatusRequest",
-  #   "StatusPing",
+  "StatusResponse", #   "StatusPong",  #   "StatusRequest",  #   "StatusPing",
   "Disconnect",
   "EncRequest",
   "LoginSuccess",
@@ -21,4 +20,5 @@ logging_packets = [
   "ClientSettings", #   "UpdateHealth",
   #   "PlayerPosition",
   #   "PlayerPositionRotation",
+  "PlayerAbilities",
 ]
