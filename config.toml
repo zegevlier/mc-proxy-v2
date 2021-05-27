@@ -8,8 +8,7 @@ logging_packets = [
   "PluginRequest",
   "LoginStart",
   "EncResponse",
-  "PluginResponse", #   "SpawnEntity",
-  #   "SpawnXpOrb",
+  "PluginResponse", #   "SpawnEntity",  #   "SpawnXpOrb",
   #   "SpawnLivingEntity",
   #   "SpawnPainting",
   #   "SpawnPlayer",
@@ -21,4 +20,6 @@ logging_packets = [
   #   "PlayerPosition",
   #   "PlayerPositionRotation",
   "PlayerAbilities",
+  "KeepAliveCb",
+  "KeepAliveSb",
 ]

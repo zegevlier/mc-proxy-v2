@@ -44,6 +44,8 @@ pub enum Fid {
     PlayerPosition,
     PlayerPositionRotation,
     PlayerAbilities,
+    KeepAliveCb,
+    KeepAliveSb,
 }
 
 pub fn fid_to_pid(fid: Fid) -> i32 {
@@ -77,6 +79,8 @@ pub fn fid_to_pid(fid: Fid) -> i32 {
         Fid::PlayerPosition => 0x12,
         Fid::PlayerPositionRotation => 0x13,
         Fid::PlayerAbilities => 0x30,
+        Fid::KeepAliveCb => 0x1F,
+        Fid::KeepAliveSb => 0x10,
     }
 }
 
@@ -120,6 +124,7 @@ impl Functions {
                         0x38 => Fid::ResourcePackSend,
                         0x49 => Fid::UpdateHealth,
                         0x30 => Fid::PlayerAbilities,
+                        0x1F => Fid::KeepAliveCb,
                     },
                 },
                 Direction::Serverbound => hashmap! {
@@ -140,6 +145,7 @@ impl Functions {
                         0x05 => Fid::ClientSettings,
                         0x12 => Fid::PlayerPosition,
                         0x13 => Fid::PlayerPositionRotation,
+                        0x10 => Fid::KeepAliveSb,
                     },
                 },
 
@@ -269,6 +275,8 @@ pub fn get_functions() -> Functions {
         Box::new(cb::play::PlayerAbilities::empty()),
     );
 
+    functions.add(Fid::KeepAliveCb, Box::new(cb::play::KeepAliveCb::empty()));
+
     // Serverbound
     functions.add(
         Fid::ChatMessageServerbound,
@@ -289,6 +297,8 @@ pub fn get_functions() -> Functions {
         Fid::PlayerPositionRotation,
         Box::new(sb::play::PlayerPositionRotation::empty()),
     );
+
+    functions.add(Fid::KeepAliveSb, Box::new(sb::play::KeepAliveSb::empty()));
 
     functions
 }

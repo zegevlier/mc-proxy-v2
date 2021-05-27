@@ -226,8 +226,8 @@ impl RawPacket {
         todo!()
     }
 
-    pub fn encode_long(&mut self) {
-        todo!()
+    pub fn encode_long(&mut self, value: i64) {
+        self.push_slice(&value.to_be_bytes());
     }
 
     pub fn encode_float(&mut self, value: f32) {
