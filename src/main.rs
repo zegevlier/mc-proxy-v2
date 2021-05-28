@@ -325,16 +325,6 @@ async fn handle_connection(mut client_stream: TcpStream) -> Result<(), ()> {
 
     let ip = server_address.strip_suffix(".proxy").unwrap().to_string();
 
-    let mut new_packet = RawPacket::new();
-    new_packet.encode_varint(0);
-    new_packet.encode_varint(protocol_version);
-    new_packet.encode_string(ip.clone());
-    new_packet.encode_ushort(25565);
-    new_packet.encode_varint(next_state);
-    new_packet.prepend_length();
-    new_packet.push_vec(raw_first_packet.get_vec());
-    client_proxy_queue.push(new_packet.get_vec());
-
     // It connects to the new IP, if it fails just error.
     log::debug!("Resolving ip: {:?}", ip);
     let resolver =
@@ -352,6 +342,17 @@ async fn handle_connection(mut client_stream: TcpStream) -> Result<(), ()> {
     } else {
         ip.to_owned()
     };
+
+    let mut new_packet = RawPacket::new();
+    new_packet.encode_varint(0);
+    new_packet.encode_varint(protocol_version);
+    new_packet.encode_string(address.clone());
+    new_packet.encode_ushort(25565);
+    new_packet.encode_varint(next_state);
+    new_packet.prepend_length();
+    new_packet.push_vec(raw_first_packet.get_vec());
+    client_proxy_queue.push(new_packet.get_vec());
+
     log::info!("Connecting to IP {}", address);
     let server_stream = match TcpStream::connect(&format!("{}:{}", address, 25565)).await {
         Ok(stream) => stream,
