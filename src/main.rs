@@ -223,7 +223,7 @@ async fn parser(
                     if parsed_packet.packet_editing() {
                         let shared_status_c = shared_status.lock().clone();
                         match parsed_packet
-                            .edit_packet(shared_status_c, &mut plugins)
+                            .edit_packet(shared_status_c, &mut plugins, &config)
                             .await
                         {
                             Ok((packet_vec, new_shared_status)) => {

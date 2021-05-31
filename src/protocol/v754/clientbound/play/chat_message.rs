@@ -1,5 +1,6 @@
 use crate::{
-    packet::Packet, parsable::Parsable, raw_packet::RawPacket, Direction, EventHandler, SharedState,
+    conf::Configuration, packet::Packet, parsable::Parsable, raw_packet::RawPacket, Direction,
+    EventHandler, SharedState,
 };
 
 #[derive(Clone, Debug)]
@@ -50,6 +51,7 @@ impl Parsable for ChatMessageClientbound {
         &self,
         status: SharedState,
         _plugins: &mut Vec<Box<dyn EventHandler + Send>>,
+        _config: &Configuration,
     ) -> Result<(Vec<(Packet, Direction)>, SharedState), ()> {
         if self.data == "{\"text\":\"\",\"extra\":[{\"text\":\"[\",\"color\":\"dark_purple\"},{\"text\":\"F\",\"color\":\"light_purple\",\"bold\":true},{\"text\":\"] [\",\"color\":\"dark_purple\"},{\"text\":\"FearRP \",\"color\":\"light_purple\"},{\"text\":\"-\\u003e \",\"color\":\"dark_purple\"},{\"text\":\"zegevlier\",\"color\":\"light_purple\"},{\"text\":\"] \",\"color\":\"dark_purple\"},{\"text\":\"test\",\"color\":\"white\"}]}" {
             Ok((vec![({

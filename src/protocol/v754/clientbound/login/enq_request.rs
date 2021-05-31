@@ -1,4 +1,5 @@
 use crate::{
+    conf::Configuration,
     functions::{fid_to_pid, Fid},
     utils, Ciphers,
 };
@@ -82,6 +83,7 @@ impl Parsable for EncRequest {
         &self,
         status: SharedState,
         _: &mut Vec<Box<dyn crate::plugin::EventHandler + Send>>,
+        config: &Configuration,
     ) -> Result<(Vec<(Packet, Direction)>, SharedState), ()> {
         let mut status = status;
         status.secret_key = rand::thread_rng().gen::<[u8; 16]>();
@@ -112,8 +114,8 @@ impl Parsable for EncRequest {
         };
 
         let mut req_map = HashMap::new();
-        req_map.insert("accessToken", "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI2NTY0M2EzYmU0NGY4NmVlODE4OWEwMDllMGNlYTNmYSIsInlnZ3QiOiJhMDFiM2Q0MzY4NzU0YThiYjc3M2QzMzYzZGYzOTkxYiIsInNwciI6ImY1NGM3NGRkMzM2MjQyMmM4MGY5ZGE3MWVjYTRhYWEzIiwiaXNzIjoiWWdnZHJhc2lsLUF1dGgiLCJleHAiOjE2MjIyODI0NTMsImlhdCI6MTYyMjEwOTY1M30.VHHb6tKBqqCE2gpxwqgCrxl3t172tcfkqMOaRdIsliA");
-        req_map.insert("selectedProfile", "f54c74dd3362422c80f9da71eca4aaa3");
+        req_map.insert("accessToken", &config.player_auth_token);
+        req_map.insert("selectedProfile", &config.player_uuid);
         req_map.insert("serverId", &result_hash);
 
         let client = Client::new();

@@ -1,4 +1,5 @@
 use crate::{
+    conf::Configuration,
     functions::{fid_to_pid, Fid},
     utils::generate_message_packet,
 };
@@ -41,6 +42,7 @@ impl Parsable for UpdateHealth {
         &self,
         status: SharedState,
         _: &mut Vec<Box<dyn crate::plugin::EventHandler + Send>>,
+        _config: &Configuration,
     ) -> Result<(Vec<(Packet, Direction)>, SharedState), ()> {
         let mut return_packet_vec = Vec::new();
         if self.food == 7 {

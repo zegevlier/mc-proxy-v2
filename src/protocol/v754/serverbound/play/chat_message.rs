@@ -1,5 +1,6 @@
 //, rainbowfy};
 use crate::{
+    conf::Configuration,
     functions::{fid_to_pid, Fid},
     packet::Packet,
     parsable::Parsable,
@@ -37,6 +38,7 @@ impl Parsable for ChatMessageServerbound {
         &self,
         status: SharedState,
         plugins: &mut Vec<Box<dyn crate::plugin::EventHandler + Send>>,
+        _config: &Configuration,
     ) -> Result<(Vec<(Packet, Direction)>, SharedState), ()> {
         let mut return_vec = None;
         for plugin in plugins {

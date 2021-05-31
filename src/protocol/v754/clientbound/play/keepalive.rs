@@ -1,4 +1,5 @@
 use crate::{
+    conf::Configuration,
     functions::{fid_to_pid, Fid},
     packet::Packet,
     parsable::Parsable,
@@ -34,6 +35,7 @@ impl Parsable for KeepAliveCb {
         &self,
         status: SharedState,
         _: &mut Vec<Box<dyn EventHandler + Send>>,
+        _config: &Configuration,
     ) -> Result<(Vec<(Packet, Direction)>, SharedState), ()> {
         return Ok((
             vec![

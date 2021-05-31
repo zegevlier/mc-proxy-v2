@@ -1,5 +1,6 @@
 use crate::{
-    packet::Packet, parsable::Parsable, raw_packet::RawPacket, Direction, EventHandler, SharedState,
+    conf::Configuration, packet::Packet, parsable::Parsable, raw_packet::RawPacket, Direction,
+    EventHandler, SharedState,
 };
 
 #[derive(Clone)]
@@ -30,6 +31,7 @@ impl Parsable for KeepAliveSb {
         &self,
         status: SharedState,
         _: &mut Vec<Box<dyn EventHandler + Send>>,
+        _config: &Configuration,
     ) -> Result<(Vec<(Packet, Direction)>, SharedState), ()> {
         return Ok((
             vec![(

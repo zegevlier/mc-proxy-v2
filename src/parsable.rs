@@ -1,5 +1,6 @@
 use crate::{
-    packet::Packet, plugin::EventHandler, raw_packet::RawPacket, Ciphers, Direction, SharedState,
+    conf::Configuration, packet::Packet, plugin::EventHandler, raw_packet::RawPacket, Ciphers,
+    Direction, SharedState,
 };
 use async_trait::async_trait;
 use dyn_clone::DynClone;
@@ -30,6 +31,7 @@ pub trait Parsable: DynClone {
         &self,
         status: SharedState,
         _plugins: &mut Vec<Box<dyn EventHandler + Send>>,
+        _config: &Configuration,
     ) -> Result<(Vec<(Packet, Direction)>, SharedState), ()> {
         Ok((Vec::new(), status))
     }
