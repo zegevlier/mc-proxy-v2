@@ -33,3 +33,6 @@ pub use player_abilities::*;
 
 mod keepalive;
 pub use keepalive::*;
+
+mod update_score;
+pub use update_score::*;

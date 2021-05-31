@@ -46,6 +46,7 @@ pub enum Fid {
     PlayerAbilities,
     KeepAliveCb,
     KeepAliveSb,
+    UpdateScore,
 }
 
 pub fn fid_to_pid(fid: Fid) -> i32 {
@@ -81,6 +82,7 @@ pub fn fid_to_pid(fid: Fid) -> i32 {
         Fid::PlayerAbilities => 0x30,
         Fid::KeepAliveCb => 0x1F,
         Fid::KeepAliveSb => 0x10,
+        Fid::UpdateScore => 0x4D,
     }
 }
 
@@ -125,6 +127,7 @@ impl Functions {
                         0x49 => Fid::UpdateHealth,
                         0x30 => Fid::PlayerAbilities,
                         0x1F => Fid::KeepAliveCb,
+                        0x4D => Fid::UpdateScore,
                     },
                 },
                 Direction::Serverbound => hashmap! {
@@ -276,6 +279,8 @@ pub fn get_functions() -> Functions {
     );
 
     functions.add(Fid::KeepAliveCb, Box::new(cb::play::KeepAliveCb::empty()));
+
+    functions.add(Fid::UpdateScore, Box::new(cb::play::UpdateScore::empty()));
 
     // Serverbound
     functions.add(
