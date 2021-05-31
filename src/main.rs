@@ -97,6 +97,7 @@ async fn parser(
     let mut unprocessed_data = RawPacket::new();
     let functions = functions::get_functions();
     let mut plugins = plugins::get_plugins();
+    let config = conf::get_config();
     loop {
         let new_data = match timeout(
             Duration::from_secs(60),
@@ -193,12 +194,8 @@ async fn parser(
                 let success = match parsed_packet.parse_packet(packet) {
                     Ok(_) => {
                         let packet_info = parsed_packet.get_printable();
-                        if conf::get_config()
-                            .logging_packets
-                            .contains(&func_id.to_string())
-                            || conf::get_config()
-                                .logging_packets
-                                .contains(&"*".to_string())
+                        if config.logging_packets.contains(&func_id.to_string())
+                            || config.logging_packets.contains(&"*".to_string())
                         {
                             log::info!(
                                 "{} [{}]{3:4$} {}",
