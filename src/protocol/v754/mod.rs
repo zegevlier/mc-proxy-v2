@@ -47,6 +47,8 @@ pub enum Fid {
     KeepAliveCb,
     KeepAliveSb,
     UpdateScore,
+    DisplayScoreboard,
+    ScoreboardObjective,
 }
 
 pub fn fid_to_pid(fid: Fid) -> i32 {
@@ -83,6 +85,8 @@ pub fn fid_to_pid(fid: Fid) -> i32 {
         Fid::KeepAliveCb => 0x1F,
         Fid::KeepAliveSb => 0x10,
         Fid::UpdateScore => 0x4D,
+        Fid::DisplayScoreboard => 0x43,
+        Fid::ScoreboardObjective => 0x4A,
     }
 }
 
@@ -128,6 +132,8 @@ impl Functions {
                         0x30 => Fid::PlayerAbilities,
                         0x1F => Fid::KeepAliveCb,
                         0x4D => Fid::UpdateScore,
+                        0x43 => Fid::DisplayScoreboard,
+                        0x4A => Fid::ScoreboardObjective,
                     },
                 },
                 Direction::Serverbound => hashmap! {
@@ -281,6 +287,16 @@ pub fn get_functions() -> Functions {
     functions.add(Fid::KeepAliveCb, Box::new(cb::play::KeepAliveCb::empty()));
 
     functions.add(Fid::UpdateScore, Box::new(cb::play::UpdateScore::empty()));
+
+    functions.add(
+        Fid::DisplayScoreboard,
+        Box::new(cb::play::DisplayScoreboard::empty()),
+    );
+
+    functions.add(
+        Fid::ScoreboardObjective,
+        Box::new(cb::play::ScoreboardObjective::empty()),
+    );
 
     // Serverbound
     functions.add(

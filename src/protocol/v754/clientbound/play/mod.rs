@@ -36,3 +36,9 @@ pub use keepalive::*;
 
 mod update_score;
 pub use update_score::*;
+
+mod display_scoreboard;
+pub use display_scoreboard::*;
+
+mod scoreboard_objective;
+pub use scoreboard_objective::*;
