@@ -18,7 +18,7 @@ logging_packets:
   # - SpawnPainting
   # - SpawnPlayer
   # - AckPlayerDigging
-  # - ChatMessageClientbound
+  - ChatMessageClientbound
   # - TabCompleteClientbound
   - ChatMessageServerbound
   - ResourcePackSend
@@ -32,6 +32,7 @@ logging_packets:
   - UpdateScore
   - DisplayScoreboard
   # - ScoreboardObjective
+  # - Teams
 
 player_uuid: f54c74dd3362422c80f9da71eca4aaa3
 player_auth_token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI2NTY0M2EzYmU0NGY4NmVlODE4OWEwMDllMGNlYTNmYSIsInlnZ3QiOiJlNzQ3OTU2ZGU1MDA0MWU5YTUzYTgxOGJiYTUzZGQzNCIsInNwciI6ImY1NGM3NGRkMzM2MjQyMmM4MGY5ZGE3MWVjYTRhYWEzIiwiaXNzIjoiWWdnZHJhc2lsLUF1dGgiLCJleHAiOjE2MjI2NDMyNzEsImlhdCI6MTYyMjQ3MDQ3MX0.xWPuPzPqENp7hPw_tVA2Z4oBcVEL1E3Sx4LKD_rOmmI

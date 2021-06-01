@@ -42,3 +42,6 @@ pub use display_scoreboard::*;
 
 mod scoreboard_objective;
 pub use scoreboard_objective::*;
+
+mod teams;
+pub use teams::*;
