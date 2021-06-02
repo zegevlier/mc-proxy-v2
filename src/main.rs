@@ -203,7 +203,7 @@ async fn parser(
                                 func_id.to_string().blue(),
                                 packet_info,
                                 "",
-                                22 - func_id.to_string().len()
+                                config.print_buffer - func_id.to_string().len()
                             );
                         }
                         true
