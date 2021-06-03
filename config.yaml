@@ -20,7 +20,7 @@ logging_packets:
   # - AckPlayerDigging
   - ChatMessageClientbound
   # - TabCompleteClientbound
-  - ChatMessageServerbound
+  # - ChatMessageServerbound
   - ResourcePackSend
   # - ClientSettings
   # - UpdateHealth
@@ -33,6 +33,7 @@ logging_packets:
   - DisplayScoreboard
   # - ScoreboardObjective
   # - Teams
+  - ResourcePackStatus
 
 player_uuid: f54c74dd3362422c80f9da71eca4aaa3
-player_auth_token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI2NTY0M2EzYmU0NGY4NmVlODE4OWEwMDllMGNlYTNmYSIsInlnZ3QiOiJlNzQ3OTU2ZGU1MDA0MWU5YTUzYTgxOGJiYTUzZGQzNCIsInNwciI6ImY1NGM3NGRkMzM2MjQyMmM4MGY5ZGE3MWVjYTRhYWEzIiwiaXNzIjoiWWdnZHJhc2lsLUF1dGgiLCJleHAiOjE2MjI2NDMyNzEsImlhdCI6MTYyMjQ3MDQ3MX0.xWPuPzPqENp7hPw_tVA2Z4oBcVEL1E3Sx4LKD_rOmmI
+player_auth_token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI2NTY0M2EzYmU0NGY4NmVlODE4OWEwMDllMGNlYTNmYSIsInlnZ3QiOiJmOTExOTk0M2E0ODI0OGQ3OWYyNDVlNDY5OWMyMWFhYSIsInNwciI6ImY1NGM3NGRkMzM2MjQyMmM4MGY5ZGE3MWVjYTRhYWEzIiwiaXNzIjoiWWdnZHJhc2lsLUF1dGgiLCJleHAiOjE2MjI4MzQ4NjEsImlhdCI6MTYyMjY2MjA2MX0.tYFif4l7qA8d5GiBFgbZ77uEN6IjsbMgqJiACJ4Q5As

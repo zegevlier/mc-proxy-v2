@@ -50,6 +50,7 @@ pub enum Fid {
     DisplayScoreboard,
     ScoreboardObjective,
     Teams,
+    ResourcePackStatus,
 }
 
 pub fn fid_to_pid(fid: Fid) -> i32 {
@@ -89,6 +90,7 @@ pub fn fid_to_pid(fid: Fid) -> i32 {
         Fid::DisplayScoreboard => 0x43,
         Fid::ScoreboardObjective => 0x4A,
         Fid::Teams => 0x4C,
+        Fid::ResourcePackStatus => 0x21,
     }
 }
 
@@ -158,6 +160,7 @@ impl Functions {
                         0x12 => Fid::PlayerPosition,
                         0x13 => Fid::PlayerPositionRotation,
                         0x10 => Fid::KeepAliveSb,
+                        0x21 => Fid::ResourcePackStatus,
                     },
                 },
 
@@ -322,6 +325,11 @@ pub fn get_functions() -> Functions {
     functions.add(
         Fid::PlayerPositionRotation,
         Box::new(sb::play::PlayerPositionRotation::empty()),
+    );
+
+    functions.add(
+        Fid::ResourcePackStatus,
+        Box::new(sb::play::ResourcePackStatus::empty()),
     );
 
     functions.add(Fid::KeepAliveSb, Box::new(sb::play::KeepAliveSb::empty()));

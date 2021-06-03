@@ -12,3 +12,6 @@ pub use player_position_and_rotation::*;
 
 mod keepalive;
 pub use keepalive::*;
+
+mod resource_pack_status;
+pub use resource_pack_status::*;
