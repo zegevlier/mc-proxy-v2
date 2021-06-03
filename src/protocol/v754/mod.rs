@@ -13,7 +13,7 @@ use crate::{
     types::{Direction, State},
 };
 
-#[derive(Hash, Eq, PartialEq, Debug)]
+#[derive(Hash, Eq, PartialEq, Debug, Clone, Copy)]
 pub enum Fid {
     Unparsable,
     Handshake,
@@ -107,64 +107,82 @@ pub struct Functions {
 
 impl Functions {
     fn new() -> Self {
-        Self {
-            map: hashmap! {
-                Direction::Clientbound => hashmap! {
-                    State::Handshaking => hashmap! {},
-                    State::Status => hashmap! {
-                        0x00 => Fid::StatusResponse,
-                        0x01 => Fid::StatusPong
-                    },
-                    State::Login => hashmap! {
-                        0x00 => Fid::Disconnect,
-                        0x01 => Fid::EncRequest,
-                        0x02 => Fid::LoginSuccess,
-                        0x03 => Fid::SetCompression,
-                        0x04 => Fid::PluginRequest
-                    },
-                    State::Play => hashmap! {
-                        0x00 => Fid::SpawnEntity,
-                        0x01 => Fid::SpawnXpOrb,
-                        0x02 => Fid::SpawnLivingEntity,
-                        0x03 => Fid::SpawnPainting,
-                        0x04 => Fid::SpawnPlayer,
-                        0x07 => Fid::AckPlayerDigging,
-                        0x0E => Fid::ChatMessageClientbound,
-                        0x0F => Fid::TabCompleteClientbound,
-                        0x38 => Fid::ResourcePackSend,
-                        0x49 => Fid::UpdateHealth,
-                        0x30 => Fid::PlayerAbilities,
-                        0x1F => Fid::KeepAliveCb,
-                        0x4D => Fid::UpdateScore,
-                        0x43 => Fid::DisplayScoreboard,
-                        0x4A => Fid::ScoreboardObjective,
-                        0x4C => Fid::Teams,
-                    },
-                },
-                Direction::Serverbound => hashmap! {
-                    State::Handshaking => hashmap! {
-                        0x00 => Fid::Handshake,
-                    },
-                    State::Status => hashmap! {
-                        0x00 => Fid::StatusRequest,
-                        0x01 => Fid::StatusPing,
-                    },
-                    State::Login => hashmap! {
-                        0x00 => Fid::LoginStart,
-                        0x01 => Fid::EncResponse,
-                        0x02 => Fid::PluginResponse,
-                    },
-                    State::Play => hashmap! {
-                        0x03 => Fid::ChatMessageServerbound,
-                        0x05 => Fid::ClientSettings,
-                        0x12 => Fid::PlayerPosition,
-                        0x13 => Fid::PlayerPositionRotation,
-                        0x10 => Fid::KeepAliveSb,
-                        0x21 => Fid::ResourcePackStatus,
-                    },
-                },
-
+        let map: HashMap<Direction, HashMap<State, Vec<Fid>>> = hashmap! {
+            Direction::Clientbound => hashmap! {
+                State::Handshaking => vec! [],
+                State::Status => vec! [
+                    Fid::StatusResponse,
+                    Fid::StatusPong
+                ],
+                State::Login => vec! [
+                    Fid::Disconnect,
+                    Fid::EncRequest,
+                    Fid::LoginSuccess,
+                    Fid::SetCompression,
+                    Fid::PluginRequest
+                ],
+                State::Play => vec! [
+                    Fid::SpawnEntity,
+                    Fid::SpawnXpOrb,
+                    Fid::SpawnLivingEntity,
+                    Fid::SpawnPainting,
+                    Fid::SpawnPlayer,
+                    Fid::AckPlayerDigging,
+                    Fid::ChatMessageClientbound,
+                    Fid::TabCompleteClientbound,
+                    Fid::ResourcePackSend,
+                    Fid::UpdateHealth,
+                    Fid::PlayerAbilities,
+                    Fid::KeepAliveCb,
+                    Fid::UpdateScore,
+                    Fid::DisplayScoreboard,
+                    Fid::ScoreboardObjective,
+                    Fid::Teams,
+                ],
             },
+            Direction::Serverbound => hashmap! {
+                State::Handshaking => vec! [
+                    Fid::Handshake,
+                ],
+                State::Status => vec! [
+                    Fid::StatusRequest,
+                    Fid::StatusPing,
+                ],
+                State::Login => vec! [
+                    Fid::LoginStart,
+                    Fid::EncResponse,
+                    Fid::PluginResponse,
+                ],
+                State::Play => vec! [
+                    Fid::ChatMessageServerbound,
+                    Fid::ClientSettings,
+                    Fid::PlayerPosition,
+                    Fid::PlayerPositionRotation,
+                    Fid::KeepAliveSb,
+                    Fid::ResourcePackStatus,
+                ],
+            }
+        };
+        let map = map
+            .iter()
+            .map(|(direction, state_fid_vec)| {
+                (
+                    direction.to_owned(),
+                    state_fid_vec
+                        .iter()
+                        .map(|(state, fid_vec)| {
+                            let mut hashmap = HashMap::new();
+                            for fid in fid_vec.to_owned() {
+                                hashmap.insert(fid_to_pid(fid), fid);
+                            }
+                            (state.to_owned(), hashmap)
+                        })
+                        .collect::<HashMap<State, HashMap<i32, Fid>>>(),
+                )
+            })
+            .collect();
+        Self {
+            map,
             list: HashMap::new(),
         }
     }
