@@ -1,6 +1,13 @@
 #![allow(where_clauses_object_safety)]
 
-use std::{io::Write, sync::Arc, time::Duration};
+use std::{
+    io::Write,
+    sync::{
+        atomic::{AtomicBool, Ordering},
+        Arc,
+    },
+    time::Duration,
+};
 
 use colored::*;
 use env_logger::Builder;
@@ -20,6 +27,7 @@ use trust_dns_resolver::TokioAsyncResolver;
 
 pub use plugin::EventHandler;
 use raw_packet::RawPacket;
+use types::Queues;
 pub use types::{Ciphers, Direction, SharedState, State};
 
 mod cipher;
@@ -36,16 +44,29 @@ mod protocol;
 
 pub use protocol::v754 as functions;
 
-type DataQueue = deadqueue::unlimited::Queue<Vec<u8>>;
+pub type DataQueue = deadqueue::unlimited::Queue<Vec<u8>>;
+
+const SHUTDOWN_CHECK_TIMEOUT: u64 = 100;
 
 // This function puts all received packets (in chunks of 4096 bytes) in the receiving queue.
-async fn receiver(mut rx: OwnedReadHalf, queue: Arc<DataQueue>, socket_name: &str) {
+async fn receiver(
+    mut rx: OwnedReadHalf,
+    queue: Arc<DataQueue>,
+    socket_name: &str,
+    is_closed: Arc<AtomicBool>,
+) {
     let mut buf = [0; 4096];
     loop {
-        let n = match timeout(Duration::from_secs(60), rx.read(&mut buf)).await {
+        let n = match timeout(
+            Duration::from_millis(SHUTDOWN_CHECK_TIMEOUT),
+            rx.read(&mut buf),
+        )
+        .await
+        {
             Ok(v) => match v {
                 Ok(n) if n == 0 => {
                     log::warn!("Socket closed: {}", socket_name);
+                    is_closed.store(true, Ordering::Release);
                     return;
                 }
                 Ok(n) => n,
@@ -55,8 +76,13 @@ async fn receiver(mut rx: OwnedReadHalf, queue: Arc<DataQueue>, socket_name: &st
                 }
             },
             Err(_) => {
-                log::warn!("Did not receive new data in 60 seconds, assuming shutdown");
-                return;
+                // log::warn!("Did not receive new data in 60 seconds, assuming shutdown");
+                if is_closed.load(Ordering::Relaxed) {
+                    log::debug!("Stopping thread {} because socket was closed", socket_name);
+                    return;
+                } else {
+                    continue;
+                }
             }
         };
         queue.push(buf[0..n].to_vec());
@@ -64,15 +90,21 @@ async fn receiver(mut rx: OwnedReadHalf, queue: Arc<DataQueue>, socket_name: &st
 }
 
 // This sends the data in the respective queues to the tx.
-async fn sender(mut tx: OwnedWriteHalf, queue: Arc<DataQueue>) {
+async fn sender(mut tx: OwnedWriteHalf, queue: Arc<DataQueue>, is_closed: Arc<AtomicBool>) {
     loop {
         if let Err(e) = tx
             .write_all(
-                &(match timeout(Duration::from_secs(60), queue.pop()).await {
+                &(match timeout(Duration::from_millis(SHUTDOWN_CHECK_TIMEOUT), queue.pop()).await {
                     Ok(b) => b,
                     Err(_) => {
-                        log::warn!("Did not receive new data in 60 seconds, assuming shutdown");
-                        return;
+                        if is_closed.load(Ordering::Relaxed) {
+                            log::debug!("Stopping sender because socket was closed",);
+                            return;
+                        } else {
+                            continue;
+                        }
+                        // log::warn!("Did not receive new data in 60 seconds, assuming shutdown");
+                        // return;
                     }
                 }),
             )
@@ -86,13 +118,11 @@ async fn sender(mut tx: OwnedWriteHalf, queue: Arc<DataQueue>) {
 
 // TODO: Add comments to this function
 async fn parser(
-    client_proxy_queue: Arc<DataQueue>,
-    server_proxy_queue: Arc<DataQueue>,
-    proxy_client_queue: Arc<DataQueue>,
-    proxy_server_queue: Arc<DataQueue>,
+    queues: Queues,
     shared_status: Arc<Mutex<SharedState>>,
     ciphers: Arc<Mutex<Ciphers>>,
     direction: Direction,
+    is_closed: Arc<AtomicBool>,
 ) -> Result<(), ()> {
     let mut unprocessed_data = RawPacket::new();
     let functions = functions::get_functions();
@@ -100,18 +130,21 @@ async fn parser(
     let config = conf::get_config();
     loop {
         let new_data = match timeout(
-            Duration::from_secs(60),
+            Duration::from_millis(SHUTDOWN_CHECK_TIMEOUT),
             match direction {
-                Direction::Serverbound => client_proxy_queue.pop(),
-                Direction::Clientbound => server_proxy_queue.pop(),
+                Direction::Serverbound => queues.client_proxy.pop(),
+                Direction::Clientbound => queues.server_proxy.pop(),
             },
         )
         .await
         {
             Ok(new_data) => new_data,
             Err(_) => {
-                log::warn!("Did not receive new data in 60 seconds, assuming shutdown");
-                break;
+                if is_closed.load(Ordering::Relaxed) {
+                    break;
+                } else {
+                    continue;
+                }
             }
         };
 
@@ -242,10 +275,10 @@ async fn parser(
                                         match packet.1 {
                                             Direction::Serverbound => {
                                                 let out_d = ciphers.lock().ps_cipher.encrypt(out_d);
-                                                proxy_server_queue.push(out_d);
+                                                queues.proxy_server.push(out_d);
                                             }
                                             Direction::Clientbound => {
-                                                proxy_client_queue.push(out_d)
+                                                queues.proxy_client.push(out_d)
                                             }
                                         }
                                     }
@@ -287,8 +320,8 @@ async fn parser(
             };
 
             match to_direction {
-                Direction::Serverbound => proxy_server_queue.push(out_data),
-                Direction::Clientbound => proxy_client_queue.push(out_data),
+                Direction::Serverbound => queues.proxy_server.push(out_data),
+                Direction::Clientbound => queues.proxy_client.push(out_data),
             }
         }
     }
@@ -297,10 +330,12 @@ async fn parser(
 
 async fn handle_connection(mut client_stream: TcpStream) -> Result<(), ()> {
     // Make a new  a new queue for all the directions to the proxy
-    let client_proxy_queue = Arc::new(DataQueue::new());
-    let proxy_client_queue = Arc::new(DataQueue::new());
-    let server_proxy_queue = Arc::new(DataQueue::new());
-    let proxy_server_queue = Arc::new(DataQueue::new());
+    let queues = Queues {
+        client_proxy: Arc::new(DataQueue::new()),
+        proxy_client: Arc::new(DataQueue::new()),
+        server_proxy: Arc::new(DataQueue::new()),
+        proxy_server: Arc::new(DataQueue::new()),
+    };
     // It then makes a shared state to share amongst all the threads
     let shared_status: Arc<Mutex<SharedState>> = Arc::new(Mutex::new(SharedState::new()));
     let shared_ciphers: Arc<Mutex<Ciphers>> = Arc::new(Mutex::new(Ciphers::new()));
@@ -348,13 +383,13 @@ async fn handle_connection(mut client_stream: TcpStream) -> Result<(), ()> {
     new_packet.encode_varint(next_state);
     new_packet.prepend_length();
     new_packet.push_vec(raw_first_packet.get_vec());
-    client_proxy_queue.push(new_packet.get_vec());
+    queues.client_proxy.push(new_packet.get_vec());
 
     log::info!("Connecting to IP {}", address);
     let server_stream = match TcpStream::connect(&format!("{}:{}", address, 25565)).await {
         Ok(stream) => stream,
         Err(err) => {
-            log::error!("Could nto connect ot ip: {}", err);
+            log::error!("Could not connect to ip: {}", err);
             return Ok(());
         }
     };
@@ -363,44 +398,45 @@ async fn handle_connection(mut client_stream: TcpStream) -> Result<(), ()> {
     // It then splits both TCP streams up in rx and tx
     let (crx, ctx) = client_stream.into_split();
     let (srx, stx) = server_stream.into_split();
+    let is_closed = Arc::new(AtomicBool::new(false));
 
     // It then starts multiple threads to put all the received data into the previously created queues
     tokio::spawn({
-        let client_proxy_queue = client_proxy_queue.clone();
-        async move { receiver(crx, client_proxy_queue, "client").await }
+        let client_proxy_queue = queues.client_proxy.clone();
+        let is_closed = is_closed.clone();
+        async move { receiver(crx, client_proxy_queue, "client", is_closed).await }
     });
     tokio::spawn({
-        let server_proxy_queue = server_proxy_queue.clone();
-        async move { receiver(srx, server_proxy_queue, "server").await }
+        let server_proxy_queue = queues.server_proxy.clone();
+        let is_closed = is_closed.clone();
+        async move { receiver(srx, server_proxy_queue, "server", is_closed).await }
     });
 
     // And it also starts two to put the send data in the tx's
     tokio::spawn({
-        let proxy_client_queue = proxy_client_queue.clone();
-        async move { sender(ctx, proxy_client_queue).await }
+        let proxy_client_queue = queues.proxy_client.clone();
+        let is_closed = is_closed.clone();
+        async move { sender(ctx, proxy_client_queue, is_closed).await }
     });
     tokio::spawn({
-        let proxy_server_queue = proxy_server_queue.clone();
-        async move { sender(stx, proxy_server_queue).await }
+        let proxy_server_queue = queues.proxy_server.clone();
+        let is_closed = is_closed.clone();
+        async move { sender(stx, proxy_server_queue, is_closed).await }
     });
 
     // It then starts a parser for both of the directions. It's a bit annoying to have to make so many clones but I can't think of a better way.
     tokio::spawn({
         let shared_status = shared_status.clone();
         let shared_ciphers = shared_ciphers.clone();
-        let client_proxy_queue = client_proxy_queue.clone();
-        let server_proxy_queue = server_proxy_queue.clone();
-        let proxy_client_queue = proxy_client_queue.clone();
-        let proxy_server_queue = proxy_server_queue.clone();
+        let queues = queues.clone();
+        let is_closed = is_closed.clone();
         async move {
             parser(
-                client_proxy_queue,
-                server_proxy_queue,
-                proxy_client_queue,
-                proxy_server_queue,
+                queues,
                 shared_status,
                 shared_ciphers,
                 Direction::Serverbound,
+                is_closed,
             )
             .await
         }
@@ -409,13 +445,11 @@ async fn handle_connection(mut client_stream: TcpStream) -> Result<(), ()> {
     tokio::spawn({
         async move {
             parser(
-                client_proxy_queue,
-                server_proxy_queue,
-                proxy_client_queue,
-                proxy_server_queue,
+                queues,
                 shared_status,
                 shared_ciphers,
                 Direction::Clientbound,
+                is_closed,
             )
             .await
         }

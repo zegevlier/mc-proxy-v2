@@ -1,5 +1,5 @@
-use crate::cipher::Cipher;
-use std::fmt;
+use crate::{cipher::Cipher, DataQueue};
+use std::{fmt, sync::Arc};
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub enum State {
@@ -68,4 +68,12 @@ impl fmt::Display for Direction {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{:?}", self)
     }
+}
+
+#[derive(Clone)]
+pub struct Queues {
+    pub client_proxy: Arc<DataQueue>,
+    pub proxy_client: Arc<DataQueue>,
+    pub server_proxy: Arc<DataQueue>,
+    pub proxy_server: Arc<DataQueue>,
 }
