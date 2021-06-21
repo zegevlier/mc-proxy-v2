@@ -476,7 +476,7 @@ async fn main() -> std::io::Result<()> {
 
     log::info!("Starting listener...");
     // Start listening on the ip waiting for new connections
-    let mc_client_listener = match TcpListener::bind("127.0.0.1:25555").await {
+    let mc_client_listener = match TcpListener::bind("127.0.0.55:25565").await {
         Ok(listener) => listener,
         Err(err) => panic!("Could not connect to server: {}", err),
     };
