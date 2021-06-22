@@ -123,14 +123,14 @@ impl RawPacket {
         let mut read: u8;
         loop {
             read = self.read(1)?[0];
-            let value: i32 = (read & 0b01111111) as i32;
+            let value: i32 = (read & 0x7F) as i32;
             result |= value << (7 * num_read);
 
             num_read += 1;
             if num_read > 5 {
                 return Err(());
             }
-            if (read & 0b10000000) == 0 {
+            if (read & 0x80) == 0 {
                 break;
             }
         }
@@ -143,14 +143,14 @@ impl RawPacket {
         let mut read: u8;
         loop {
             read = self.read(1)?[0];
-            let value: i64 = (read & 0b01111111) as i64;
+            let value: i64 = (read & 0x7F) as i64;
             result |= value << (7 * num_read);
 
             num_read += 1;
             if num_read > 10 {
                 return Err(());
             }
-            if (read & 0b10000000) == 0 {
+            if (read & 0x80) == 0 {
                 break;
             }
         }
@@ -254,10 +254,10 @@ impl RawPacket {
     pub fn encode_varint(&mut self, v: i32) {
         let mut value = u32::from_le_bytes(v.to_le_bytes());
         loop {
-            let mut temp: u8 = (value & 0b01111111) as u8;
+            let mut temp: u8 = (value & 0x7F) as u8;
             value >>= 7;
             if value != 0 {
-                temp |= 0b10000000;
+                temp |= 0x80;
             }
             self.push(temp);
             if value == 0 {
@@ -269,10 +269,10 @@ impl RawPacket {
     pub fn encode_varlong(&mut self, v: i64) {
         let mut value = u64::from_le_bytes(v.to_le_bytes());
         loop {
-            let mut temp: u8 = (value & 0b01111111) as u8;
+            let mut temp: u8 = (value & 0x7F) as u8;
             value >>= 7;
             if value != 0 {
-                temp |= 0b10000000;
+                temp |= 0x80;
             }
             self.push(temp);
             if value == 0 {
