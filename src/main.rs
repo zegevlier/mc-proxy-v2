@@ -329,6 +329,8 @@ async fn parser(
 }
 
 async fn handle_connection(mut client_stream: TcpStream) -> Result<(), ()> {
+    let config = conf::get_config();
+
     // Make a new  a new queue for all the directions to the proxy
     let queues = Queues {
         client_proxy: Arc::new(DataQueue::new()),
@@ -337,7 +339,7 @@ async fn handle_connection(mut client_stream: TcpStream) -> Result<(), ()> {
         proxy_server: Arc::new(DataQueue::new()),
     };
     // It then makes a shared state to share amongst all the threads
-    let shared_status: Arc<Mutex<SharedState>> = Arc::new(Mutex::new(SharedState::new()));
+
     let shared_ciphers: Arc<Mutex<Ciphers>> = Arc::new(Mutex::new(Ciphers::new()));
 
     let mut buffer = Vec::new();
@@ -394,6 +396,13 @@ async fn handle_connection(mut client_stream: TcpStream) -> Result<(), ()> {
         }
     };
     log::info!("Connected...");
+
+    let shared_status: Arc<Mutex<SharedState>> = Arc::new(Mutex::new(SharedState {
+        access_token: config.player_auth_token,
+        uuid: config.player_uuid,
+        server_ip: address,
+        ..SharedState::new()
+    }));
 
     // It then splits both TCP streams up in rx and tx
     let (crx, ctx) = client_stream.into_split();

@@ -6,6 +6,8 @@ pub struct Configuration {
     pub player_uuid: String,
     pub player_auth_token: String,
     pub print_buffer: usize,
+    pub ws_url: String,
+    pub ws_enabled: bool,
 }
 
 #[derive(Deserialize)]
@@ -13,6 +15,8 @@ pub struct ReadConfiguration {
     pub logging_packets: Vec<String>,
     pub player_uuid: String,
     pub player_auth_token: String,
+    pub ws_url: String,
+    pub ws_enabled: bool,
 }
 
 pub fn get_config() -> Configuration {
@@ -34,5 +38,7 @@ pub fn get_config() -> Configuration {
                 acc
             }
         }),
+        ws_url: config.ws_url,
+        ws_enabled: config.ws_enabled,
     }
 }

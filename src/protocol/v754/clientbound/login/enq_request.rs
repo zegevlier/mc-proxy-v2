@@ -83,7 +83,7 @@ impl Parsable for EncRequest {
         &self,
         status: SharedState,
         _: &mut Vec<Box<dyn crate::plugin::EventHandler + Send>>,
-        config: &Configuration,
+        _config: &Configuration,
     ) -> Result<(Vec<(Packet, Direction)>, SharedState), ()> {
         let mut status = status;
         status.secret_key = rand::thread_rng().gen::<[u8; 16]>();
@@ -114,8 +114,8 @@ impl Parsable for EncRequest {
         };
 
         let mut req_map = HashMap::new();
-        req_map.insert("accessToken", &config.player_auth_token);
-        req_map.insert("selectedProfile", &config.player_uuid);
+        req_map.insert("accessToken", &status.access_token);
+        req_map.insert("selectedProfile", &status.uuid);
         req_map.insert("serverId", &result_hash);
 
         let client = Client::new();

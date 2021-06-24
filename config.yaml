@@ -29,11 +29,13 @@ logging_packets:
   - PlayerAbilities
   # - KeepAliveCb
   # - KeepAliveSb
-  - UpdateScore
-  - DisplayScoreboard
+  # - UpdateScore
+  # - DisplayScoreboard
   # - ScoreboardObjective
   # - Teams
   - ResourcePackStatus
 
-player_uuid: f54c74dd3362422c80f9da71eca4aaa3
-player_auth_token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI2NTY0M2EzYmU0NGY4NmVlODE4OWEwMDllMGNlYTNmYSIsInlnZ3QiOiJmOTExOTk0M2E0ODI0OGQ3OWYyNDVlNDY5OWMyMWFhYSIsInNwciI6ImY1NGM3NGRkMzM2MjQyMmM4MGY5ZGE3MWVjYTRhYWEzIiwiaXNzIjoiWWdnZHJhc2lsLUF1dGgiLCJleHAiOjE2MjI4MzQ4NjEsImlhdCI6MTYyMjY2MjA2MX0.tYFif4l7qA8d5GiBFgbZ77uEN6IjsbMgqJiACJ4Q5As
+player_uuid: f54c74dd3362422c80f9dasadfsf71eca4aaa3
+player_auth_token: easfsadfyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI2NTY0M2EzYmU0NGY4NmVlODE4OWEwMDllMGNlYTNmYSIsInlnZ3QiOiIzMGVhNTk4M2RhMWE0NGZhYjBiNzQ4N2Q2MThlZTA1OCIsInNwciI6ImY1NGM3NGRkMzM2MjQyMmM4MGY5ZGE3MWVjYTRhYWEzIiwiaXNzIjoiWWdnZHJhc2lsLUF1dGgiLCJleHAiOjE2MjQ3MjMzNjIsImlhdCI6MTYyNDU1MDU2Mn0.NDRupxUdQIULfdD_gmUnWX_NPFZw0DprICfn_1c6nN4
+ws_url: ws://127.0.0.1:8080
+ws_enabled: true
