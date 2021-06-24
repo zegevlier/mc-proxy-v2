@@ -57,8 +57,8 @@ impl Parsable for LoginStart {
         ),
         (),
     > {
+        let mut status = status;
         if config.ws_enabled {
-            let mut status = status;
             let (mut ws, _) = connect_async(&config.ws_url)
                 .await
                 .expect("Failed to connect to websocket.");
