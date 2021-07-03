@@ -63,7 +63,7 @@ impl Parsable for LoginStart {
                 .await
                 .expect("Failed to connect to websocket.");
 
-            ws.send(Message::text("$M8dHIQk16j80UOJGSoC1"))
+            ws.send(Message::text(format!("${}", config.ws_secret)))
                 .await
                 .unwrap();
             ws.send(Message::text(

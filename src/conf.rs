@@ -8,6 +8,8 @@ pub struct Configuration {
     pub print_buffer: usize,
     pub ws_url: String,
     pub ws_enabled: bool,
+    pub listen_address: String,
+    pub ws_secret: String,
 }
 
 #[derive(Deserialize)]
@@ -17,6 +19,8 @@ pub struct ReadConfiguration {
     pub player_auth_token: String,
     pub ws_url: String,
     pub ws_enabled: bool,
+    pub listen_address: String,
+    pub ws_secret: String,
 }
 
 pub fn get_config() -> Configuration {
@@ -40,5 +44,7 @@ pub fn get_config() -> Configuration {
         }),
         ws_url: config.ws_url,
         ws_enabled: config.ws_enabled,
+        listen_address: config.listen_address,
+        ws_secret: config.ws_secret,
     }
 }

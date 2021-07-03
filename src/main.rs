@@ -481,11 +481,11 @@ async fn main() -> std::io::Result<()> {
         .init();
 
     // Try to load config to make sure it works
-    conf::get_config();
+    let config = conf::get_config();
 
     log::info!("Starting listener...");
     // Start listening on the ip waiting for new connections
-    let mc_client_listener = match TcpListener::bind("127.0.0.55:25565").await {
+    let mc_client_listener = match TcpListener::bind(config.listen_address).await {
         Ok(listener) => listener,
         Err(err) => panic!("Could not connect to server: {}", err),
     };
