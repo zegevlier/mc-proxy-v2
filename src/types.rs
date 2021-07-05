@@ -17,6 +17,7 @@ pub struct SharedState {
     pub access_token: String,
     pub uuid: String,
     pub server_ip: String,
+    pub user_ip: String,
 }
 
 impl SharedState {
@@ -28,6 +29,7 @@ impl SharedState {
             access_token: String::new(),
             uuid: String::new(),
             server_ip: String::new(),
+            user_ip: String::new(),
         }
     }
 
@@ -38,6 +40,7 @@ impl SharedState {
         self.access_token = new_state.access_token;
         self.uuid = new_state.uuid;
         self.server_ip = new_state.server_ip;
+        self.user_ip = new_state.user_ip;
     }
 }
 

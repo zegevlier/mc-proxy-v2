@@ -10,6 +10,7 @@ pub struct Configuration {
     pub ws_enabled: bool,
     pub listen_address: String,
     pub ws_secret: String,
+    pub domain_suffix: String,
 }
 
 #[derive(Deserialize)]
@@ -21,6 +22,7 @@ pub struct ReadConfiguration {
     pub ws_enabled: bool,
     pub listen_address: String,
     pub ws_secret: String,
+    pub domain_suffix: String,
 }
 
 pub fn get_config() -> Configuration {
@@ -46,5 +48,6 @@ pub fn get_config() -> Configuration {
         ws_enabled: config.ws_enabled,
         listen_address: config.listen_address,
         ws_secret: config.ws_secret,
+        domain_suffix: config.domain_suffix,
     }
 }

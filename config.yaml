@@ -1,34 +1,34 @@
 logging_packets:
   - Handshake
   - StatusResponse
-  # - StatusPong
+  - StatusPong
   - StatusRequest
-  # - StatusPing
+  - StatusPing
   - Disconnect
   - EncRequest
   - LoginSuccess
-  # - SetCompression
+  - SetCompression
   - PluginRequest
   - LoginStart
   - EncResponse
   - PluginResponse
-  # - SpawnEntity
-  # - SpawnXpOrb
-  # - SpawnLivingEntity
-  # - SpawnPainting
-  # - SpawnPlayer
-  # - AckPlayerDigging
+  - SpawnEntity
+  - SpawnXpOrb
+  - SpawnLivingEntity
+  - SpawnPainting
+  - SpawnPlayer
+  - AckPlayerDigging
   - ChatMessageClientbound
-  # - TabCompleteClientbound
-  # - ChatMessageServerbound
+  - TabCompleteClientbound
+  - ChatMessageServerbound
   - ResourcePackSend
-  # - ClientSettings
-  # - UpdateHealth
-  # - PlayerPosition
-  # - PlayerPositionRotation
+  - ClientSettings
+  - UpdateHealth
+  - PlayerPosition
+  - PlayerPositionRotation
   - PlayerAbilities
-  # - KeepAliveCb
-  # - KeepAliveSb
+  - KeepAliveCb
+  - KeepAliveSb
   # - UpdateScore
   # - DisplayScoreboard
   # - ScoreboardObjective
@@ -41,3 +41,4 @@ ws_url: ws://127.0.0.1:8080
 ws_secret: "M8dHIQk16j80UOJGSoC1"
 ws_enabled: true
 listen_address: "127.0.0.55:25565"
+domain_suffix: .proxy

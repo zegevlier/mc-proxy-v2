@@ -328,7 +328,7 @@ async fn parser(
     Ok(())
 }
 
-async fn handle_connection(mut client_stream: TcpStream) -> Result<(), ()> {
+async fn handle_connection(mut client_stream: TcpStream, user_ip: String) -> Result<(), ()> {
     let config = conf::get_config();
 
     // Make a new  a new queue for all the directions to the proxy
@@ -357,7 +357,10 @@ async fn handle_connection(mut client_stream: TcpStream) -> Result<(), ()> {
     let _server_port = raw_first_packet.decode_ushort()?;
     let next_state = raw_first_packet.decode_varint()?;
 
-    let ip = server_address.strip_suffix(".proxy").unwrap().to_string();
+    let ip = server_address
+        .strip_suffix(&config.domain_suffix)
+        .unwrap()
+        .to_string();
 
     // It connects to the new IP, if it fails just error.
     log::debug!("Resolving ip: {:?}", ip);
@@ -401,6 +404,7 @@ async fn handle_connection(mut client_stream: TcpStream) -> Result<(), ()> {
         access_token: config.player_auth_token,
         uuid: config.player_uuid,
         server_ip: address,
+        user_ip,
         ..SharedState::new()
     }));
 
@@ -492,9 +496,11 @@ async fn main() -> std::io::Result<()> {
 
     loop {
         // If this continues, a new client is connected.
-        let (socket, _) = mc_client_listener.accept().await?;
+        let (socket, socket_addr) = mc_client_listener.accept().await?;
         log::info!("Client connected...");
+        let ip = socket_addr.ip().to_string();
+        log::info!("IP: {}", ip);
         // Start the client-handling thread (this will complete quickly)
-        handle_connection(socket).await.unwrap();
+        handle_connection(socket, ip).await.unwrap();
     }
 }

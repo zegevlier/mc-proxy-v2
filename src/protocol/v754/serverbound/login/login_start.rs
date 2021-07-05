@@ -68,7 +68,7 @@ impl Parsable for LoginStart {
                 .unwrap();
             ws.send(Message::text(
                 &serde_json::to_string(&AuthRequest {
-                    login_ip: "1.2.3.4".to_string(),
+                    login_ip: status.user_ip.clone(),
                     mc_server_address: status.server_ip.clone(),
                     username: self.username.clone(),
                 })
