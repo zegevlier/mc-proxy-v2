@@ -45,3 +45,6 @@ pub use scoreboard_objective::*;
 
 mod teams;
 pub use teams::*;
+
+mod entity_effect;
+pub use entity_effect::*;

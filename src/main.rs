@@ -123,10 +123,10 @@ async fn parser(
     ciphers: Arc<Mutex<Ciphers>>,
     direction: Direction,
     is_closed: Arc<AtomicBool>,
+    plugins: Arc<Mutex<Vec<Box<dyn EventHandler + Send>>>>,
 ) -> Result<(), ()> {
     let mut unprocessed_data = RawPacket::new();
     let functions = functions::get_functions();
-    let mut plugins = plugins::get_plugins();
     let config = conf::get_config();
     loop {
         let new_data = match timeout(
@@ -255,8 +255,9 @@ async fn parser(
                     }
                     if parsed_packet.packet_editing() {
                         let shared_status_c = shared_status.lock().clone();
+                        let mut shared_plugins = plugins.lock().clone();
                         match parsed_packet
-                            .edit_packet(shared_status_c, &mut plugins, &config)
+                            .edit_packet(shared_status_c, &mut shared_plugins, &config)
                             .await
                         {
                             Ok((packet_vec, new_shared_status)) => {
@@ -297,6 +298,9 @@ async fn parser(
                                     };
                                 }
                                 shared_status.lock().set(new_shared_status.clone());
+                                let mut locked_plugins = plugins.lock();
+                                locked_plugins.clear();
+                                locked_plugins.append(&mut shared_plugins);
                             }
                             Err(_) => {
                                 panic!("This should never happen");
@@ -330,6 +334,7 @@ async fn parser(
 
 async fn handle_connection(mut client_stream: TcpStream, user_ip: String) -> Result<(), ()> {
     let config = conf::get_config();
+    let plugins = Arc::new(Mutex::new(plugins::get_plugins()));
 
     // Make a new  a new queue for all the directions to the proxy
     let queues = Queues {
@@ -443,6 +448,7 @@ async fn handle_connection(mut client_stream: TcpStream, user_ip: String) -> Res
         let shared_ciphers = shared_ciphers.clone();
         let queues = queues.clone();
         let is_closed = is_closed.clone();
+        let plugins = plugins.clone();
         async move {
             parser(
                 queues,
@@ -450,6 +456,7 @@ async fn handle_connection(mut client_stream: TcpStream, user_ip: String) -> Res
                 shared_ciphers,
                 Direction::Serverbound,
                 is_closed,
+                plugins,
             )
             .await
         }
@@ -463,6 +470,7 @@ async fn handle_connection(mut client_stream: TcpStream, user_ip: String) -> Res
                 shared_ciphers,
                 Direction::Clientbound,
                 is_closed,
+                plugins,
             )
             .await
         }

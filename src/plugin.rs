@@ -1,13 +1,15 @@
 use crate::{
-    functions::clientbound::play::PlayerAbilities,
-    functions::serverbound::play::ChatMessageServerbound, packet::Packet, Direction,
+    functions::clientbound::play::{EntityEffect, PlayerAbilities},
+    functions::serverbound::play::ChatMessageServerbound,
+    packet::Packet,
+    Direction,
 };
 use dyn_clone::DynClone;
 
 pub trait EventHandler: DynClone {
     fn new() -> Self
     where
-        Self: Sized;
+        Self: Sized + Clone;
 
     fn on_message(
         &mut self,
@@ -26,4 +28,12 @@ pub trait EventHandler: DynClone {
     ) -> Option<Vec<(Packet, Direction)>> {
         None
     }
+
+    fn on_potion_effect_apply(
+        &mut self,
+        _effect_info: &EntityEffect,
+    ) -> Option<Vec<(Packet, Direction)>> {
+        None
+    }
 }
+dyn_clone::clone_trait_object!(EventHandler);
