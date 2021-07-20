@@ -8,11 +8,11 @@ use crate::{
 };
 
 #[derive(Clone)]
-pub struct JumpBoostCommand {
+pub struct SwimSpeedCommand {
     current_amplifier: u8,
 }
 
-impl plugin::EventHandler for JumpBoostCommand {
+impl plugin::EventHandler for SwimSpeedCommand {
     fn new() -> Self {
         Self {
             current_amplifier: 1,
@@ -23,7 +23,7 @@ impl plugin::EventHandler for JumpBoostCommand {
         &mut self,
         message: &functions::serverbound::play::ChatMessageServerbound,
     ) -> Option<Vec<(Packet, Direction)>> {
-        if message.message.starts_with(".jb ") {
+        if message.message.starts_with(".ss ") {
             let new_amplifier = match message.message.split(' ').nth(1) {
                 Some(n) => n.parse::<u8>(),
                 None => return None,
@@ -33,7 +33,7 @@ impl plugin::EventHandler for JumpBoostCommand {
             self.current_amplifier = new_amplifier;
             return Some(vec![(
                 generate_message_packet(&format!(
-                    "Set jump boost to {}!",
+                    "Set swim speed to {}!",
                     self.current_amplifier + 1
                 ))
                 .unwrap(),
@@ -47,7 +47,7 @@ impl plugin::EventHandler for JumpBoostCommand {
         &mut self,
         effect_info: &functions::clientbound::play::EntityEffect,
     ) -> Option<Vec<(Packet, Direction)>> {
-        if effect_info.amplifier != self.current_amplifier && effect_info.effect_id == 8 {
+        if effect_info.amplifier != self.current_amplifier && effect_info.effect_id == 30 {
             let mut raw_packet = RawPacket::new();
             raw_packet.encode_varint(effect_info.entity_id);
             raw_packet.encode_ubyte(effect_info.effect_id);
