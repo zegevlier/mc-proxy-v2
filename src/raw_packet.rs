@@ -1,9 +1,19 @@
-use std::convert::TryInto;
+use serde::de;
+use std::{convert::TryInto, io::Read};
 
 // RawPacket holds a raw (unparsed) packet.
 #[derive(Debug, Clone)]
 pub struct RawPacket {
     data: Vec<u8>,
+}
+
+impl Read for RawPacket {
+    fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
+        // (&mut self.data[..]).read(buf)
+        let n = Read::read(&mut &self.data[0..], buf)?;
+        self.data.drain(0..n);
+        Ok(n)
+    }
 }
 
 // TODO: Make this type also hold a packet ID, and be able to generate packets.
@@ -167,9 +177,11 @@ impl RawPacket {
         todo!()
     }
 
-    pub fn decode_nbt_tag(&mut self) -> Result<(), ()> {
-        // Requires a *lot* of work and is not yet needed, so TODO.
-        todo!()
+    pub fn decode_nbt_tag<T>(&mut self) -> Result<T, ()>
+    where
+        T: de::DeserializeOwned,
+    {
+        Ok(nbt::from_reader(self).unwrap())
     }
 
     pub fn decode_position(&mut self) -> Result<(i64, i64, i64), ()> {
@@ -457,5 +469,42 @@ mod tests {
             assert_eq!(packet.decode_byte().unwrap(), v);
             packet.clear()
         }
+    }
+
+    #[test]
+    fn test_read() {
+        let mut packet = RawPacket::new();
+        packet.encode_bool(true);
+        test_read_helper(&mut packet);
+        let packet_vec: Vec<u8> = Vec::new();
+        assert_eq!(packet.get_vec(), packet_vec);
+    }
+
+    fn test_read_helper(r: &mut impl Read) {
+        let buf = &mut [0_u8; 1];
+        r.read_exact(buf).unwrap();
+    }
+
+    #[test]
+    fn test_nbt_small() {
+        #[derive(Debug, PartialEq, serde::Deserialize)]
+        pub struct Small1 {
+            name: String,
+        }
+
+        let test_data = vec![
+            0x0A, 0x00, 0x0B, 0x68, 0x65, 0x6C, 0x6C, 0x6F, 0x20, 0x77, 0x6F, 0x72, 0x6C, 0x64,
+            0x08, 0x00, 0x04, 0x6E, 0x61, 0x6D, 0x65, 0x00, 0x09, 0x42, 0x61, 0x6E, 0x61, 0x6E,
+            0x72, 0x61, 0x6D, 0x61, 0x00,
+        ];
+        let nbt = Small1 {
+            name: "Bananrama".to_string(),
+        };
+
+        let mut raw_packet = RawPacket::new();
+        raw_packet.push_vec(test_data);
+        let nbt_data: Small1 = raw_packet.decode_nbt_tag().unwrap();
+        assert_eq!(raw_packet.len(), 0);
+        assert_eq!(nbt_data, nbt);
     }
 }
