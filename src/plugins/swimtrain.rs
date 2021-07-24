@@ -4,14 +4,14 @@ use crate::{
 };
 
 #[derive(Clone)]
-pub struct JumpTrain {
+pub struct SwimTrain {
     x: f64,
     y: f64,
     z: f64,
     enabled: bool,
 }
 
-impl plugin::EventHandler for JumpTrain {
+impl plugin::EventHandler for SwimTrain {
     fn new() -> Self {
         Self {
             x: 0.0,
@@ -25,29 +25,11 @@ impl plugin::EventHandler for JumpTrain {
         &mut self,
         message: &functions::serverbound::play::ChatMessageServerbound,
     ) -> Option<Vec<(Packet, Direction)>> {
-        let mut return_vec = vec![];
-        if message.message.starts_with(".jump ") {
-            for _ in 0..message.message.split(' ').nth(1).unwrap().parse().unwrap() {
-                let mut raw_packet = RawPacket::new();
-                raw_packet.encode_double(self.x);
-                raw_packet.encode_double(self.y + 0.41999998688698);
-                raw_packet.encode_double(self.z);
-                raw_packet.encode_bool(false);
-                return_vec.push((Packet::from(raw_packet, 0x12), Direction::Serverbound));
-                let mut raw_packet = RawPacket::new();
-                raw_packet.encode_double(self.x);
-                raw_packet.encode_double(self.y);
-                raw_packet.encode_double(self.z);
-                raw_packet.encode_bool(true);
-                return_vec.push((Packet::from(raw_packet, 0x12), Direction::Serverbound));
-            }
-            log::info!("Jumped at {} {} {}", self.x, self.y, self.z);
-
-            Some(return_vec)
-        } else if message.message == ".startjump" {
+        if message.message == ".startswim" {
             self.enabled = !self.enabled;
             return Some(vec![(
-                generate_message_packet(&format!("Switched jumping to {}!", self.enabled)).unwrap(),
+                generate_message_packet(&format!("Switched swimming to {}!", self.enabled))
+                    .unwrap(),
                 Direction::Clientbound,
             )]);
         } else {
@@ -66,7 +48,7 @@ impl plugin::EventHandler for JumpTrain {
                 for _ in 0..35 {
                     let mut raw_packet = RawPacket::new();
                     raw_packet.encode_double(self.x);
-                    raw_packet.encode_double(self.y + 0.41999998688698);
+                    raw_packet.encode_double(self.y + 5.41999998688698);
                     raw_packet.encode_double(self.z);
                     raw_packet.encode_bool(false);
                     return_vec.push((Packet::from(raw_packet, 0x12), Direction::Serverbound));
@@ -77,7 +59,7 @@ impl plugin::EventHandler for JumpTrain {
                     raw_packet.encode_bool(true);
                     return_vec.push((Packet::from(raw_packet, 0x12), Direction::Serverbound));
                 }
-                log::info!("Jumped at {} {} {}", self.x, self.y, self.z);
+                log::info!("Swam at {} {} {}", self.x, self.y, self.z);
                 return Some(return_vec);
             }
         }

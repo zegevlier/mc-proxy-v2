@@ -6,6 +6,7 @@ mod jumpboostcommand;
 mod jumptrain;
 mod rainbowify;
 mod swimspeedcommand;
+mod swimtrain;
 mod test_plugin;
 mod update_game;
 mod velocity_monitor;
@@ -18,7 +19,8 @@ pub fn get_plugins() -> Vec<Box<dyn EventHandler + Send>> {
         Box::new(weird_sky::WeirdSky::new()),
         Box::new(gamemode::Gamemode::new()),
         Box::new(update_game::UpdateGame::new()),
-        // Box::new(jumptrain::JumpTrain::new()),
+        Box::new(jumptrain::JumpTrain::new()),
+        Box::new(swimtrain::SwimTrain::new()),
         Box::new(jumpboostcommand::JumpBoostCommand::new()),
         Box::new(swimspeedcommand::SwimSpeedCommand::new()),
         Box::new(anti_command_fail::Acf::new()),
