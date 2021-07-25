@@ -1,5 +1,5 @@
 use crate::{
-    functions::clientbound::play::{EntityEffect, PlayerAbilities},
+    functions::clientbound::play::{EntityEffect, JoinGame, PlayerAbilities},
     functions::serverbound::play::ChatMessageServerbound,
     packet::Packet,
     Direction,
@@ -33,6 +33,10 @@ pub trait EventHandler: DynClone {
         &mut self,
         _effect_info: &EntityEffect,
     ) -> Option<Vec<(Packet, Direction)>> {
+        None
+    }
+
+    fn edit_join_game(&mut self, _join_game: &JoinGame) -> Option<JoinGame> {
         None
     }
 }

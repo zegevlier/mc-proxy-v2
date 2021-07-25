@@ -52,6 +52,7 @@ pub enum Fid {
     Teams,
     ResourcePackStatus,
     EntityEffect,
+    JoinGame,
 }
 
 pub fn fid_to_pid(fid: Fid) -> i32 {
@@ -93,6 +94,7 @@ pub fn fid_to_pid(fid: Fid) -> i32 {
         Fid::Teams => 0x4C,
         Fid::ResourcePackStatus => 0x21,
         Fid::EntityEffect => 0x59,
+        Fid::JoinGame => 0x24,
     }
 }
 
@@ -141,6 +143,7 @@ impl Functions {
                     Fid::ScoreboardObjective,
                     Fid::Teams,
                     Fid::EntityEffect,
+                    Fid::JoinGame,
                 ],
             },
             Direction::Serverbound => hashmap! {
@@ -328,6 +331,8 @@ pub fn get_functions() -> Functions {
     functions.add(Fid::Teams, Box::new(cb::play::Teams::empty()));
 
     functions.add(Fid::EntityEffect, Box::new(cb::play::EntityEffect::empty()));
+
+    functions.add(Fid::JoinGame, Box::new(cb::play::JoinGame::empty()));
 
     // Serverbound
     functions.add(
