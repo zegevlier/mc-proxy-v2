@@ -18,7 +18,7 @@ pub struct JoinGame {
     pub world_count: i32,
     pub world_names: Vec<String>,
     pub dimension_codec: DimentionCodec,
-    pub dimension: nbt::Blob,
+    pub dimension: DimentionType,
     pub world_name: String,
     pub hashed_seed: i64,
     pub max_players: i32,
@@ -142,21 +142,6 @@ pub struct ParticleOptions {
     pub r#type: String,
 }
 
-impl DimentionCodec {
-    fn new() -> Self {
-        Self {
-            dimension_type_registry: DimentionTypeRegistry {
-                r#type: String::new(),
-                value: Vec::new(),
-            },
-            biome_registry: BiomeRegistry {
-                r#type: String::new(),
-                value: Vec::new(),
-            },
-        }
-    }
-}
-
 #[async_trait::async_trait]
 impl Parsable for JoinGame {
     fn empty() -> Self {
@@ -167,8 +152,32 @@ impl Parsable for JoinGame {
             previous_gamemode: 0,
             world_count: 0,
             world_names: Vec::new(),
-            dimension_codec: DimentionCodec::new(),
-            dimension: nbt::Blob::new(),
+            dimension_codec: DimentionCodec {
+                dimension_type_registry: DimentionTypeRegistry {
+                    r#type: String::new(),
+                    value: Vec::new(),
+                },
+                biome_registry: BiomeRegistry {
+                    r#type: String::new(),
+                    value: Vec::new(),
+                },
+            },
+            dimension: DimentionType {
+                piglin_safe: 0,
+                natural: 0,
+                ambient_light: 0f32,
+                fixed_time: None,
+                infiniburn: String::new(),
+                respawn_anchor_works: 0,
+                has_skylight: 0,
+                bed_works: 0,
+                effects: String::new(),
+                has_raids: 0,
+                logical_height: 0,
+                coordinate_scale: 0f32,
+                ultrawarm: 0,
+                has_ceiling: 0,
+            },
             world_name: String::new(),
             hashed_seed: 0,
             max_players: 0,
@@ -190,7 +199,7 @@ impl Parsable for JoinGame {
             self.world_names.push(packet.decode_string()?);
         }
         self.dimension_codec = packet.decode_nbt()?;
-        self.dimension = packet.decode_nbt_blob()?;
+        self.dimension = packet.decode_nbt()?;
         self.world_name = packet.decode_identifier()?;
         self.hashed_seed = packet.decode_long()?;
         self.max_players = packet.decode_varint()?;
@@ -211,7 +220,7 @@ impl Parsable for JoinGame {
             self.previous_gamemode,
             self.world_names,
             make_string_fixed_length(format!("{:?}", self.dimension_codec), 16),
-            make_string_fixed_length(self.dimension.to_string().replace("\n", ""), 16),
+            make_string_fixed_length(format!("{:?}", self.dimension), 16),
             self.world_name,
             self.hashed_seed,
             self.max_players,
@@ -253,7 +262,7 @@ impl Parsable for JoinGame {
             raw_packet.encode_string(wn);
         }
         raw_packet.encode_nbt(join_game_packet.dimension_codec);
-        raw_packet.encode_nbt_blob(join_game_packet.dimension);
+        raw_packet.encode_nbt(join_game_packet.dimension);
         raw_packet.encode_identifier(join_game_packet.world_name);
         raw_packet.encode_long(join_game_packet.hashed_seed);
         raw_packet.encode_varint(join_game_packet.max_players);
