@@ -1,5 +1,8 @@
-use serde::de;
-use std::{convert::TryInto, io::Read};
+use serde::{de, ser};
+use std::{
+    convert::TryInto,
+    io::{Read, Write},
+};
 
 // RawPacket holds a raw (unparsed) packet.
 #[derive(Debug, Clone)]
@@ -13,6 +16,17 @@ impl Read for RawPacket {
         let n = Read::read(&mut &self.data[0..], buf)?;
         self.data.drain(0..n);
         Ok(n)
+    }
+}
+
+impl Write for RawPacket {
+    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+        self.push_slice(buf);
+        Ok(buf.len())
+    }
+
+    fn flush(&mut self) -> std::io::Result<()> {
+        todo!()
     }
 }
 
@@ -177,11 +191,15 @@ impl RawPacket {
         todo!()
     }
 
-    pub fn decode_nbt_tag<T>(&mut self) -> Result<T, ()>
+    pub fn decode_nbt<T>(&mut self) -> Result<T, ()>
     where
         T: de::DeserializeOwned,
     {
         Ok(nbt::from_reader(self).unwrap())
+    }
+
+    pub fn decode_nbt_blob(&mut self) -> Result<nbt::Blob, ()> {
+        Ok(nbt::Blob::from_reader(self).unwrap())
     }
 
     pub fn decode_position(&mut self) -> Result<(i64, i64, i64), ()> {
@@ -234,8 +252,8 @@ impl RawPacket {
         self.push_slice(&value.to_be_bytes());
     }
 
-    pub fn encode_int(&mut self) {
-        todo!()
+    pub fn encode_int(&mut self, value: i32) {
+        self.push_slice(&value.to_be_bytes());
     }
 
     pub fn encode_long(&mut self, value: i64) {
@@ -255,12 +273,12 @@ impl RawPacket {
         self.push_slice(message.as_bytes());
     }
 
-    pub fn encode_chat(&mut self) {
-        todo!()
+    pub fn encode_chat(&mut self, message: String) {
+        self.encode_string(message);
     }
 
-    pub fn encode_identifier(&mut self) {
-        todo!()
+    pub fn encode_identifier(&mut self, message: String) {
+        self.encode_string(message);
     }
 
     pub fn encode_varint(&mut self, v: i32) {
@@ -303,9 +321,15 @@ impl RawPacket {
         todo!()
     }
 
-    pub fn encode_nbt_tag(&mut self) {
-        // Requires a *lot* of work and is not yet needed, so TODO.
-        todo!()
+    pub fn encode_nbt<T>(&mut self, data: T)
+    where
+        T: ser::Serialize,
+    {
+        nbt::to_writer(self, &data, None).unwrap();
+    }
+
+    pub fn encode_nbt_blob(&mut self, data: nbt::Blob) {
+        data.to_writer(self).unwrap()
     }
 
     pub fn encode_position(&mut self) {
@@ -503,7 +527,7 @@ mod tests {
 
         let mut raw_packet = RawPacket::new();
         raw_packet.push_vec(test_data);
-        let nbt_data: Small1 = raw_packet.decode_nbt_tag().unwrap();
+        let nbt_data: Small1 = raw_packet.decode_nbt().unwrap();
         assert_eq!(raw_packet.len(), 0);
         assert_eq!(nbt_data, nbt);
     }
