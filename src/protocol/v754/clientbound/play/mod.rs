@@ -51,3 +51,6 @@ pub use entity_effect::*;
 
 mod join_game;
 pub use join_game::*;
+
+mod open_book;
+pub use open_book::*;

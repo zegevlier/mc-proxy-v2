@@ -1,5 +1,6 @@
 use crate::plugin::EventHandler;
 mod anti_command_fail;
+mod book_copy;
 mod fake_fly;
 mod gamemode;
 mod join_game_test;
@@ -25,6 +26,7 @@ pub fn get_plugins() -> Vec<Box<dyn EventHandler + Send>> {
         Box::new(swimtrain::SwimTrain::new()),
         Box::new(jumpboostcommand::JumpBoostCommand::new()),
         Box::new(swimspeedcommand::SwimSpeedCommand::new()),
+        Box::new(book_copy::CopyBook::new()),
         Box::new(anti_command_fail::Acf::new()),
         // Box::new(velocity_monitor::Velocity::new()),
         // Box::new(fake_fly::FakeFly::new()),
