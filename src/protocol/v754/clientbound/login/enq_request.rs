@@ -17,7 +17,7 @@ use std::iter;
 
 use num_bigint_dig::BigUint;
 use reqwest::Client;
-use rsa::{PaddingScheme, PublicKey, RSAPublicKey};
+use rsa::{PaddingScheme, PublicKey, RsaPublicKey};
 use rsa_der::public_key_from_der;
 use rustc_serialize::hex::ToHex;
 
@@ -141,7 +141,7 @@ impl Parsable for EncRequest {
         let mut rng = rand::rngs::OsRng;
         let (n, e) = public_key_from_der(&self.public_key).unwrap();
         let public_key =
-            RSAPublicKey::new(BigUint::from_bytes_be(&n), BigUint::from_bytes_be(&e)).unwrap();
+            RsaPublicKey::new(BigUint::from_bytes_be(&n), BigUint::from_bytes_be(&e)).unwrap();
         let padding = PaddingScheme::new_pkcs1v15_encrypt();
 
         let mut unformatted_packet = crate::RawPacket::new();
