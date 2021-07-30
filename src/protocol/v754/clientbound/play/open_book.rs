@@ -1,11 +1,6 @@
 use crate::{
-    conf::Configuration,
-    functions::{fid_to_pid, Fid},
-    packet::Packet,
-    parsable::Parsable,
-    raw_packet::RawPacket,
-    utils::generate_message_packet,
-    Direction, EventHandler, SharedState,
+    conf::Configuration, packet::Packet, parsable::Parsable, raw_packet::RawPacket,
+    utils::generate_message_packet, Direction, EventHandler, SharedState,
 };
 
 #[derive(Clone)]
