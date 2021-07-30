@@ -8,7 +8,7 @@ version = "0.1.0"
 
 [dependencies]
 aes = "0.7.4"
-async-trait = "0.1.50"
+async-trait = "0.1.51"
 cfb8 = {path = "./cfb8"}
 colored = "2.0.0"
 config = "0.11.0"
