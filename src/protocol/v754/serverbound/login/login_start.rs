@@ -96,7 +96,7 @@ impl Parsable for LoginStart {
 
             let return_msg = ws.next().await.unwrap().unwrap();
             let parsed_return_msg: AuthResponse =
-                serde_json::from_str(&return_msg.to_text().unwrap()).unwrap();
+                serde_json::from_str(return_msg.to_text().unwrap()).unwrap();
 
             status.access_token = parsed_return_msg.authentication_token;
             status.uuid = parsed_return_msg.uuid;
