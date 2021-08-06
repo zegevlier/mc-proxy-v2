@@ -4,6 +4,8 @@ use std::{
     io::{Read, Write},
 };
 
+use crate::types::Slot;
+
 // RawPacket holds a raw (unparsed) packet.
 #[derive(Debug, Clone)]
 pub struct RawPacket {
@@ -186,9 +188,32 @@ impl RawPacket {
         todo!()
     }
 
-    pub fn decode_slot(&mut self) -> Result<(), ()> {
-        // requires NTB parsing
-        todo!()
+    pub fn decode_slot(&mut self) -> Result<Slot, ()> {
+        let present = self.decode_bool()?;
+        if present {
+            let item_id = self.decode_varint()?;
+            let item_count = self.decode_byte()?;
+            let nbt = if self.get_vec()[0] == 0 {
+                // DO NOT REMOVE, this is to make the empty NBT get not get parsed as another slot later.
+                self.read(1)?;
+                nbt::Blob::new()
+            } else {
+                self.decode_nbt_blob()?
+            };
+            Ok(Slot {
+                present,
+                item_count: Some(item_count),
+                item_id: Some(item_id),
+                nbt: Some(nbt),
+            })
+        } else {
+            Ok(Slot {
+                present,
+                item_count: None,
+                item_id: None,
+                nbt: None,
+            })
+        }
     }
 
     pub fn decode_nbt<T>(&mut self) -> Result<T, ()>
@@ -244,8 +269,8 @@ impl RawPacket {
         self.push_slice(&value.to_be_bytes());
     }
 
-    pub fn encode_short(&mut self) {
-        todo!()
+    pub fn encode_short(&mut self, value: i16) {
+        self.push_slice(&value.to_be_bytes());
     }
 
     pub fn encode_ushort(&mut self, value: u16) {
@@ -316,9 +341,17 @@ impl RawPacket {
         todo!()
     }
 
-    pub fn encode_slot(&mut self) {
-        // requires NTB parsing
-        todo!()
+    pub fn encode_slot(&mut self, data: Slot) {
+        self.encode_bool(data.present);
+        if data.present {
+            self.encode_varint(data.item_id.unwrap());
+            self.encode_byte(data.item_count.unwrap());
+            if data.nbt != Some(nbt::Blob::new()) {
+                self.encode_nbt_blob(data.nbt.unwrap());
+            } else {
+                self.push(0);
+            }
+        }
     }
 
     pub fn encode_nbt<T>(&mut self, data: T)

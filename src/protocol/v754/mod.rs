@@ -54,6 +54,7 @@ pub enum Fid {
     EntityEffect,
     JoinGame,
     OpenBook,
+    WindowItems,
 }
 
 pub fn fid_to_pid(fid: Fid) -> i32 {
@@ -97,6 +98,7 @@ pub fn fid_to_pid(fid: Fid) -> i32 {
         Fid::EntityEffect => 0x59,
         Fid::JoinGame => 0x24,
         Fid::OpenBook => 0x2C,
+        Fid::WindowItems => 0x13,
     }
 }
 
@@ -147,6 +149,7 @@ impl Functions {
                     Fid::EntityEffect,
                     Fid::JoinGame,
                     Fid::OpenBook,
+                    Fid::WindowItems,
                 ],
             },
             Direction::Serverbound => hashmap! {
@@ -322,6 +325,8 @@ pub fn get_functions() -> Functions {
     functions.add(Fid::UpdateScore, Box::new(cb::play::UpdateScore::empty()));
 
     functions.add(Fid::OpenBook, Box::new(cb::play::OpenBook::empty()));
+
+    functions.add(Fid::WindowItems, Box::new(cb::play::WindowItems::empty()));
 
     functions.add(
         Fid::DisplayScoreboard,

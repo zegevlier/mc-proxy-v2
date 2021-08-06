@@ -54,3 +54,6 @@ pub use join_game::*;
 
 mod open_book;
 pub use open_book::*;
+
+mod window_items;
+pub use window_items::*;

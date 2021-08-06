@@ -89,3 +89,11 @@ pub struct Queues {
     pub server_proxy: Arc<DataQueue>,
     pub proxy_server: Arc<DataQueue>,
 }
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Slot {
+    pub present: bool,
+    pub item_id: Option<i32>,
+    pub item_count: Option<i8>,
+    pub nbt: Option<nbt::Blob>,
+}
