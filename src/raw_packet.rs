@@ -32,7 +32,6 @@ impl Write for RawPacket {
     }
 }
 
-// TODO: Make this type also hold a packet ID, and be able to generate packets.
 impl RawPacket {
     pub fn new() -> RawPacket {
         RawPacket { data: Vec::new() }

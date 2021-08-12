@@ -482,7 +482,7 @@ async fn handle_connection(mut client_stream: TcpStream, user_ip: String) -> Res
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
     // Load the logger, it has a fancy format with colours and it's spaced.
-    // TODO: Add  file logging
+    // TODO: Add file logging
     Builder::from_default_env()
         .format(|buf, record| {
             let formatted_level = buf.default_styled_level(record.level());
