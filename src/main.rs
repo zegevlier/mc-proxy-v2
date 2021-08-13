@@ -44,6 +44,8 @@ mod protocol;
 
 pub use protocol::v754 as functions;
 
+use crate::parsable::Parsable;
+
 pub type DataQueue = deadqueue::unlimited::Queue<Vec<u8>>;
 
 const SHUTDOWN_CHECK_TIMEOUT: u64 = 100;
@@ -332,7 +334,11 @@ async fn parser(
     Ok(())
 }
 
-async fn handle_connection(mut client_stream: TcpStream, user_ip: String) -> Result<(), ()> {
+async fn handle_connection(
+    mut client_stream: TcpStream,
+    user_ip: String,
+    connection_id: String,
+) -> Result<(), ()> {
     let config = conf::get_config();
     let plugins = Arc::new(Mutex::new(plugins::get_plugins()));
 
@@ -343,31 +349,42 @@ async fn handle_connection(mut client_stream: TcpStream, user_ip: String) -> Res
         server_proxy: Arc::new(DataQueue::new()),
         proxy_server: Arc::new(DataQueue::new()),
     };
-    // It then makes a shared state to share amongst all the threads
 
+    // It then makes a shared state to share amongst all the threads
     let shared_ciphers: Arc<Mutex<Ciphers>> = Arc::new(Mutex::new(Ciphers::new()));
 
+    // This part reads the sent data into a buffer
     let mut buffer = Vec::new();
     client_stream.read_buf(&mut buffer).await.unwrap();
-    let mut raw_first_packet = RawPacket::from(buffer.clone());
-    let _packet_length = raw_first_packet.decode_varint()?;
+
+    // It then tries to parse the first data into a packet.
+    let mut first_data = RawPacket::from(buffer.clone());
+    let packet_length = first_data.decode_varint()?;
+    let mut raw_first_packet = RawPacket::from(first_data.read(packet_length as usize).unwrap());
     let packet_id = raw_first_packet.decode_varint()?;
+
+    // If the packet ID is not 0, it is not a valid minecraft packet.
     if packet_id != 0 {
         log::error!("Packet ID did not match handshaking packet, terminating connection...");
         log::debug!("Packet: {:?}", buffer);
         return Ok(());
     };
-    let protocol_version = raw_first_packet.decode_varint()?;
-    let server_address = &raw_first_packet.decode_string()?;
-    let _server_port = raw_first_packet.decode_ushort()?;
-    let next_state = raw_first_packet.decode_varint()?;
 
-    let ip = server_address
+    // It then continues to parse the packet
+    let mut handshaking_packet = functions::serverbound::handshaking::Handshake::empty();
+    if handshaking_packet.parse_packet(raw_first_packet).is_err() {
+        log::error!("Invalid handshake packet! Closing connection...");
+        return Err(());
+    };
+
+    // It then gets the IP address of the actual server
+    let ip = handshaking_packet
+        .server_address
         .strip_suffix(&config.domain_suffix)
         .unwrap()
         .to_string();
 
-    // It connects to the new IP, if it fails just error.
+    // It looks if there is an SRV record present on the domain, if there is it uses that.
     log::debug!("Resolving ip: {:?}", ip);
     let resolver =
         TokioAsyncResolver::tokio(ResolverConfig::default(), ResolverOpts::default()).unwrap();
@@ -382,19 +399,27 @@ async fn handle_connection(mut client_stream: TcpStream, user_ip: String) -> Res
 
         record.target().to_string().trim_matches('.').to_string()
     } else {
+        // Othwerise it just uses the IP directly
         ip.to_owned()
     };
 
+    // It converts the data back to a packet, with all the stuff that's associated with that.
     let mut new_packet = RawPacket::new();
     new_packet.encode_varint(0);
-    new_packet.encode_varint(protocol_version);
+    new_packet.encode_varint(handshaking_packet.protocol_version);
     new_packet.encode_string(address.clone());
     new_packet.encode_ushort(25565);
-    new_packet.encode_varint(next_state);
+    new_packet.encode_varint(match handshaking_packet.next_state {
+        State::Status => 1,
+        State::Login => 2,
+        _ => unreachable!(),
+    });
     new_packet.prepend_length();
-    new_packet.push_vec(raw_first_packet.get_vec());
+    // It adds the remaining data that was sent in the first packet, to make sure no data gets lost.
+    new_packet.push_vec(first_data.get_vec());
     queues.client_proxy.push(new_packet.get_vec());
 
+    // It connects to the server, for now the port 25565 is hardcoded.
     log::info!("Connecting to IP {}", address);
     let server_stream = match TcpStream::connect(&format!("{}:{}", address, 25565)).await {
         Ok(stream) => stream,
@@ -405,11 +430,13 @@ async fn handle_connection(mut client_stream: TcpStream, user_ip: String) -> Res
     };
     log::info!("Connected...");
 
+    // It creates a shared status where all data that is mutable or request specific is kept.
     let shared_status: Arc<Mutex<SharedState>> = Arc::new(Mutex::new(SharedState {
         access_token: config.player_auth_token,
         uuid: config.player_uuid,
         server_ip: address,
         user_ip,
+        connection_id,
         ..SharedState::new()
     }));
 
@@ -504,11 +531,14 @@ async fn main() -> std::io::Result<()> {
 
     loop {
         // If this continues, a new client is connected.
+        let next_connection_id = utils::generate_connection_id();
         let (socket, socket_addr) = mc_client_listener.accept().await?;
-        log::info!("Client connected...");
+        log::info!("Client connected, connection ID: {}...", next_connection_id);
         let ip = socket_addr.ip().to_string();
         log::info!("IP: {}", ip);
         // Start the client-handling thread (this will complete quickly)
-        handle_connection(socket, ip).await.unwrap();
+        handle_connection(socket, ip, next_connection_id)
+            .await
+            .unwrap();
     }
 }

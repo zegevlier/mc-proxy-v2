@@ -18,6 +18,7 @@ pub struct SharedState {
     pub uuid: String,
     pub server_ip: String,
     pub user_ip: String,
+    pub connection_id: String,
 }
 
 impl SharedState {
@@ -30,6 +31,7 @@ impl SharedState {
             uuid: String::new(),
             server_ip: String::new(),
             user_ip: String::new(),
+            connection_id: String::new(),
         }
     }
 
@@ -41,6 +43,7 @@ impl SharedState {
         self.uuid = new_state.uuid;
         self.server_ip = new_state.server_ip;
         self.user_ip = new_state.user_ip;
+        self.connection_id = new_state.connection_id;
     }
 }
 

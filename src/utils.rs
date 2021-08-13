@@ -1,4 +1,5 @@
 use crate::{functions, packet::Packet, raw_packet::RawPacket};
+use rand::{distributions::Alphanumeric, Rng};
 
 // This converts a long string into one that's shortened.
 // alongstringlikethis would become alongs...kethis
@@ -48,4 +49,13 @@ pub fn rainbowfy(message: String) -> String {
         }
     }
     return_message
+}
+
+pub fn generate_connection_id() -> String {
+    let rand_string: String = rand::thread_rng()
+        .sample_iter(&Alphanumeric)
+        .take(30)
+        .map(char::from)
+        .collect();
+    rand_string
 }

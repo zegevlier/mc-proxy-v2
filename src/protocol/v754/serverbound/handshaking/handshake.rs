@@ -3,10 +3,10 @@ use crate::{SharedState, State};
 
 #[derive(Clone)]
 pub struct Handshake {
-    protocol_version: i32,
-    server_address: String,
-    server_port: u16,
-    next_state: State,
+    pub protocol_version: i32,
+    pub server_address: String,
+    pub server_port: u16,
+    pub next_state: State,
 }
 
 impl Parsable for Handshake {
