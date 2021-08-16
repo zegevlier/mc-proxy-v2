@@ -7,8 +7,9 @@ use crate::{
     raw_packet::RawPacket,
 };
 use crate::{Direction, SharedState};
+use serde::Serialize;
 
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
 pub struct ChatMessageServerbound {
     pub message: String,
 }

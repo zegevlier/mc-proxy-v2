@@ -1,11 +1,14 @@
 use crate::{parsable::Parsable, raw_packet::RawPacket};
-#[derive(Clone, Debug)]
+use serde::Serialize;
+
+#[derive(Clone, Debug, Serialize)]
 enum DiggingStatus {
     Started,
     Cancelled,
     Finished,
 }
-#[derive(Clone)]
+
+#[derive(Clone, Serialize)]
 pub struct AckPlayerDigging {
     x: i64,
     y: i64,

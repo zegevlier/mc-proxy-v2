@@ -1,16 +1,18 @@
+use crate::types::Uuid;
 use crate::{parsable::Parsable, raw_packet::RawPacket};
 use crate::{SharedState, State};
+use serde::Serialize;
 
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
 pub struct LoginSuccess {
-    uuid: u128,
+    uuid: Uuid,
     username: String,
 }
 
 impl Parsable for LoginSuccess {
     fn empty() -> Self {
         Self {
-            uuid: 0,
+            uuid: Uuid::from(0),
             username: "".into(),
         }
     }
@@ -22,7 +24,7 @@ impl Parsable for LoginSuccess {
     }
 
     fn get_printable(&self) -> String {
-        format!("{:x} {}", self.uuid, self.username,)
+        format!("{} {}", self.uuid, self.username,)
     }
 
     fn status_updating(&self) -> bool {

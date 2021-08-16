@@ -1,7 +1,8 @@
 use crate::{parsable::Parsable, raw_packet::RawPacket};
 use crate::{SharedState, State};
+use serde::Serialize;
 
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
 pub struct StatusPong {
     payload: i64,
 }

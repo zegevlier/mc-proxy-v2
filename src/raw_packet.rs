@@ -4,7 +4,7 @@ use std::{
     io::{Read, Write},
 };
 
-use crate::types::Slot;
+use crate::types::{Slot, Uuid};
 
 // RawPacket holds a raw (unparsed) packet.
 #[derive(Debug, Clone)]
@@ -249,8 +249,10 @@ impl RawPacket {
         Ok(self.read(1)?[0])
     }
 
-    pub fn decode_uuid(&mut self) -> Result<u128, ()> {
-        Ok(u128::from_be_bytes(self.read(16)?.try_into().unwrap()))
+    pub fn decode_uuid(&mut self) -> Result<Uuid, ()> {
+        Ok(Uuid::from(u128::from_be_bytes(
+            self.read(16)?.try_into().unwrap(),
+        )))
     }
 
     pub fn encode_bool(&mut self, value: bool) {

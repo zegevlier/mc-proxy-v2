@@ -2,8 +2,9 @@ use crate::{
     conf::Configuration, packet::Packet, parsable::Parsable, raw_packet::RawPacket, Direction,
     EventHandler, SharedState,
 };
+use serde::Serialize;
 
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
 pub struct KeepAliveSb {
     keep_alive_id: i64,
 }

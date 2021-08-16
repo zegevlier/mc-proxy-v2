@@ -1,9 +1,10 @@
-use crate::{parsable::Parsable, raw_packet::RawPacket};
+use crate::{parsable::Parsable, raw_packet::RawPacket, types::Uuid};
+use serde::Serialize;
 
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
 pub struct SpawnPlayer {
     entity_id: i32,
-    player_uuid: u128,
+    player_uuid: Uuid,
     x: f64,
     y: f64,
     z: f64,
@@ -15,7 +16,7 @@ impl Parsable for SpawnPlayer {
     fn empty() -> Self {
         Self {
             entity_id: 0,
-            player_uuid: 0,
+            player_uuid: Uuid::from(0),
             x: 0f64,
             y: 0f64,
             z: 0f64,
@@ -37,7 +38,7 @@ impl Parsable for SpawnPlayer {
 
     fn get_printable(&self) -> String {
         format!(
-            "{} {:x} {} {} {} {} {}",
+            "{} {} {} {} {} {} {}",
             self.entity_id, self.player_uuid, self.x, self.y, self.z, self.yaw, self.pitch,
         )
     }

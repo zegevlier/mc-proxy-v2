@@ -42,11 +42,14 @@ mod utils;
 mod packet;
 mod protocol;
 
+mod logging;
+
 pub use protocol::v754 as functions;
 
 use crate::parsable::Parsable;
 
 pub type DataQueue = deadqueue::unlimited::Queue<Vec<u8>>;
+pub type LogQueue = deadqueue::unlimited::Queue<Box<dyn Parsable + Send + Sync>>;
 
 const SHUTDOWN_CHECK_TIMEOUT: u64 = 100;
 
@@ -126,6 +129,7 @@ async fn parser(
     direction: Direction,
     is_closed: Arc<AtomicBool>,
     plugins: Arc<Mutex<Vec<Box<dyn EventHandler + Send>>>>,
+    log_queue: Arc<LogQueue>,
 ) -> Result<(), ()> {
     let mut unprocessed_data = RawPacket::new();
     let functions = functions::get_functions();
@@ -197,21 +201,16 @@ async fn parser(
 
             let packet_id = packet.decode_varint()?;
 
-            let mut not_processed = false;
-
             let func_id =
                 match functions.get_name(&direction, &shared_status.lock().state, &packet_id) {
                     Some(func_name) => func_name,
-                    None => {
-                        not_processed = true;
-                        &functions::Fid::Unparsable
-                    }
+                    None => &functions::Fid::Unparsable,
                 };
 
             let mut to_direction = direction;
             let mut out_data = original_packet.get_vec();
 
-            let out_data = if not_processed {
+            let out_data = if func_id == &functions::Fid::Unparsable {
                 let out_data = if to_direction == Direction::Serverbound {
                     // Compress data if needed, then encrypt
                     ciphers.lock().ps_cipher.encrypt(out_data)
@@ -223,7 +222,7 @@ async fn parser(
             } else {
                 let mut parsed_packet = match functions.get(func_id) {
                     Some(func) => func,
-                    None => panic!("This should never happen, if it does: crash"),
+                    None => unreachable!(),
                 };
 
                 let success = match parsed_packet.parse_packet(packet) {
@@ -250,6 +249,7 @@ async fn parser(
                 };
 
                 if success {
+                    log_queue.push(parsed_packet.clone());
                     if parsed_packet.status_updating() {
                         parsed_packet
                             .update_status(&mut shared_status.lock())
@@ -320,7 +320,7 @@ async fn parser(
                         .post_send_update(&mut ciphers.lock(), &shared_status.lock())
                         .is_err()
                 {
-                    panic!("PSU failed, panicing.")
+                    panic!("Post send update failed, panicing.")
                 }
                 out_data
             };
@@ -435,15 +435,24 @@ async fn handle_connection(
         access_token: config.player_auth_token,
         uuid: config.player_uuid,
         server_ip: address,
+        connection_id: connection_id.clone(),
         user_ip,
-        connection_id,
         ..SharedState::new()
     }));
+
+    let log_queue = Arc::new(LogQueue::new());
 
     // It then splits both TCP streams up in rx and tx
     let (crx, ctx) = client_stream.into_split();
     let (srx, stx) = server_stream.into_split();
     let is_closed = Arc::new(AtomicBool::new(false));
+
+    // Start a thread for logging the packets
+    tokio::spawn({
+        let log_path = format!("./logs/{}.txt", &connection_id);
+        let log_queue = log_queue.clone();
+        async move { logging::logger(&log_path, log_queue).await }
+    });
 
     // It then starts multiple threads to put all the received data into the previously created queues
     tokio::spawn({
@@ -476,6 +485,7 @@ async fn handle_connection(
         let queues = queues.clone();
         let is_closed = is_closed.clone();
         let plugins = plugins.clone();
+        let log_queue = log_queue.clone();
         async move {
             parser(
                 queues,
@@ -484,6 +494,7 @@ async fn handle_connection(
                 Direction::Serverbound,
                 is_closed,
                 plugins,
+                log_queue,
             )
             .await
         }
@@ -498,6 +509,7 @@ async fn handle_connection(
                 Direction::Clientbound,
                 is_closed,
                 plugins,
+                log_queue,
             )
             .await
         }

@@ -1,7 +1,8 @@
 use crate::{parsable::Parsable, raw_packet::RawPacket};
 use crate::{SharedState, State};
+use serde::Serialize;
 
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
 pub struct Handshake {
     pub protocol_version: i32,
     pub server_address: String,

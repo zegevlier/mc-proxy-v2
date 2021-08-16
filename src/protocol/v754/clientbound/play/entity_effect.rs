@@ -2,7 +2,9 @@ use crate::{
     conf::Configuration, functions::fid_to_pid, packet::Packet, parsable::Parsable,
     raw_packet::RawPacket, Direction, SharedState,
 };
-#[derive(Clone)]
+use serde::Serialize;
+
+#[derive(Clone, Serialize)]
 pub struct EntityEffect {
     pub entity_id: i32,
     pub effect_id: u8,

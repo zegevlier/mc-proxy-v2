@@ -1,8 +1,9 @@
 use crate::utils;
 use crate::{parsable::Parsable, raw_packet::RawPacket};
 use hex::encode;
+use serde::Serialize;
 
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
 pub struct PluginRequest {
     message_id: i32,
     channel: String,

@@ -6,8 +6,9 @@ use crate::{
     types::Slot,
     Direction,
 };
+use serde::Serialize;
 
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
 pub struct WindowItems {
     window_id: u8,
     count: i16,

@@ -2,8 +2,9 @@ use crate::{
     conf::Configuration, packet::Packet, parsable::Parsable, raw_packet::RawPacket,
     utils::generate_message_packet, Direction, EventHandler, SharedState,
 };
+use serde::Serialize;
 
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
 pub struct OpenBook {
     hand: i32,
 }

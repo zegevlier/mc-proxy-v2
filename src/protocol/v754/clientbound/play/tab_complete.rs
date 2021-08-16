@@ -1,13 +1,14 @@
 use crate::{parsable::Parsable, raw_packet::RawPacket};
+use serde::Serialize;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize)]
 struct TabCompleteMatch {
     mat: String,
     has_tooltip: bool,
     tooltip: Option<String>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
 pub struct TabCompleteClientbound {
     id: i32,
     start: i32,

@@ -9,7 +9,7 @@ use crate::{
 };
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
 pub struct JoinGame {
     pub player_entity_id: i32,
     pub is_hardcore: bool,

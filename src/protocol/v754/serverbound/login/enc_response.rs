@@ -2,8 +2,9 @@ use crate::{parsable::Parsable, raw_packet::RawPacket};
 use hex::encode;
 
 use crate::utils;
+use serde::Serialize;
 
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
 pub struct EncResponse {
     shared_secret_length: i32,
     shared_secret: Vec<u8>,

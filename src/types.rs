@@ -1,7 +1,8 @@
 use crate::{cipher::Cipher, DataQueue};
+use serde::{Serialize, Serializer};
 use std::{fmt, sync::Arc};
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize)]
 pub enum State {
     Handshaking,
     Status,
@@ -73,7 +74,7 @@ impl Default for Ciphers {
     }
 }
 
-#[derive(Debug, PartialEq, Eq, Hash, Copy, Clone)]
+#[derive(Debug, PartialEq, Eq, Hash, Copy, Clone, Serialize)]
 pub enum Direction {
     Serverbound,
     Clientbound,
@@ -93,10 +94,36 @@ pub struct Queues {
     pub proxy_server: Arc<DataQueue>,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct Slot {
     pub present: bool,
     pub item_id: Option<i32>,
     pub item_count: Option<i8>,
     pub nbt: Option<nbt::Blob>,
+}
+
+#[derive(Debug, Clone)]
+pub struct Uuid {
+    value: u128,
+}
+
+impl Serialize for Uuid {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(&format!("{:x}", self.value))
+    }
+}
+
+impl fmt::Display for Uuid {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{:x}", self.value)
+    }
+}
+
+impl Uuid {
+    pub fn from(v: u128) -> Self {
+        Self { value: v }
+    }
 }

@@ -1,19 +1,20 @@
 use crate::{parsable::Parsable, raw_packet::RawPacket};
+use serde::Serialize;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize)]
 enum ScoreboardType {
     Integer,
     Hearts,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 enum ScoreboardMode {
     Create,
     Remove,
     UpdateDisplayText,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
 pub struct ScoreboardObjective {
     objective_name: String,
     mode: ScoreboardMode,

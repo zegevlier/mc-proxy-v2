@@ -1,6 +1,7 @@
 use crate::{parsable::Parsable, raw_packet::RawPacket};
+use serde::Serialize;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize)]
 enum ScoreboardPosition {
     List,
     Sidebar,
@@ -8,7 +9,7 @@ enum ScoreboardPosition {
     TeamSpecificSidebar,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
 pub struct DisplayScoreboard {
     position: ScoreboardPosition,
     name: String,

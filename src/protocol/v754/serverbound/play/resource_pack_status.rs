@@ -1,6 +1,7 @@
 use crate::{parsable::Parsable, raw_packet::RawPacket};
+use serde::Serialize;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize)]
 pub enum ResourcePackResponse {
     Success,
     Declined,
@@ -8,7 +9,7 @@ pub enum ResourcePackResponse {
     Accepted,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
 pub struct ResourcePackStatus {
     result: ResourcePackResponse,
 }

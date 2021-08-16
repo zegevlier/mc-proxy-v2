@@ -1,9 +1,10 @@
-use crate::{parsable::Parsable, raw_packet::RawPacket};
+use crate::{parsable::Parsable, raw_packet::RawPacket, types::Uuid};
+use serde::Serialize;
 
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
 pub struct SpawnLivingEntity {
     entity_id: i32,
-    object_uuid: u128,
+    object_uuid: Uuid,
     r#type: i32,
     x: f64,
     y: f64,
@@ -20,7 +21,7 @@ impl Parsable for SpawnLivingEntity {
     fn empty() -> Self {
         Self {
             entity_id: 0,
-            object_uuid: 0,
+            object_uuid: Uuid::from(0),
             r#type: 0,
             x: 0f64,
             y: 0f64,
@@ -52,7 +53,7 @@ impl Parsable for SpawnLivingEntity {
 
     fn get_printable(&self) -> String {
         format!(
-            "{} {:x} {} {} {} {} {} {} {} {} {} {}",
+            "{} {} {} {} {} {} {} {} {} {} {} {}",
             self.entity_id,
             self.object_uuid,
             self.r#type,

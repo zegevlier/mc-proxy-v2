@@ -20,8 +20,9 @@ use reqwest::Client;
 use rsa::{PaddingScheme, PublicKey, RsaPublicKey};
 use rsa_der::public_key_from_der;
 use rustc_serialize::hex::ToHex;
+use serde::Serialize;
 
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
 pub struct EncRequest {
     server_id: String,
     public_key_length: i32,

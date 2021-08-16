@@ -1,16 +1,18 @@
-use crate::{parsable::Parsable, raw_packet::RawPacket};
+use crate::{parsable::Parsable, raw_packet::RawPacket, types::Uuid};
+use serde::Serialize;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize)]
 enum FacingDirection {
     North,
     South,
     East,
     West,
 }
-#[derive(Clone)]
+
+#[derive(Clone, Serialize)]
 pub struct SpawnPainting {
     entity_id: i32,
-    object_uuid: u128,
+    object_uuid: Uuid,
     motive: i32,
     x: i64,
     y: i64,
@@ -22,7 +24,7 @@ impl Parsable for SpawnPainting {
     fn empty() -> Self {
         Self {
             entity_id: 0,
-            object_uuid: 0,
+            object_uuid: Uuid::from(0),
             motive: 0,
             x: 0,
             y: 0,
@@ -51,7 +53,7 @@ impl Parsable for SpawnPainting {
 
     fn get_printable(&self) -> String {
         format!(
-            "{} {:x} {} {} {} {} {:?}",
+            "{} {} {} {} {} {} {:?}",
             self.entity_id, self.object_uuid, self.motive, self.x, self.y, self.z, self.direction,
         )
     }

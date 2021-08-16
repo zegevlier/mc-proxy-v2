@@ -4,9 +4,10 @@ use crate::{
 };
 use async_trait::async_trait;
 use dyn_clone::DynClone;
+use erased_serde::serialize_trait_object;
 
 #[async_trait]
-pub trait Parsable: DynClone {
+pub trait Parsable: erased_serde::Serialize + DynClone {
     fn empty() -> Self
     where
         Self: Sized;
@@ -46,3 +47,4 @@ pub trait Parsable: DynClone {
 }
 
 dyn_clone::clone_trait_object!(Parsable);
+serialize_trait_object!(Parsable);

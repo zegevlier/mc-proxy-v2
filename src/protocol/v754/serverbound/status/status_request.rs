@@ -1,6 +1,7 @@
 use crate::{parsable::Parsable, raw_packet::RawPacket};
+use serde::Serialize;
 
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
 pub struct StatusRequest {}
 
 impl Parsable for StatusRequest {

@@ -19,7 +19,7 @@ struct AuthRequest {
     login_ip: String,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
 pub struct LoginStart {
     username: String,
 }

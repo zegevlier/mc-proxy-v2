@@ -1,6 +1,7 @@
 use crate::{parsable::Parsable, raw_packet::RawPacket};
+use serde::Serialize;
 
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
 pub struct UpdateScore {
     entity_name: String,
     action: i8,

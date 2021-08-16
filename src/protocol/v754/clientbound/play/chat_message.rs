@@ -1,20 +1,21 @@
 use crate::{
-    conf::Configuration, packet::Packet, parsable::Parsable, raw_packet::RawPacket, Direction,
-    EventHandler, SharedState,
+    conf::Configuration, packet::Packet, parsable::Parsable, raw_packet::RawPacket, types::Uuid,
+    Direction, EventHandler, SharedState,
 };
+use serde::Serialize;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize)]
 enum ChatMessagePosition {
     Chat,
     SystemMessage,
     GameInfo,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
 pub struct ChatMessageClientbound {
     data: String,
     position: ChatMessagePosition,
-    sender: u128,
+    sender: Uuid,
 }
 
 #[async_trait::async_trait]
@@ -23,7 +24,7 @@ impl Parsable for ChatMessageClientbound {
         Self {
             data: String::new(),
             position: ChatMessagePosition::Chat,
-            sender: 0,
+            sender: Uuid::from(0),
         }
     }
 
@@ -40,7 +41,7 @@ impl Parsable for ChatMessageClientbound {
     }
 
     fn get_printable(&self) -> String {
-        format!("{} {:?} {:x}", self.data, self.position, self.sender)
+        format!("{} {:?} {}", self.data, self.position, self.sender)
     }
 
     fn packet_editing(&self) -> bool {

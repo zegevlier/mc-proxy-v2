@@ -5,8 +5,9 @@ use crate::{
 };
 use crate::{packet::Packet, parsable::Parsable, raw_packet::RawPacket};
 use crate::{Direction, SharedState};
+use serde::Serialize;
 
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
 pub struct UpdateHealth {
     health: f32,
     food: i32,

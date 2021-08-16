@@ -1,6 +1,7 @@
 use crate::{parsable::Parsable, raw_packet::RawPacket};
+use serde::Serialize;
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 enum TeamMode {
     Create,
     Remove,
@@ -9,7 +10,7 @@ enum TeamMode {
     RemoveEntities,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
 pub struct Teams {
     team_name: String,
     mode: TeamMode,

@@ -6,8 +6,9 @@ use crate::{
     raw_packet::RawPacket,
     Direction, SharedState,
 };
+use serde::Serialize;
 
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
 pub struct PlayerPositionRotation {
     x: f64,
     feet_y: f64,

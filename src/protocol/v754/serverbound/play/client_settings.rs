@@ -1,19 +1,20 @@
 use crate::{parsable::Parsable, raw_packet::RawPacket};
+use serde::Serialize;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize)]
 enum ChatMode {
     Enabled,
     CommandsOnly,
     Hidden,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize)]
 enum Hand {
     Left,
     Right,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
 pub struct ClientSettings {
     locale: String,
     view_distance: i8,
