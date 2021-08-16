@@ -40,7 +40,7 @@ impl Parsable for Handshake {
     }
 
     fn update_status(&self, status: &mut SharedState) -> Result<(), ()> {
-        status.state = self.next_state.clone();
+        status.state = self.next_state;
         log::debug!("State updated to {:?}", status.state);
         Ok(())
     }

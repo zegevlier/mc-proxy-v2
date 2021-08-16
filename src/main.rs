@@ -309,7 +309,7 @@ async fn parser(
                                             .unwrap()
                                     };
                                 }
-                                shared_status.lock().set(shared_status_copy.clone());
+                                shared_status.lock().set(shared_status_copy);
                                 let mut locked_plugins = plugins.lock();
                                 // This should probably be optimized?
                                 locked_plugins.clear();
@@ -458,7 +458,7 @@ async fn handle_connection(
         access_token: config.player_auth_token,
         uuid: config.player_uuid,
         server_ip: address,
-        connection_id: connection_id.clone(),
+        connection_id,
         user_ip,
         ..SharedState::new()
     }));
@@ -471,7 +471,7 @@ async fn handle_connection(
 
     // Start a thread for logging the packets
     tokio::spawn({
-        let log_path = format!("./logs/{}.txt", &connection_id);
+        let log_path = format!("./logs/{}.txt", &shared_status.lock().connection_id);
         let log_queue = log_queue.clone();
         async move { logging::logger(&log_path, log_queue).await }
     });

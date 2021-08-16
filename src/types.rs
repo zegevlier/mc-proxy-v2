@@ -4,7 +4,7 @@ use std::{fmt, sync::Arc};
 
 pub type DataQueue = deadqueue::unlimited::Queue<Vec<u8>>;
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash, Serialize)]
 pub enum State {
     Handshaking,
     Status,
@@ -40,7 +40,7 @@ impl SharedState {
 
     pub fn set(&mut self, new_state: SharedState) {
         self.compress = new_state.compress;
-        self.state = new_state.state.clone();
+        self.state = new_state.state;
         self.secret_key = new_state.secret_key;
         self.access_token = new_state.access_token;
         self.uuid = new_state.uuid;
