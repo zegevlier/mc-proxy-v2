@@ -238,10 +238,10 @@ impl Parsable for JoinGame {
 
     async fn edit_packet(
         &self,
-        status: SharedState,
+        _status: &mut SharedState,
         plugins: &mut Vec<Box<dyn crate::plugin::EventHandler + Send>>,
         _config: &Configuration,
-    ) -> Result<(Vec<(Packet, Direction)>, SharedState), ()> {
+    ) -> Result<Vec<(Packet, Direction)>, ()> {
         let mut join_game_packet: JoinGame = self.to_owned();
 
         for plugin in plugins {
@@ -272,12 +272,9 @@ impl Parsable for JoinGame {
         raw_packet.encode_bool(join_game_packet.is_debug);
         raw_packet.encode_bool(join_game_packet.is_flat);
 
-        Ok((
-            vec![(
-                Packet::from(raw_packet, fid_to_pid(Fid::JoinGame)),
-                Direction::Clientbound,
-            )],
-            status,
-        ))
+        Ok(vec![(
+            Packet::from(raw_packet, fid_to_pid(Fid::JoinGame)),
+            Direction::Clientbound,
+        )])
     }
 }

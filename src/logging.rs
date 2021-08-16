@@ -1,5 +1,3 @@
-use crate::LogQueue;
-
 use std::{
     fs::File,
     io::{prelude::*, LineWriter},
@@ -8,6 +6,10 @@ use std::{
 };
 
 use serde::Serialize;
+
+use crate::parsable::Parsable;
+
+pub type LogQueue = deadqueue::unlimited::Queue<Box<dyn Parsable + Send + Sync>>;
 
 #[derive(Serialize)]
 struct LogShape<T>

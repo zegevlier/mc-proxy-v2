@@ -20,25 +20,17 @@ pub trait Parsable: erased_serde::Serialize + DynClone {
         Ok(())
     }
 
-    fn status_updating(&self) -> bool {
-        false
-    }
-
     fn packet_editing(&self) -> bool {
         false
     }
 
     async fn edit_packet(
         &self,
-        status: SharedState,
+        _status: &mut SharedState,
         _plugins: &mut Vec<Box<dyn EventHandler + Send>>,
         _config: &Configuration,
-    ) -> Result<(Vec<(Packet, Direction)>, SharedState), ()> {
-        Ok((Vec::new(), status))
-    }
-
-    fn post_send_updating(&self) -> bool {
-        false
+    ) -> Result<Vec<(Packet, Direction)>, ()> {
+        unimplemented!()
     }
 
     fn post_send_update(&self, _ciphers: &mut Ciphers, _status: &SharedState) -> Result<(), ()> {

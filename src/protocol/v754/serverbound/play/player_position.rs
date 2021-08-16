@@ -45,10 +45,10 @@ impl Parsable for PlayerPosition {
 
     async fn edit_packet(
         &self,
-        status: SharedState,
+        _status: &mut SharedState,
         plugins: &mut Vec<Box<dyn crate::plugin::EventHandler + Send>>,
         _config: &Configuration,
-    ) -> Result<(Vec<(Packet, Direction)>, SharedState), ()> {
+    ) -> Result<Vec<(Packet, Direction)>, ()> {
         let mut return_vec = Vec::new();
         for plugin in plugins {
             match plugin.on_move(self.x, self.feet_y, self.z) {
@@ -71,6 +71,6 @@ impl Parsable for PlayerPosition {
             ));
         }
 
-        Ok((return_vec, status))
+        Ok(return_vec)
     }
 }

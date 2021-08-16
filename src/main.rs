@@ -9,11 +9,6 @@ use std::{
     time::Duration,
 };
 
-use colored::*;
-use env_logger::Builder;
-use log::LevelFilter;
-use miniz_oxide::inflate::decompress_to_vec_zlib;
-use parking_lot::Mutex;
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
     net::{
@@ -22,34 +17,39 @@ use tokio::{
     },
     time::timeout,
 };
-use trust_dns_resolver::config::*;
-use trust_dns_resolver::TokioAsyncResolver;
 
-pub use plugin::EventHandler;
-use raw_packet::RawPacket;
-use types::Queues;
-pub use types::{Ciphers, Direction, SharedState, State};
+use colored::*;
+use env_logger::Builder;
+use log::LevelFilter;
+use miniz_oxide::inflate::decompress_to_vec_zlib;
+use parking_lot::Mutex;
+use trust_dns_resolver::{config::*, TokioAsyncResolver};
+
+use crate::{
+    logging::LogQueue,
+    parsable::Parsable,
+    raw_packet::RawPacket,
+    types::{DataQueue, Queues},
+};
+
+pub use crate::{
+    plugin::EventHandler,
+    types::{Ciphers, Direction, SharedState, State},
+};
 
 mod cipher;
 mod conf;
+mod logging;
+mod packet;
 mod parsable;
 mod plugin;
 mod plugins;
+mod protocol;
 mod raw_packet;
 mod types;
 mod utils;
 
-mod packet;
-mod protocol;
-
-mod logging;
-
-pub use protocol::v754 as functions;
-
-use crate::parsable::Parsable;
-
-pub type DataQueue = deadqueue::unlimited::Queue<Vec<u8>>;
-pub type LogQueue = deadqueue::unlimited::Queue<Box<dyn Parsable + Send + Sync>>;
+pub use crate::protocol::v754 as functions;
 
 const SHUTDOWN_CHECK_TIMEOUT: u64 = 100;
 
@@ -60,8 +60,10 @@ async fn receiver(
     socket_name: &str,
     is_closed: Arc<AtomicBool>,
 ) {
+    // This buffer is continually reused
     let mut buf = [0; 4096];
     loop {
+        // The timeout is there to close the socket and thread if the connection is closed
         let n = match timeout(
             Duration::from_millis(SHUTDOWN_CHECK_TIMEOUT),
             rx.read(&mut buf),
@@ -81,7 +83,6 @@ async fn receiver(
                 }
             },
             Err(_) => {
-                // log::warn!("Did not receive new data in 60 seconds, assuming shutdown");
                 if is_closed.load(Ordering::Relaxed) {
                     log::debug!("Stopping thread {} because socket was closed", socket_name);
                     return;
@@ -108,8 +109,6 @@ async fn sender(mut tx: OwnedWriteHalf, queue: Arc<DataQueue>, is_closed: Arc<At
                         } else {
                             continue;
                         }
-                        // log::warn!("Did not receive new data in 60 seconds, assuming shutdown");
-                        // return;
                     }
                 }),
             )
@@ -121,7 +120,6 @@ async fn sender(mut tx: OwnedWriteHalf, queue: Arc<DataQueue>, is_closed: Arc<At
     }
 }
 
-// TODO: Add comments to this function
 async fn parser(
     queues: Queues,
     shared_status: Arc<Mutex<SharedState>>,
@@ -132,9 +130,13 @@ async fn parser(
     log_queue: Arc<LogQueue>,
 ) -> Result<(), ()> {
     let mut unprocessed_data = RawPacket::new();
+    // functions is a list of all the packets that can be parsed
     let functions = functions::get_functions();
     let config = conf::get_config();
+
+    // If this loop ever breaks, the thread is closed.
     loop {
+        // This is the only place this function can hang, so it has a timeout to fix that.
         let new_data = match timeout(
             Duration::from_millis(SHUTDOWN_CHECK_TIMEOUT),
             match direction {
@@ -154,34 +156,41 @@ async fn parser(
             }
         };
 
-        let new_data = if direction == Direction::Clientbound {
-            ciphers.lock().sp_cipher.decrypt(new_data)
-        } else {
-            new_data
-        };
+        // Data from the server (clientbound) needs to be decrypted, that is done here.
+        unprocessed_data.push_vec({
+            if direction == Direction::Clientbound {
+                ciphers.lock().sp_cipher.decrypt(new_data)
+            } else {
+                new_data
+            }
+        });
 
-        unprocessed_data.push_vec(new_data);
+        // Sometimes multiple packets will be sent at once, so this keeps running until all the packets are dealth with.
         while unprocessed_data.len() > 0 {
-            let o_data = unprocessed_data.get_vec();
+            // A backup of the packet is made, so if the packet is incomplete it will be reset to that.
+            let original_data = unprocessed_data.get_vec();
 
             let packet_length = match unprocessed_data.decode_varint() {
-                Ok(packet_length) => packet_length,
+                Ok(packet_length) => packet_length as usize,
                 Err(_) => {
-                    unprocessed_data.set(o_data);
+                    unprocessed_data.set(original_data);
                     break;
                 }
             };
 
-            if (unprocessed_data.len() as i32) < packet_length {
-                unprocessed_data.set(o_data);
+            // If there is not enough data in the unprocessed_data variable, it will restore the backup and wait for more data.
+            if unprocessed_data.len() < packet_length {
+                unprocessed_data.set(original_data);
                 break;
             }
 
+            // This packet will always have the exact amount of data to contain the packet, no more no less.
             let mut packet =
-                raw_packet::RawPacket::from(unprocessed_data.read(packet_length as usize).unwrap());
+                raw_packet::RawPacket::from(unprocessed_data.read(packet_length).unwrap());
 
+            // A copy of the packet is made, this is to not have to recreate it if it doesn't get parsed or edited.
             let mut original_packet = RawPacket::new();
-            original_packet.encode_varint(packet_length);
+            original_packet.encode_varint(packet_length as i32);
             original_packet.push_vec(packet.get_vec());
 
             // Uncompress if needed
@@ -201,81 +210,80 @@ async fn parser(
 
             let packet_id = packet.decode_varint()?;
 
+            // Get the Fid of the current packet, if it doesn't get parsed set it to Unparsable
             let func_id =
                 match functions.get_name(&direction, &shared_status.lock().state, &packet_id) {
                     Some(func_name) => func_name,
                     None => &functions::Fid::Unparsable,
                 };
 
-            let mut to_direction = direction;
             let mut out_data = original_packet.get_vec();
+            let mut to_direction = direction;
 
-            let out_data = if func_id == &functions::Fid::Unparsable {
-                let out_data = if to_direction == Direction::Serverbound {
-                    // Compress data if needed, then encrypt
-                    ciphers.lock().ps_cipher.encrypt(out_data)
-                } else {
-                    out_data
-                };
-
-                out_data
+            if func_id == &functions::Fid::Unparsable {
+                // Encrypt the data if it wont get parsed. Othwerise, ecryption is done later.
+                if direction == Direction::Serverbound {
+                    out_data = ciphers.lock().ps_cipher.encrypt(out_data)
+                }
             } else {
+                // This arm runs if the data will get parsed.
+                // This gets the actual functions to parse the packet
                 let mut parsed_packet = match functions.get(func_id) {
                     Some(func) => func,
                     None => unreachable!(),
                 };
 
-                let success = match parsed_packet.parse_packet(packet) {
-                    Ok(_) => {
-                        let packet_info = parsed_packet.get_printable();
-                        if config.logging_packets.contains(&func_id.to_string())
-                            || config.logging_packets.contains(&"*".to_string())
-                        {
-                            log::info!(
-                                "{} [{}]{3:4$} {}",
-                                direction.to_string().yellow(),
-                                func_id.to_string().blue(),
-                                packet_info,
-                                "",
-                                config.print_buffer - func_id.to_string().len()
-                            );
-                        }
-                        true
+                // The success variable is used becase some code needs to be executed regardless of if the packet parsed correct
+                // otherwise the connection would fail as soon as one packet doesn't get parsed correctly.
+                let success = if parsed_packet.parse_packet(packet).is_ok() {
+                    if config.logging_packets.contains(&func_id.to_string())
+                        || config.logging_packets.contains(&"*".to_string())
+                    {
+                        // The 3:4$ makes sure there is a consistant amount of spaces between the ] and the start of the packet info
+                        log::info!(
+                            "{} [{}]{3:4$} {}",
+                            direction.to_string().yellow(),
+                            func_id.to_string().blue(),
+                            parsed_packet.get_printable(),
+                            "",
+                            config.print_buffer - func_id.to_string().len()
+                        );
                     }
-                    Err(_) => {
-                        log::error!("Could not parse packet!");
-                        false
-                    }
+                    // This is for the JSON logging
+                    log_queue.push(parsed_packet.clone());
+                    true
+                } else {
+                    log::error!("Could not parse packet!");
+                    false
                 };
 
                 if success {
-                    log_queue.push(parsed_packet.clone());
-                    if parsed_packet.status_updating() {
-                        parsed_packet
-                            .update_status(&mut shared_status.lock())
-                            .unwrap()
-                    }
+                    parsed_packet
+                        .update_status(&mut shared_status.lock())
+                        .unwrap();
+
+                    // Packet editing takes a lot more time, so it only gets executed if it is needed.
                     if parsed_packet.packet_editing() {
-                        let shared_status_c = shared_status.lock().clone();
+                        let mut shared_status_copy = shared_status.lock().clone();
                         let mut shared_plugins = plugins.lock().clone();
                         match parsed_packet
-                            .edit_packet(shared_status_c, &mut shared_plugins, &config)
+                            .edit_packet(&mut shared_status_copy, &mut shared_plugins, &config)
                             .await
                         {
-                            Ok((packet_vec, new_shared_status)) => {
+                            Ok(packet_vec) => {
                                 if packet_vec.len() > 1 {
-                                    for packet in packet_vec {
-                                        let out_d = if new_shared_status.compress == 0 {
-                                            packet.0.get_data_uncompressed().unwrap()
+                                    // When multiple packet get sent back
+                                    for (packet, new_direction) in packet_vec {
+                                        let out_d = if shared_status_copy.compress == 0 {
+                                            packet.get_data_uncompressed().unwrap()
                                         } else {
                                             packet
-                                                .0
                                                 .get_data_compressed(
-                                                    new_shared_status.compress as i32,
+                                                    shared_status_copy.compress as i32,
                                                 )
                                                 .unwrap()
                                         };
-                                        match packet.1 {
+                                        match new_direction {
                                             Direction::Serverbound => {
                                                 let out_d = ciphers.lock().ps_cipher.encrypt(out_d);
                                                 queues.proxy_server.push(out_d);
@@ -285,22 +293,25 @@ async fn parser(
                                             }
                                         }
                                     }
+                                    // Make sure the original data doesn't get sent anymore
                                     out_data.clear();
                                 } else if packet_vec.is_empty() {
+                                    // Send the original packet.
                                 } else {
-                                    let packet = &packet_vec[0];
-                                    to_direction = packet.1;
-                                    out_data = if new_shared_status.compress == 0 {
-                                        packet.0.get_data_uncompressed().unwrap()
+                                    // One packet
+                                    let (packet, new_direction) = &packet_vec[0];
+                                    to_direction = new_direction.to_owned();
+                                    out_data = if shared_status_copy.compress == 0 {
+                                        packet.get_data_uncompressed().unwrap()
                                     } else {
                                         packet
-                                            .0
-                                            .get_data_compressed(new_shared_status.compress as i32)
+                                            .get_data_compressed(shared_status_copy.compress as i32)
                                             .unwrap()
                                     };
                                 }
-                                shared_status.lock().set(new_shared_status.clone());
+                                shared_status.lock().set(shared_status_copy.clone());
                                 let mut locked_plugins = plugins.lock();
+                                // This should probably be optimized?
                                 locked_plugins.clear();
                                 locked_plugins.append(&mut shared_plugins);
                             }
@@ -314,15 +325,14 @@ async fn parser(
                 if to_direction == Direction::Serverbound {
                     out_data = ciphers.lock().ps_cipher.encrypt(out_data)
                 }
+
                 if success
-                    && parsed_packet.post_send_updating()
                     && parsed_packet
                         .post_send_update(&mut ciphers.lock(), &shared_status.lock())
                         .is_err()
                 {
                     panic!("Post send update failed, panicing.")
                 }
-                out_data
             };
 
             match to_direction {
@@ -340,44 +350,36 @@ async fn handle_connection(
     connection_id: String,
 ) -> Result<(), ()> {
     let config = conf::get_config();
-    let plugins = Arc::new(Mutex::new(plugins::get_plugins()));
 
-    // Make a new  a new queue for all the directions to the proxy
-    let queues = Queues {
-        client_proxy: Arc::new(DataQueue::new()),
-        proxy_client: Arc::new(DataQueue::new()),
-        server_proxy: Arc::new(DataQueue::new()),
-        proxy_server: Arc::new(DataQueue::new()),
-    };
-
-    // It then makes a shared state to share amongst all the threads
+    // This shared state stores all *mutable* data that is needed in more than one thread.
     let shared_ciphers: Arc<Mutex<Ciphers>> = Arc::new(Mutex::new(Ciphers::new()));
 
-    // This part reads the sent data into a buffer
+    // This part reads data from the client (the first packet) into a buffer
     let mut buffer = Vec::new();
     client_stream.read_buf(&mut buffer).await.unwrap();
 
-    // It then tries to parse the first data into a packet.
-    let mut first_data = RawPacket::from(buffer.clone());
-    let packet_length = first_data.decode_varint()?;
-    let mut raw_first_packet = RawPacket::from(first_data.read(packet_length as usize).unwrap());
+    // It tries to parse the first packet
+    let mut initial_data = RawPacket::from(buffer);
+    let packet_length = initial_data.decode_varint()?;
+    let mut raw_first_packet = RawPacket::from(initial_data.read(packet_length as usize).unwrap());
     let packet_id = raw_first_packet.decode_varint()?;
 
     // If the packet ID is not 0, it is not a valid minecraft packet.
     if packet_id != 0 {
         log::error!("Packet ID did not match handshaking packet, terminating connection...");
-        log::debug!("Packet: {:?}", buffer);
+        // It returns OK because the connection was dealth with successfully, not because everything went like it should have.
         return Ok(());
     };
 
-    // It then continues to parse the packet
+    // It then continues to parse the packet like it is a handshaking packet.
     let mut handshaking_packet = functions::serverbound::handshaking::Handshake::empty();
     if handshaking_packet.parse_packet(raw_first_packet).is_err() {
         log::error!("Invalid handshake packet! Closing connection...");
-        return Err(());
+        // Again, returning OK because everything was dealt with, no loose ends.
+        return Ok(());
     };
 
-    // It then gets the IP address of the actual server
+    // It then gets the IP address of the actual server to connect to, minus the domain suffix.
     let ip = handshaking_packet
         .server_address
         .strip_suffix(&config.domain_suffix)
@@ -385,53 +387,74 @@ async fn handle_connection(
         .to_string();
 
     // It looks if there is an SRV record present on the domain, if there is it uses that.
-    log::debug!("Resolving ip: {:?}", ip);
+    log::debug!("Resolving SRV recrod for ip: {}", ip);
     let resolver =
         TokioAsyncResolver::tokio(ResolverConfig::default(), ResolverOpts::default()).unwrap();
     let lookup = resolver.srv_lookup(format!("_minecraft._tcp.{}", ip)).await;
 
-    let address = if lookup.is_ok() {
-        let response = lookup.unwrap();
-        let record = response.iter().next().unwrap();
+    let address = match lookup {
+        Ok(response) => {
+            let record = response.iter().next().unwrap();
 
-        let ip = record.target().to_string().trim_matches('.').to_string();
-        log::debug!("ip: {:?}", ip);
-
-        record.target().to_string().trim_matches('.').to_string()
-    } else {
-        // Othwerise it just uses the IP directly
-        ip.to_owned()
+            let ip = record.target().to_string().trim_matches('.').to_string();
+            log::debug!("IP after SRV resolution: {}", ip);
+            ip
+        }
+        Err(_) => {
+            // Othwerise it just uses the initial IP
+            log::debug!("No different IP found after SRV resolution: {}", ip);
+            ip.to_owned()
+        }
     };
 
-    // It converts the data back to a packet, with all the stuff that's associated with that.
+    // It converts the updated data back to a packet.
     let mut new_packet = RawPacket::new();
-    new_packet.encode_varint(0);
+    new_packet.encode_varint(0); // Packet ID
     new_packet.encode_varint(handshaking_packet.protocol_version);
     new_packet.encode_string(address.clone());
-    new_packet.encode_ushort(25565);
+    new_packet.encode_ushort(25565); // Port
     new_packet.encode_varint(match handshaking_packet.next_state {
         State::Status => 1,
         State::Login => 2,
         _ => unreachable!(),
     });
+
     new_packet.prepend_length();
+
     // It adds the remaining data that was sent in the first packet, to make sure no data gets lost.
-    new_packet.push_vec(first_data.get_vec());
-    queues.client_proxy.push(new_packet.get_vec());
+    new_packet.push_vec(initial_data.get_vec());
 
     // It connects to the server, for now the port 25565 is hardcoded.
-    log::info!("Connecting to IP {}", address);
-    let server_stream = match TcpStream::connect(&format!("{}:{}", address, 25565)).await {
+    log::info!("Connecting to IP {}", &address);
+    let server_stream = match TcpStream::connect(&format!("{}:{}", &address, 25565)).await {
         Ok(stream) => stream,
         Err(err) => {
             log::error!("Could not connect to ip: {}", err);
+            // As always, returning OK because nothing unhandled happend.
             return Ok(());
         }
     };
     log::info!("Connected...");
 
+    // It then splits both TCP streams up in rx and tx
+    let (crx, ctx) = client_stream.into_split();
+    let (srx, stx) = server_stream.into_split();
+
+    // The queues (except for logging) are in this struct, this is to keep the arguments organized.
+    let queues = Queues {
+        client_proxy: Arc::new(DataQueue::new()),
+        proxy_client: Arc::new(DataQueue::new()),
+        server_proxy: Arc::new(DataQueue::new()),
+        proxy_server: Arc::new(DataQueue::new()),
+    };
+
+    // The data that might have been left over from the first packet is added to the queue.
+    // This is done here because there is no need to create the queues when the server might never connect.
+    queues.client_proxy.push(new_packet.get_vec());
+
     // It creates a shared status where all data that is mutable or request specific is kept.
     let shared_status: Arc<Mutex<SharedState>> = Arc::new(Mutex::new(SharedState {
+        // These values might not get used.
         access_token: config.player_auth_token,
         uuid: config.player_uuid,
         server_ip: address,
@@ -440,12 +463,11 @@ async fn handle_connection(
         ..SharedState::new()
     }));
 
+    // These variables are set here, this is after something could have gone wrong,
+    //    so they don't get created if they don't need to.
     let log_queue = Arc::new(LogQueue::new());
-
-    // It then splits both TCP streams up in rx and tx
-    let (crx, ctx) = client_stream.into_split();
-    let (srx, stx) = server_stream.into_split();
     let is_closed = Arc::new(AtomicBool::new(false));
+    let plugins = Arc::new(Mutex::new(plugins::get_plugins()));
 
     // Start a thread for logging the packets
     tokio::spawn({
@@ -454,7 +476,7 @@ async fn handle_connection(
         async move { logging::logger(&log_path, log_queue).await }
     });
 
-    // It then starts multiple threads to put all the received data into the previously created queues
+    // It then starts two threads to put all the received data from the RX channels into the queues
     tokio::spawn({
         let client_proxy_queue = queues.client_proxy.clone();
         let is_closed = is_closed.clone();
@@ -466,7 +488,7 @@ async fn handle_connection(
         async move { receiver(srx, server_proxy_queue, "server", is_closed).await }
     });
 
-    // And it also starts two to put the send data in the tx's
+    // And it also starts two to put the queued data into the TX channels
     tokio::spawn({
         let proxy_client_queue = queues.proxy_client.clone();
         let is_closed = is_closed.clone();
@@ -478,7 +500,8 @@ async fn handle_connection(
         async move { sender(stx, proxy_server_queue, is_closed).await }
     });
 
-    // It then starts a parser for both of the directions. It's a bit annoying to have to make so many clones but I can't think of a better way.
+    // It then starts two parsers, one for each of the directions.
+    // These parsers make sure the data is sent both ways and possibly edited and/or logged.
     tokio::spawn({
         let shared_status = shared_status.clone();
         let shared_ciphers = shared_ciphers.clone();
@@ -499,7 +522,6 @@ async fn handle_connection(
             .await
         }
     });
-
     tokio::spawn({
         async move {
             parser(
@@ -521,7 +543,6 @@ async fn handle_connection(
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
     // Load the logger, it has a fancy format with colours and it's spaced.
-    // TODO: Add file logging
     Builder::from_default_env()
         .format(|buf, record| {
             let formatted_level = buf.default_styled_level(record.level());
@@ -545,9 +566,12 @@ async fn main() -> std::io::Result<()> {
         // If this continues, a new client is connected.
         let next_connection_id = utils::generate_connection_id();
         let (socket, socket_addr) = mc_client_listener.accept().await?;
-        log::info!("Client connected, connection ID: {}...", next_connection_id);
         let ip = socket_addr.ip().to_string();
-        log::info!("IP: {}", ip);
+        log::info!(
+            "Client connected, connection ID: {} IP: {}",
+            next_connection_id,
+            ip
+        );
         // Start the client-handling thread (this will complete quickly)
         handle_connection(socket, ip, next_connection_id)
             .await

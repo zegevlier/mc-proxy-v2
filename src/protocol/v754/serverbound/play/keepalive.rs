@@ -30,24 +30,21 @@ impl Parsable for KeepAliveSb {
 
     async fn edit_packet(
         &self,
-        status: SharedState,
-        _: &mut Vec<Box<dyn EventHandler + Send>>,
+        _status: &mut SharedState,
+        _plugins: &mut Vec<Box<dyn EventHandler + Send>>,
         _config: &Configuration,
-    ) -> Result<(Vec<(Packet, Direction)>, SharedState), ()> {
-        return Ok((
-            vec![(
-                Packet::from(
-                    {
-                        let mut raw_packet = RawPacket::new();
-                        raw_packet.encode_ubyte(7);
-                        raw_packet.encode_float(7f32);
-                        raw_packet
-                    },
-                    0x1D,
-                ),
-                Direction::Clientbound,
-            )],
-            status,
-        ));
+    ) -> Result<Vec<(Packet, Direction)>, ()> {
+        return Ok(vec![(
+            Packet::from(
+                {
+                    let mut raw_packet = RawPacket::new();
+                    raw_packet.encode_ubyte(7);
+                    raw_packet.encode_float(7f32);
+                    raw_packet
+                },
+                0x1D,
+            ),
+            Direction::Clientbound,
+        )]);
     }
 }

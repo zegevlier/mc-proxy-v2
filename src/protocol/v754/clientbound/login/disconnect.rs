@@ -9,7 +9,9 @@ pub struct Disconnect {
 
 impl Parsable for Disconnect {
     fn empty() -> Self {
-        Self { reason: "".into() }
+        Self {
+            reason: String::new(),
+        }
     }
 
     fn parse_packet(&mut self, mut packet: RawPacket) -> Result<(), ()> {
@@ -21,13 +23,9 @@ impl Parsable for Disconnect {
         self.reason.to_string()
     }
 
-    fn status_updating(&self) -> bool {
-        true
-    }
-
     fn update_status(&self, status: &mut SharedState) -> Result<(), ()> {
         status.state = State::Handshaking;
-        log::debug!("State updated to {:?}", status.state);
+        log::debug!("State updated to Handshaking");
         Ok(())
     }
 }

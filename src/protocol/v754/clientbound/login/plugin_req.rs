@@ -14,7 +14,7 @@ impl Parsable for PluginRequest {
     fn empty() -> Self {
         Self {
             message_id: 0,
-            channel: "".into(),
+            channel: String::new(),
             data: Vec::new(),
         }
     }

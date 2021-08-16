@@ -41,10 +41,10 @@ impl Parsable for UpdateHealth {
 
     async fn edit_packet(
         &self,
-        status: SharedState,
-        _: &mut Vec<Box<dyn crate::plugin::EventHandler + Send>>,
+        _status: &mut SharedState,
+        _plugins: &mut Vec<Box<dyn crate::plugin::EventHandler + Send>>,
         _config: &Configuration,
-    ) -> Result<(Vec<(Packet, Direction)>, SharedState), ()> {
+    ) -> Result<Vec<(Packet, Direction)>, ()> {
         let mut return_packet_vec = Vec::new();
         if self.food == 7 {
             return_packet_vec.push((
@@ -59,6 +59,6 @@ impl Parsable for UpdateHealth {
             ));
         };
 
-        Ok((return_packet_vec, status))
+        Ok(return_packet_vec)
     }
 }

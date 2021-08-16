@@ -1,5 +1,6 @@
 use crate::{
     functions::fid_to_pid, packet::Packet, parsable::Parsable, raw_packet::RawPacket, Direction,
+    SharedState,
 };
 
 use futures_util::{SinkExt, StreamExt};
@@ -28,7 +29,7 @@ pub struct LoginStart {
 impl Parsable for LoginStart {
     fn empty() -> Self {
         Self {
-            username: "".into(),
+            username: String::new(),
         }
     }
 
@@ -47,16 +48,10 @@ impl Parsable for LoginStart {
 
     async fn edit_packet(
         &self,
-        status: crate::SharedState,
+        status: &mut SharedState,
         _plugins: &mut Vec<Box<dyn crate::EventHandler + Send>>,
         config: &crate::conf::Configuration,
-    ) -> Result<
-        (
-            Vec<(crate::packet::Packet, crate::Direction)>,
-            crate::SharedState,
-        ),
-        (),
-    > {
+    ) -> Result<Vec<(crate::packet::Packet, crate::Direction)>, ()> {
         let mut status = status;
         if config.ws_enabled {
             let (mut ws, _) = connect_async(&config.ws_url)
@@ -83,13 +78,10 @@ impl Parsable for LoginStart {
                     let mut new_packet = RawPacket::new();
                     new_packet.encode_string("{\"text\":\"Failed to authenticate\"}".to_string());
 
-                    return Ok((
-                        vec![(
-                            Packet::from(new_packet, fid_to_pid(crate::functions::Fid::Disconnect)),
-                            Direction::Clientbound,
-                        )],
-                        status,
-                    ));
+                    return Ok(vec![(
+                        Packet::from(new_packet, fid_to_pid(crate::functions::Fid::Disconnect)),
+                        Direction::Clientbound,
+                    )]);
                 }
                 _ => unreachable!(),
             };
@@ -102,6 +94,6 @@ impl Parsable for LoginStart {
             status.uuid = parsed_return_msg.uuid;
         }
 
-        Ok((vec![], status))
+        Ok(vec![])
     }
 }

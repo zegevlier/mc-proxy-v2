@@ -21,10 +21,6 @@ impl Parsable for SetCompression {
         format!("{}", self.threshold)
     }
 
-    fn status_updating(&self) -> bool {
-        true
-    }
-
     fn update_status(&self, status: &mut SharedState) -> Result<(), ()> {
         status.compress = self.threshold as u32;
         Ok(())

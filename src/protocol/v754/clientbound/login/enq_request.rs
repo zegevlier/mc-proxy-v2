@@ -48,7 +48,7 @@ fn two_complement(bytes: &mut Vec<u8>) {
 impl Parsable for EncRequest {
     fn empty() -> Self {
         Self {
-            server_id: "".into(),
+            server_id: String::new(),
             public_key_length: 0,
             public_key: Vec::new(),
             verify_token_length: 0,
@@ -82,11 +82,10 @@ impl Parsable for EncRequest {
 
     async fn edit_packet(
         &self,
-        status: SharedState,
-        _: &mut Vec<Box<dyn crate::plugin::EventHandler + Send>>,
+        status: &mut SharedState,
+        _plugins: &mut Vec<Box<dyn crate::plugin::EventHandler + Send>>,
         _config: &Configuration,
-    ) -> Result<(Vec<(Packet, Direction)>, SharedState), ()> {
-        let mut status = status;
+    ) -> Result<Vec<(Packet, Direction)>, ()> {
         status.secret_key = rand::thread_rng().gen::<[u8; 16]>();
 
         let mut hash = Sha1::new();
@@ -161,7 +160,7 @@ impl Parsable for EncRequest {
                 .unwrap(),
         );
         let response_packet = Packet::from(unformatted_packet, fid_to_pid(Fid::EncResponse));
-        log::debug!("Sending serverbound enc response");
+        log::debug!("Sending serverbound encryption response");
 
         // Send to proxy_server packet:
         // Shared key length (varint)
@@ -169,11 +168,10 @@ impl Parsable for EncRequest {
         // Verify token length (varint)
         // Verify token encrypted with public key (byte array)
 
-        Ok((vec![(response_packet, Direction::Serverbound)], status))
-    }
+        // Reset the access_token to not keep it in memory needlessly.
+        status.access_token = String::new();
 
-    fn post_send_updating(&self) -> bool {
-        true
+        Ok(vec![(response_packet, Direction::Serverbound)])
     }
 
     fn post_send_update(&self, ciphers: &mut Ciphers, status: &SharedState) -> Result<(), ()> {

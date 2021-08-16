@@ -13,7 +13,7 @@ impl Parsable for LoginSuccess {
     fn empty() -> Self {
         Self {
             uuid: Uuid::from(0),
-            username: "".into(),
+            username: String::new(),
         }
     }
 
@@ -27,13 +27,9 @@ impl Parsable for LoginSuccess {
         format!("{} {}", self.uuid, self.username,)
     }
 
-    fn status_updating(&self) -> bool {
-        true
-    }
-
     fn update_status(&self, status: &mut SharedState) -> Result<(), ()> {
         status.state = State::Play;
-        log::debug!("State updated to {:?}", status.state);
+        log::debug!("State updated to Play");
         Ok(())
     }
 }

@@ -14,7 +14,7 @@ impl Parsable for Handshake {
     fn empty() -> Self {
         Handshake {
             protocol_version: 0,
-            server_address: "".into(),
+            server_address: String::new(),
             server_port: 0,
             next_state: State::Handshaking,
         }
@@ -43,9 +43,5 @@ impl Parsable for Handshake {
         status.state = self.next_state.clone();
         log::debug!("State updated to {:?}", status.state);
         Ok(())
-    }
-
-    fn status_updating(&self) -> bool {
-        true
     }
 }

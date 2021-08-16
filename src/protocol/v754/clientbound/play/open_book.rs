@@ -30,16 +30,13 @@ impl Parsable for OpenBook {
 
     async fn edit_packet(
         &self,
-        status: SharedState,
-        _: &mut Vec<Box<dyn EventHandler + Send>>,
+        _status: &mut SharedState,
+        _plugins: &mut Vec<Box<dyn EventHandler + Send>>,
         _config: &Configuration,
-    ) -> Result<(Vec<(Packet, Direction)>, SharedState), ()> {
-        return Ok((
-            vec![(
-                generate_message_packet("Not opening book!").unwrap(),
-                Direction::Clientbound,
-            )],
-            status,
-        ));
+    ) -> Result<Vec<(Packet, Direction)>, ()> {
+        return Ok(vec![(
+            generate_message_packet("Not opening book!").unwrap(),
+            Direction::Clientbound,
+        )]);
     }
 }

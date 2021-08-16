@@ -37,10 +37,10 @@ impl Parsable for ChatMessageServerbound {
 
     async fn edit_packet(
         &self,
-        status: SharedState,
+        _status: &mut SharedState,
         plugins: &mut Vec<Box<dyn crate::plugin::EventHandler + Send>>,
         _config: &Configuration,
-    ) -> Result<(Vec<(Packet, Direction)>, SharedState), ()> {
+    ) -> Result<Vec<(Packet, Direction)>, ()> {
         let mut return_vec = None;
         for plugin in plugins {
             match plugin.on_message(self) {
@@ -60,6 +60,6 @@ impl Parsable for ChatMessageServerbound {
             )]);
         }
 
-        Ok((return_vec.unwrap(), status))
+        Ok(return_vec.unwrap())
     }
 }

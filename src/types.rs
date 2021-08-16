@@ -1,6 +1,8 @@
-use crate::{cipher::Cipher, DataQueue};
+use crate::cipher::Cipher;
 use serde::{Serialize, Serializer};
 use std::{fmt, sync::Arc};
+
+pub type DataQueue = deadqueue::unlimited::Queue<Vec<u8>>;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize)]
 pub enum State {

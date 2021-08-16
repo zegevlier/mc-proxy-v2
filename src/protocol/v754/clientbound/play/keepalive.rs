@@ -34,36 +34,33 @@ impl Parsable for KeepAliveCb {
 
     async fn edit_packet(
         &self,
-        status: SharedState,
-        _: &mut Vec<Box<dyn EventHandler + Send>>,
+        _status: &mut SharedState,
+        _plugins: &mut Vec<Box<dyn EventHandler + Send>>,
         _config: &Configuration,
-    ) -> Result<(Vec<(Packet, Direction)>, SharedState), ()> {
-        return Ok((
-            vec![
-                (
-                    Packet::from(
-                        {
-                            let mut raw_packet = RawPacket::new();
-                            raw_packet.encode_long(self.keep_alive_id);
-                            raw_packet
-                        },
-                        fid_to_pid(Fid::KeepAliveSb),
-                    ),
-                    Direction::Serverbound,
+    ) -> Result<Vec<(Packet, Direction)>, ()> {
+        return Ok(vec![
+            (
+                Packet::from(
+                    {
+                        let mut raw_packet = RawPacket::new();
+                        raw_packet.encode_long(self.keep_alive_id);
+                        raw_packet
+                    },
+                    fid_to_pid(Fid::KeepAliveSb),
                 ),
-                (
-                    Packet::from(
-                        {
-                            let mut raw_packet = RawPacket::new();
-                            raw_packet.encode_long(self.keep_alive_id);
-                            raw_packet
-                        },
-                        fid_to_pid(Fid::KeepAliveCb),
-                    ),
-                    Direction::Clientbound,
+                Direction::Serverbound,
+            ),
+            (
+                Packet::from(
+                    {
+                        let mut raw_packet = RawPacket::new();
+                        raw_packet.encode_long(self.keep_alive_id);
+                        raw_packet
+                    },
+                    fid_to_pid(Fid::KeepAliveCb),
                 ),
-            ],
-            status,
-        ));
+                Direction::Clientbound,
+            ),
+        ]);
     }
 }

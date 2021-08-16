@@ -9,7 +9,7 @@ pub struct StatusResponse {
 impl Parsable for StatusResponse {
     fn empty() -> Self {
         Self {
-            json_response: "".into(),
+            json_response: String::new(),
         }
     }
 

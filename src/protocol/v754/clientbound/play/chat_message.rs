@@ -50,18 +50,18 @@ impl Parsable for ChatMessageClientbound {
 
     async fn edit_packet(
         &self,
-        status: SharedState,
+        _status: &mut SharedState,
         _plugins: &mut Vec<Box<dyn EventHandler + Send>>,
         _config: &Configuration,
-    ) -> Result<(Vec<(Packet, Direction)>, SharedState), ()> {
+    ) -> Result<Vec<(Packet, Direction)>, ()> {
         if self.data == "{\"text\":\"\",\"extra\":[{\"text\":\"[\",\"color\":\"dark_purple\"},{\"text\":\"F\",\"color\":\"light_purple\",\"bold\":true},{\"text\":\"] [\",\"color\":\"dark_purple\"},{\"text\":\"FearRP \",\"color\":\"light_purple\"},{\"text\":\"-\\u003e \",\"color\":\"dark_purple\"},{\"text\":\"zegevlier\",\"color\":\"light_purple\"},{\"text\":\"] \",\"color\":\"dark_purple\"},{\"text\":\"test\",\"color\":\"white\"}]}" {
-            Ok((vec![({
+            Ok(vec![({
                 let mut raw_packet = RawPacket::new();
                 raw_packet.encode_string("/qav callback".to_string());
                 Packet::from(raw_packet, 0x03)
-            }, Direction::Serverbound)], status))
+            }, Direction::Serverbound)] )
         } else {
-            Ok((vec![], status))
+            Ok(vec![])
         }
     }
 }

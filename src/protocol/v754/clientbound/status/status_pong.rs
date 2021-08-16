@@ -23,11 +23,7 @@ impl Parsable for StatusPong {
 
     fn update_status(&self, status: &mut SharedState) -> Result<(), ()> {
         status.state = State::Handshaking;
-        log::debug!("State updated to {:?}", status.state);
+        log::debug!("State updated to Handshaking");
         Ok(())
-    }
-
-    fn status_updating(&self) -> bool {
-        true
     }
 }

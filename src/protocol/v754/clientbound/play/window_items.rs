@@ -4,7 +4,7 @@ use crate::{
     parsable::Parsable,
     raw_packet::RawPacket,
     types::Slot,
-    Direction,
+    Direction, SharedState,
 };
 use serde::Serialize;
 
@@ -46,16 +46,10 @@ impl Parsable for WindowItems {
 
     async fn edit_packet(
         &self,
-        status: crate::SharedState,
+        _status: &mut SharedState,
         _plugins: &mut Vec<Box<dyn crate::EventHandler + Send>>,
         _config: &crate::conf::Configuration,
-    ) -> Result<
-        (
-            Vec<(crate::packet::Packet, crate::Direction)>,
-            crate::SharedState,
-        ),
-        (),
-    > {
+    ) -> Result<Vec<(crate::packet::Packet, crate::Direction)>, ()> {
         let mut raw_packet = RawPacket::new();
         let new_slot_data = self.slot_data.clone();
         raw_packet.encode_ubyte(self.window_id);
@@ -63,12 +57,9 @@ impl Parsable for WindowItems {
         for slot in new_slot_data.iter() {
             raw_packet.encode_slot(slot.to_owned());
         }
-        Ok((
-            vec![(
-                Packet::from(raw_packet, fid_to_pid(Fid::WindowItems)),
-                Direction::Clientbound,
-            )],
-            status,
-        ))
+        Ok(vec![(
+            Packet::from(raw_packet, fid_to_pid(Fid::WindowItems)),
+            Direction::Clientbound,
+        )])
     }
 }
