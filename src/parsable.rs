@@ -14,6 +14,10 @@ pub trait Parsable: erased_serde::Serialize + DynClone {
 
     fn parse_packet(&mut self, packet: RawPacket) -> Result<(), ()>;
 
+    fn encode_packet(&self) -> Result<Packet, ()> {
+        unimplemented!()
+    }
+
     fn get_printable(&self) -> String;
 
     #[allow(unused_variables)]
