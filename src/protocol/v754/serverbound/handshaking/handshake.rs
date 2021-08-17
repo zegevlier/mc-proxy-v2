@@ -1,3 +1,5 @@
+use crate::functions::fid_to_pid;
+use crate::packet::Packet;
 use crate::{parsable::Parsable, raw_packet::RawPacket};
 use crate::{SharedState, State};
 use serde::Serialize;
@@ -30,6 +32,22 @@ impl Parsable for Handshake {
             _ => return Err(()),
         };
         Ok(())
+    }
+
+    fn encode_packet(&self) -> Result<Packet, ()> {
+        let mut raw_packet = RawPacket::new();
+        raw_packet.encode_varint(self.protocol_version);
+        raw_packet.encode_string(self.server_address.to_owned());
+        raw_packet.encode_ushort(self.server_port);
+        raw_packet.encode_varint(match self.next_state {
+            State::Status => 1,
+            State::Login => 2,
+            _ => return Err(()),
+        });
+        Ok(Packet::from(
+            raw_packet,
+            fid_to_pid(crate::functions::Fid::Handshake),
+        ))
     }
 
     fn get_printable(&self) -> String {

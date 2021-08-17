@@ -408,21 +408,17 @@ async fn handle_connection(
     };
 
     // It converts the updated data back to a packet.
-    let mut new_packet = RawPacket::new();
-    new_packet.encode_varint(0); // Packet ID
-    new_packet.encode_varint(handshaking_packet.protocol_version);
-    new_packet.encode_string(address.clone());
-    new_packet.encode_ushort(25565); // Port
-    new_packet.encode_varint(match handshaking_packet.next_state {
-        State::Status => 1,
-        State::Login => 2,
-        _ => unreachable!(),
-    });
-
-    new_packet.prepend_length();
+    let mut new_packet = functions::serverbound::handshaking::Handshake {
+        protocol_version: handshaking_packet.protocol_version,
+        server_address: address.clone(),
+        server_port: 25565,
+        next_state: handshaking_packet.next_state,
+    }
+    .encode_packet()?
+    .get_data_uncompressed()?;
 
     // It adds the remaining data that was sent in the first packet, to make sure no data gets lost.
-    new_packet.push_vec(initial_data.get_vec());
+    new_packet.append(&mut initial_data.get_vec());
 
     // It connects to the server, for now the port 25565 is hardcoded.
     log::info!("Connecting to IP {}", &address);
@@ -450,7 +446,7 @@ async fn handle_connection(
 
     // The data that might have been left over from the first packet is added to the queue.
     // This is done here because there is no need to create the queues when the server might never connect.
-    queues.client_proxy.push(new_packet.get_vec());
+    queues.client_proxy.push(new_packet);
 
     // It creates a shared status where all data that is mutable or request specific is kept.
     let shared_status: Arc<Mutex<SharedState>> = Arc::new(Mutex::new(SharedState {
