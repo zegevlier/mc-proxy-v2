@@ -16,7 +16,8 @@ pub trait Parsable: erased_serde::Serialize + DynClone {
 
     fn get_printable(&self) -> String;
 
-    fn update_status(&self, _status: &mut SharedState) -> Result<(), ()> {
+    #[allow(unused_variables)]
+    fn update_status(&self, status: &mut SharedState) -> Result<(), ()> {
         Ok(())
     }
 
@@ -24,16 +25,18 @@ pub trait Parsable: erased_serde::Serialize + DynClone {
         false
     }
 
+    #[allow(unused_variables)]
     async fn edit_packet(
         &self,
-        _status: &mut SharedState,
-        _plugins: &mut Vec<Box<dyn EventHandler + Send>>,
-        _config: &Configuration,
+        status: &mut SharedState,
+        plugins: &mut Vec<Box<dyn EventHandler + Send>>,
+        config: &Configuration,
     ) -> Result<Vec<(Packet, Direction)>, ()> {
         unimplemented!()
     }
 
-    fn post_send_update(&self, _ciphers: &mut Ciphers, _status: &SharedState) -> Result<(), ()> {
+    #[allow(unused_variables)]
+    fn post_send_update(&self, ciphers: &mut Ciphers, status: &SharedState) -> Result<(), ()> {
         Ok(())
     }
 }
