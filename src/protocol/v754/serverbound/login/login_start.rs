@@ -146,6 +146,7 @@ impl Parsable for LoginStart {
                 // )]);
             }
         } else {
+            // Just send the packet to the client
             Ok(vec![])
         }
     }
