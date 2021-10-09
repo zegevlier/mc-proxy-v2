@@ -361,7 +361,10 @@ async fn handle_connection(
     // It tries to parse the first packet
     let mut initial_data = RawPacket::from(buffer);
     let packet_length = initial_data.decode_varint()?;
-    let mut raw_first_packet = RawPacket::from(initial_data.read(packet_length as usize).unwrap());
+    let mut raw_first_packet = RawPacket::from(match initial_data.read(packet_length as usize) {
+        Ok(p) => p,
+        Err(_) => return Ok(()),
+    });
     let packet_id = raw_first_packet.decode_varint()?;
 
     // If the packet ID is not 0, it is not a valid minecraft packet.

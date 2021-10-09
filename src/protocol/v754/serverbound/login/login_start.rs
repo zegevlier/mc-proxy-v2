@@ -9,8 +9,9 @@ use tokio_tungstenite::{connect_async, tungstenite::protocol::Message};
 
 #[derive(Serialize, Deserialize, Debug)]
 struct AuthResponse {
-    authentication_token: String,
-    uuid: String,
+    authentication_token: Option<String>,
+    uuid: Option<String>,
+    allowed: bool,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -54,9 +55,20 @@ impl Parsable for LoginStart {
     ) -> Result<Vec<(crate::packet::Packet, crate::Direction)>, ()> {
         let mut status = status;
         if config.ws_enabled {
-            let (mut ws, _) = connect_async(&config.ws_url)
-                .await
-                .expect("Failed to connect to websocket.");
+            let (mut ws, _) = match connect_async(&config.ws_url).await {
+                Ok(ws) => ws,
+                Err(_) => {
+                    let mut new_packet = RawPacket::new();
+                    new_packet.encode_string(
+                        "{\"text\":\"WS server down! Please report this!\"}".to_string(),
+                    );
+
+                    return Ok(vec![(
+                        Packet::from(new_packet, fid_to_pid(crate::functions::Fid::Disconnect)),
+                        Direction::Clientbound,
+                    )]);
+                }
+            };
 
             ws.send(Message::text(format!("${}", config.ws_secret)))
                 .await
@@ -71,6 +83,7 @@ impl Parsable for LoginStart {
             ))
             .await
             .unwrap();
+
             match ws.next().await.unwrap().unwrap().to_text().unwrap() {
                 "OK" => {}
                 "ERR: NOT_FOUND" => {
@@ -86,14 +99,47 @@ impl Parsable for LoginStart {
                 _ => unreachable!(),
             };
 
-            let return_msg = ws.next().await.unwrap().unwrap();
+            let return_msg = match ws.next().await.unwrap() {
+                Ok(msg) => msg,
+                Err(_) => {
+                    let mut new_packet = RawPacket::new();
+                    new_packet.encode_string("{\"text\":\"Failed to authenticate\"}".to_string());
+
+                    return Ok(vec![(
+                        Packet::from(new_packet, fid_to_pid(crate::functions::Fid::Disconnect)),
+                        Direction::Clientbound,
+                    )]);
+                }
+            };
+
             let parsed_return_msg: AuthResponse =
                 serde_json::from_str(return_msg.to_text().unwrap()).unwrap();
 
-            status.access_token = parsed_return_msg.authentication_token;
-            status.uuid = parsed_return_msg.uuid;
-        }
+            if parsed_return_msg.allowed {
+                status.access_token = parsed_return_msg.authentication_token.unwrap();
+                status.uuid = parsed_return_msg.uuid.unwrap();
+                return Ok(vec![]);
+            } else {
+                log::error!("Connection disallowed!");
+                let mut new_packet = RawPacket::new();
+                new_packet.encode_string("{\"text\":\"Failed to authenticate\"}".to_string());
 
-        Ok(vec![])
+                return Ok(vec![(
+                    Packet::from(new_packet, fid_to_pid(crate::functions::Fid::Disconnect)),
+                    Direction::Clientbound,
+                )]);
+                // let mut new_packet = RawPacket::new();
+                // new_packet.encode_string(
+                //     "{\"text\":\"Connection was disallowed! How dare you...\"}".to_string(),
+                // );
+
+                // return Ok(vec![(
+                //     Packet::from(new_packet, fid_to_pid(crate::functions::Fid::Disconnect)),
+                //     Direction::Clientbound,
+                // )]);
+            }
+        } else {
+            Ok(vec![])
+        }
     }
 }
