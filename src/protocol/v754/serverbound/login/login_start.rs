@@ -25,6 +25,12 @@ pub struct LoginStart {
     username: String,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+pub struct AuthSubResponse {
+    success: bool,
+    message: String,
+}
+
 #[async_trait::async_trait]
 impl Parsable for LoginStart {
     fn empty() -> Self {
@@ -54,13 +60,10 @@ impl Parsable for LoginStart {
     ) -> Result<Vec<(crate::packet::Packet, crate::Direction)>, ()> {
         let mut status = status;
         if config.ws_enabled {
-            let (mut ws, _) = connect_async(&config.ws_url)
+            let (mut ws, _) = connect_async(format!("{}/{}", &config.ws_url, config.ws_secret))
                 .await
                 .expect("Failed to connect to websocket.");
 
-            ws.send(Message::text(format!("${}", config.ws_secret)))
-                .await
-                .unwrap();
             ws.send(Message::text(
                 &serde_json::to_string(&AuthRequest {
                     login_ip: status.user_ip.clone(),
@@ -71,9 +74,15 @@ impl Parsable for LoginStart {
             ))
             .await
             .unwrap();
-            match ws.next().await.unwrap().unwrap().to_text().unwrap() {
-                "OK" => {}
-                "ERR: NOT_FOUND" => {
+
+            match serde_json::from_str::<AuthSubResponse>(
+                ws.next().await.unwrap().unwrap().to_text().unwrap(),
+            )
+            .unwrap()
+            .success
+            {
+                true => {}
+                false => {
                     log::error!("No client found listening for that name");
                     let mut new_packet = RawPacket::new();
                     new_packet.encode_string("{\"text\":\"Failed to authenticate\"}".to_string());
@@ -83,7 +92,6 @@ impl Parsable for LoginStart {
                         Direction::Clientbound,
                     )]);
                 }
-                _ => unreachable!(),
             };
 
             let return_msg = ws.next().await.unwrap().unwrap();
