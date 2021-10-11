@@ -15,3 +15,9 @@ pub use keepalive::*;
 
 mod resource_pack_status;
 pub use resource_pack_status::*;
+
+mod steer_vehicle;
+pub use steer_vehicle::*;
+
+mod entity_action;
+pub use entity_action::*;

@@ -57,3 +57,6 @@ pub use open_book::*;
 
 mod window_items;
 pub use window_items::*;
+
+mod set_passenger;
+pub use set_passenger::*;

@@ -55,6 +55,10 @@ pub enum Fid {
     JoinGame,
     OpenBook,
     WindowItems,
+    SetPassenger,
+    SteerVehicle,
+    EntityAction,
+    // PlayerPositionAndLook,
 }
 
 pub fn fid_to_pid(fid: Fid) -> i32 {
@@ -99,6 +103,10 @@ pub fn fid_to_pid(fid: Fid) -> i32 {
         Fid::JoinGame => 0x24,
         Fid::OpenBook => 0x2C,
         Fid::WindowItems => 0x13,
+        Fid::SetPassenger => 0x4B,
+        Fid::SteerVehicle => 0x1D,
+        Fid::EntityAction => 0x1C,
+        // Fid::PlayerPositionAndLook => 0x38,
     }
 }
 
@@ -150,6 +158,8 @@ impl Functions {
                     Fid::JoinGame,
                     Fid::OpenBook,
                     Fid::WindowItems,
+                    // Fid::PlayerPositionAndLook,
+                    Fid::SetPassenger
                 ],
             },
             Direction::Serverbound => hashmap! {
@@ -172,6 +182,8 @@ impl Functions {
                     Fid::PlayerPositionRotation,
                     Fid::KeepAliveSb,
                     Fid::ResourcePackStatus,
+                    Fid::SteerVehicle,
+                    Fid::EntityAction,
                 ],
             }
         };
@@ -344,6 +356,13 @@ pub fn get_functions() -> Functions {
 
     functions.add(Fid::JoinGame, Box::new(cb::play::JoinGame::empty()));
 
+    // functions.add(
+    //     Fid::PlayerPositionAndLook,
+    //     Box::new(cb::play::PlayerPositionAndLook::empty()),
+    // );
+
+    functions.add(Fid::SetPassenger, Box::new(cb::play::SetPassenger::empty()));
+
     // Serverbound
     functions.add(
         Fid::ChatMessageServerbound,
@@ -371,6 +390,10 @@ pub fn get_functions() -> Functions {
     );
 
     functions.add(Fid::KeepAliveSb, Box::new(sb::play::KeepAliveSb::empty()));
+
+    functions.add(Fid::SteerVehicle, Box::new(sb::play::SteerVehicle::empty()));
+
+    functions.add(Fid::EntityAction, Box::new(sb::play::EntityAction::empty()));
 
     functions
 }
