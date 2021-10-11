@@ -40,8 +40,9 @@ logging_packets:
 
 player_uuid: f54c74dd3362422c80f9da71eca4aaa3
 player_auth_token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI2NTY0M2EzYmU0NGY4NmVlODE4OWEwMDllMGNlYTNmYSIsInlnZ3QiOiI0ZTc0MDk5NWI2MzQ0YmM5OTAxOGY4MjI1YmQ0ZjU0NSIsInNwciI6ImY1NGM3NGRkMzM2MjQyMmM4MGY5ZGE3MWVjYTRhYWEzIiwiaXNzIjoiWWdnZHJhc2lsLUF1dGgiLCJleHAiOjE2MDY5Mjg0MzAsImlhdCI6MTYwNjc1NTYzMH0.flsDw7RhPNJWAq2UEWO8tKKyPOn8V5NhzCXa9UxmvNc
-ws_url: ws://127.0.0.1:8080
+# ws_url: ws://127.0.0.1:8787/ws/server
+ws_url: "ws://maion-ws.zegevlier.workers.dev/ws/server"
 ws_secret: "M8dHIQk16j80UOJGSoC1"
 ws_enabled: true
 listen_address: "127.0.0.55:25565"
-domain_suffix: .proxy
+domain_suffix: .maion.cc

@@ -383,11 +383,20 @@ async fn handle_connection(
     };
 
     // It then gets the IP address of the actual server to connect to, minus the domain suffix.
-    let ip = handshaking_packet
+    let ip = match handshaking_packet
         .server_address
         .strip_suffix(&config.domain_suffix)
-        .unwrap()
-        .to_string();
+    {
+        Some(m) => m,
+        None => {
+            log::error!(
+                "Could not strip suffix of {}",
+                handshaking_packet.server_address
+            );
+            return Ok(());
+        }
+    }
+    .to_string();
 
     // It looks if there is an SRV record present on the domain, if there is it uses that.
     log::debug!("Resolving SRV recrod for ip: {}", ip);
