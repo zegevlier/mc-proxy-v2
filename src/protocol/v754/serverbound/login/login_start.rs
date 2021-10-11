@@ -29,7 +29,7 @@ pub struct LoginStart {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct AuthSubResponse {
     success: bool,
-    message: String,
+    message: Option<String>,
 }
 
 #[async_trait::async_trait]
@@ -61,20 +61,22 @@ impl Parsable for LoginStart {
     ) -> Result<Vec<(crate::packet::Packet, crate::Direction)>, ()> {
         let mut status = status;
         if config.ws_enabled {
-            let (mut ws, _) = match connect_async(&config.ws_url).await {
-                Ok(ws) => ws,
-                Err(_) => {
-                    let mut new_packet = RawPacket::new();
-                    new_packet.encode_string(
-                        "{\"text\":\"WS server down! Please report this!\"}".to_string(),
-                    );
+            let (mut ws, _) =
+                match connect_async(format!("{}/{}", &config.ws_url, &config.ws_secret)).await {
+                    Ok(ws) => ws,
+                    Err(e) => {
+                        log::error!("{}", e);
+                        let mut new_packet = RawPacket::new();
+                        new_packet.encode_string(
+                            "{\"text\":\"WS server down! Please report this!\"}".to_string(),
+                        );
 
-                    return Ok(vec![(
-                        Packet::from(new_packet, fid_to_pid(crate::functions::Fid::Disconnect)),
-                        Direction::Clientbound,
-                    )]);
-                }
-            };
+                        return Ok(vec![(
+                            Packet::from(new_packet, fid_to_pid(crate::functions::Fid::Disconnect)),
+                            Direction::Clientbound,
+                        )]);
+                    }
+                };
 
             ws.send(Message::text(
                 &serde_json::to_string(&AuthRequest {
@@ -88,7 +90,7 @@ impl Parsable for LoginStart {
             .unwrap();
 
             match serde_json::from_str::<AuthSubResponse>(
-                ws.next().await.unwrap().unwrap().to_text().unwrap(),
+                dbg! {ws.next().await.unwrap().unwrap().to_text().unwrap()},
             )
             .unwrap()
             .success
@@ -121,6 +123,8 @@ impl Parsable for LoginStart {
 
             let parsed_return_msg: AuthResponse =
                 serde_json::from_str(return_msg.to_text().unwrap()).unwrap();
+
+            println!("{:?}", parsed_return_msg);
 
             if parsed_return_msg.allowed {
                 status.access_token = parsed_return_msg.authentication_token.unwrap();
