@@ -77,6 +77,7 @@ impl Parsable for LoginStart {
                         )]);
                     }
                 };
+            log::info!("Connection to websocket established.");
 
             ws.send(Message::text(
                 &serde_json::to_string(&AuthRequest {
