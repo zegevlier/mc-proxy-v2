@@ -79,16 +79,25 @@ impl Parsable for LoginStart {
                 };
             log::info!("Connection to websocket established.");
 
+            let message_data = serde_json::to_string(&AuthRequest {
+                login_ip: status.user_ip.clone(),
+                mc_server_address: status.server_ip.clone(),
+                username: self.username.clone(),
+            })
+            .unwrap();
+
+            log::debug!("{}", message_data);
+
+            tokio::time::sleep_until(tokio::time::Instant::now() + std::time::Duration::from_millis(100)).await;
             ws.send(Message::text(
-                &serde_json::to_string(&AuthRequest {
-                    login_ip: status.user_ip.clone(),
-                    mc_server_address: status.server_ip.clone(),
-                    username: self.username.clone(),
-                })
-                .unwrap(),
+                &message_data,
             ))
             .await
             .unwrap();
+
+            // ws.send(Message::text("Hi!")).await.unwrap();
+
+            log::info!("Sent authentication request!");
 
             match serde_json::from_str::<AuthSubResponse>(
                 dbg! {ws.next().await.unwrap().unwrap().to_text().unwrap()},
