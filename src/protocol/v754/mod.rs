@@ -59,6 +59,8 @@ pub enum Fid {
     SteerVehicle,
     EntityAction,
     // PlayerPositionAndLook,
+    ChunkData,
+    PlayerBlockPlace,
 }
 
 pub fn fid_to_pid(fid: Fid) -> i32 {
@@ -106,6 +108,8 @@ pub fn fid_to_pid(fid: Fid) -> i32 {
         Fid::SetPassenger => 0x4B,
         Fid::SteerVehicle => 0x1D,
         Fid::EntityAction => 0x1C,
+        Fid::ChunkData => 0x20,
+        Fid::PlayerBlockPlace => 0x2E,
         // Fid::PlayerPositionAndLook => 0x38,
     }
 }
@@ -159,7 +163,8 @@ impl Functions {
                     Fid::OpenBook,
                     Fid::WindowItems,
                     // Fid::PlayerPositionAndLook,
-                    Fid::SetPassenger
+                    Fid::SetPassenger,
+                    Fid::ChunkData,
                 ],
             },
             Direction::Serverbound => hashmap! {
@@ -184,6 +189,7 @@ impl Functions {
                     Fid::ResourcePackStatus,
                     Fid::SteerVehicle,
                     Fid::EntityAction,
+                    Fid::PlayerBlockPlace,
                 ],
             }
         };
@@ -363,6 +369,8 @@ pub fn get_functions() -> Functions {
 
     functions.add(Fid::SetPassenger, Box::new(cb::play::SetPassenger::empty()));
 
+    functions.add(Fid::ChunkData, Box::new(cb::play::ChunkData::empty()));
+
     // Serverbound
     functions.add(
         Fid::ChatMessageServerbound,
@@ -387,6 +395,11 @@ pub fn get_functions() -> Functions {
     functions.add(
         Fid::ResourcePackStatus,
         Box::new(sb::play::ResourcePackStatus::empty()),
+    );
+
+    functions.add(
+        Fid::PlayerBlockPlace,
+        Box::new(sb::play::PlayerBlockPlace::empty()),
     );
 
     functions.add(Fid::KeepAliveSb, Box::new(sb::play::KeepAliveSb::empty()));

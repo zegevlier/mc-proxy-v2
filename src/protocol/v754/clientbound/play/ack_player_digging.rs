@@ -10,9 +10,9 @@ enum DiggingStatus {
 
 #[derive(Clone, Serialize)]
 pub struct AckPlayerDigging {
-    x: i64,
-    y: i64,
-    z: i64,
+    x: i32,
+    y: i32,
+    z: i32,
     block: i32,
     status: DiggingStatus,
     successful: bool,

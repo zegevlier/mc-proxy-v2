@@ -1,5 +1,10 @@
 use crate::{
-    conf::Configuration, packet::Packet, parsable::Parsable, raw_packet::RawPacket, types::Uuid,
+    conf::Configuration,
+    functions::{fid_to_pid, Fid},
+    packet::Packet,
+    parsable::Parsable,
+    raw_packet::RawPacket,
+    types::Uuid,
     Direction, EventHandler, SharedState,
 };
 use serde::Serialize;
@@ -54,12 +59,37 @@ impl Parsable for ChatMessageClientbound {
         _plugins: &mut Vec<Box<dyn EventHandler + Send>>,
         _config: &Configuration,
     ) -> Result<Vec<(Packet, Direction)>, ()> {
-        if self.data == "{\"text\":\"\",\"extra\":[{\"text\":\"[\",\"color\":\"dark_purple\"},{\"text\":\"F\",\"color\":\"light_purple\",\"bold\":true},{\"text\":\"] [\",\"color\":\"dark_purple\"},{\"text\":\"FearRP \",\"color\":\"light_purple\"},{\"text\":\"-\\u003e \",\"color\":\"dark_purple\"},{\"text\":\"zegevlier\",\"color\":\"light_purple\"},{\"text\":\"] \",\"color\":\"dark_purple\"},{\"text\":\"test\",\"color\":\"white\"}]}" {
-            Ok(vec![({
-                let mut raw_packet = RawPacket::new();
-                raw_packet.encode_string("/qav callback".to_string());
-                Packet::from(raw_packet, 0x03)
-            }, Direction::Serverbound)] )
+        if self.data == "{\"text\":\"§d[§5§lF§d][§5FearRP §d-\\u003e §5zegevlier§d]§r now\"}"
+        {
+            Ok(vec![(
+                {
+                    let mut raw_packet = RawPacket::new();
+                    raw_packet.encode_string("/buy".to_string());
+                    Packet::from(raw_packet, 0x03)
+                },
+                Direction::Serverbound,
+            )])
+        } else if self.data == "{\"text\":\"§d[§5§lF§d][§5FearRP §d-\\u003e §5zegevlier§d]§r hi\"}"
+        {
+            Ok(vec![(
+                {
+                    Packet::from(
+                        {
+                            let mut raw_packet = RawPacket::new();
+                            raw_packet.encode_varint(0);
+                            raw_packet.encode_position((1820, 50, 1068));
+                            raw_packet.encode_varint(4);
+                            raw_packet.encode_float(0.0);
+                            raw_packet.encode_float(0.5898391);
+                            raw_packet.encode_float(0.51513046);
+                            raw_packet.encode_bool(false);
+                            raw_packet
+                        },
+                        fid_to_pid(Fid::PlayerBlockPlace),
+                    )
+                },
+                Direction::Serverbound,
+            )])
         } else {
             Ok(vec![])
         }

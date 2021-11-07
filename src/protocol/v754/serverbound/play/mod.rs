@@ -21,3 +21,6 @@ pub use steer_vehicle::*;
 
 mod entity_action;
 pub use entity_action::*;
+
+mod player_block_placement;
+pub use player_block_placement::*;

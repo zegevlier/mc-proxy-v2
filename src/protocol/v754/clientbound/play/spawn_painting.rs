@@ -14,9 +14,9 @@ pub struct SpawnPainting {
     entity_id: i32,
     object_uuid: Uuid,
     motive: i32,
-    x: i64,
-    y: i64,
-    z: i64,
+    x: i32,
+    y: i32,
+    z: i32,
     direction: FacingDirection,
 }
 
