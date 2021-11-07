@@ -121,6 +121,10 @@ impl RawPacket {
         Ok(i64::from_be_bytes(self.read(8)?.try_into().unwrap()))
     }
 
+    pub fn decode_ulong(&mut self) -> Result<u64, ()> {
+        Ok(u64::from_le_bytes(self.read(8)?.try_into().unwrap()))
+    }
+
     pub fn decode_float(&mut self) -> Result<f32, ()> {
         Ok(f32::from_be_bytes(self.read(4)?.try_into().unwrap()))
     }
@@ -226,23 +230,13 @@ impl RawPacket {
         Ok(nbt::Blob::from_reader(self).unwrap())
     }
 
-    pub fn decode_position(&mut self) -> Result<(i64, i64, i64), ()> {
+    pub fn decode_position(&mut self) -> Result<(i32, i32, i32), ()> {
         let val = i64::from_be_bytes(self.read(8)?.try_into().unwrap());
-        let mut x = val >> 38;
-        let mut y = val & 0xFFF;
-        let mut z = val << 26 >> 38;
-
-        if x >= 2 ^ 25 {
-            x -= 2 ^ 26
-        }
-        if y >= 2 ^ 11 {
-            y -= 2 ^ 12
-        }
-        if z >= 2 ^ 25 {
-            z -= 2 ^ 26
-        }
-
-        Ok((x, y, z))
+        Ok((
+            (val >> 38) as i32,
+            (val & 0xFFF) as i32,
+            (val << 26 >> 38) as i32,
+        ))
     }
 
     pub fn decode_angle(&mut self) -> Result<u8, ()> {
@@ -283,6 +277,10 @@ impl RawPacket {
     }
 
     pub fn encode_long(&mut self, value: i64) {
+        self.push_slice(&value.to_be_bytes());
+    }
+
+    pub fn encode_ulong(&mut self, value: u64) {
         self.push_slice(&value.to_be_bytes());
     }
 
@@ -366,8 +364,11 @@ impl RawPacket {
         data.to_writer(self).unwrap()
     }
 
-    pub fn encode_position(&mut self) {
-        todo!()
+    pub fn encode_position(&mut self, data: (i32, i32, i32)) {
+        let result = ((data.0 as u64 & 0x3FFFFFF) << 38)
+            | ((data.2 as u64 & 0x3FFFFFF) << 12)
+            | (data.1 as u64 & 0xFFF);
+        self.push_slice(&result.to_be_bytes())
     }
 
     pub fn encode_angle(&mut self) {
