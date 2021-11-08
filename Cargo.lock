@@ -140,19 +140,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
-name = "chrono"
-version = "0.4.19"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "670ad68c9088c2a963aaa298cb369688cf3f9465ce5e2d4ca10e6e0098a1ce73"
-dependencies = [
- "libc",
- "num-integer",
- "num-traits 0.2.14",
- "time",
- "winapi",
-]
-
-[[package]]
 name = "cipher"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -910,9 +897,9 @@ dependencies = [
 
 [[package]]
 name = "num-bigint"
-version = "0.2.6"
+version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "090c7f9998ee0ff65aa5b723e4009f7b217707f1fb5ea551329cc4d6231fb304"
+checksum = "f93ab6289c7b344a8a9f60f88d80aa20032336fe78da341afc91c8a2341fc75f"
 dependencies = [
  "autocfg 1.0.1",
  "num-integer",
@@ -1169,6 +1156,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a1d01941d82fa2ab50be1e79e6714289dd7cde78eba4c074bc5a4374f650dfe0"
 
 [[package]]
+name = "quickcheck"
+version = "1.0.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "588f6378e4dd99458b60ec275b4477add41ce4fa9f64dcba6f15adccb19b50d6"
+dependencies = [
+ "rand 0.8.4",
+]
+
+[[package]]
 name = "quote"
 version = "1.0.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1366,9 +1362,9 @@ dependencies = [
 
 [[package]]
 name = "rsa-der"
-version = "0.2.1"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1170c86c683547fa781a0e39e6e281ebaedd4515be8a806022984f427ea3d44d"
+checksum = "a19473b2de3164677ff38e4309c42448ba8d0fe5ad5fa722e7d278f991859aa6"
 dependencies = [
  "simple_asn1",
 ]
@@ -1383,7 +1379,7 @@ dependencies = [
  "libc",
  "rand 0.3.23",
  "rustc-serialize",
- "time",
+ "time 0.1.43",
 ]
 
 [[package]]
@@ -1519,13 +1515,14 @@ dependencies = [
 
 [[package]]
 name = "simple_asn1"
-version = "0.4.1"
+version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "692ca13de57ce0613a363c8c2f1de925adebc81b04c923ac60c5488bb44abe4b"
+checksum = "69e392b68e8f171f7399608dabaa3a099525b7daca0fd1c8690bda08eb110355"
 dependencies = [
- "chrono",
  "num-bigint",
  "num-traits 0.2.14",
+ "thiserror",
+ "time 0.3.4",
 ]
 
 [[package]]
@@ -1663,6 +1660,24 @@ dependencies = [
  "libc",
  "winapi",
 ]
+
+[[package]]
+name = "time"
+version = "0.3.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "99beeb0daeac2bd1e86ac2c21caddecb244b39a093594da1a661ec2060c7aedd"
+dependencies = [
+ "itoa",
+ "libc",
+ "quickcheck",
+ "time-macros",
+]
+
+[[package]]
+name = "time-macros"
+version = "0.2.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "25eb0ca3468fc0acc11828786797f6ef9aa1555e4a211a60d64cc8e4d1be47d6"
 
 [[package]]
 name = "tinyvec"
