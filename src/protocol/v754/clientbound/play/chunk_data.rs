@@ -1,6 +1,6 @@
 use crate::{
     conf::Configuration, functions::fid_to_pid, packet::Packet, parsable::Parsable,
-    raw_packet::RawPacket, utils::make_string_fixed_length, Direction, EventHandler, SharedState,
+    raw_packet::RawPacket, Direction, EventHandler, SharedState,
 };
 use serde::Serialize;
 
@@ -40,14 +40,6 @@ pub struct ChunkData {
     data: Vec<Option<ChunkSection>>,
     number_of_block_entities: i32,
     block_entities: Vec<nbt::Blob>,
-}
-
-fn loop_amount(bits_per_block: u8) -> u8 {
-    return match bits_per_block {
-        4 => 16,
-        5 => 12,
-        _ => bits_per_block,
-    } + 1;
 }
 
 #[async_trait::async_trait]
@@ -123,8 +115,8 @@ impl Parsable for ChunkData {
                         log::info!("{}", long);
                     }
                     // for i in 0..(64.0_f64 / chunk_section.bits_per_block as f64).ceil() as u8 {
-                    for i in 0..loop_amount(chunk_section.bits_per_block) {
-                        // for i in 0..(64 / chunk_section.bits_per_block) {
+                    // for i in 0..loop_amount(chunk_section.bits_per_block) {
+                    for i in 0..(64 / chunk_section.bits_per_block) {
                         let mask = ((1 << chunk_section.bits_per_block) - 1)
                             << (i * chunk_section.bits_per_block);
                         let masked_long = (long & mask) >> (i * chunk_section.bits_per_block);
@@ -183,7 +175,7 @@ impl Parsable for ChunkData {
     }
 
     fn packet_editing(&self) -> bool {
-        false
+        true
     }
 
     async fn edit_packet(
@@ -233,7 +225,8 @@ impl Parsable for ChunkData {
                 for _ in 0..long_count {
                     let mut long = 0;
                     // for i in 0..(64.0 / chunk_data.bits_per_block as f64).ceil() as u8 {
-                    for i in 0..loop_amount(chunk_data.bits_per_block) {
+                    // for i in 0..loop_amount(chunk_data.bits_per_block) {
+                    for i in 0..64 / chunk_data.bits_per_block {
                         let block_id = match chunk_data.block_ids_array.get(block_idx) {
                             Some(block_id) => *block_id,
                             None => 0,

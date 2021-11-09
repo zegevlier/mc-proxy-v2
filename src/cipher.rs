@@ -1,5 +1,6 @@
 // use aes::cipher::AsyncStreamCipher;
 use aes::Aes128;
+mod cfb8;
 use cfb8::{
     cipher::{AsyncStreamCipher, NewCipher},
     Cfb8,
