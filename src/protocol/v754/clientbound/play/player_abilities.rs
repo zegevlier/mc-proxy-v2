@@ -13,7 +13,7 @@ pub struct PlayerAbilities {
 
 #[async_trait::async_trait]
 impl Parsable for PlayerAbilities {
-    fn empty() -> Self {
+    fn default() -> Self {
         Self {
             flags: 0,
             flying_speed: 0f32,

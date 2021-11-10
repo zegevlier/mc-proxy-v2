@@ -8,7 +8,7 @@ pub struct ResourcePackSend {
 }
 
 impl Parsable for ResourcePackSend {
-    fn empty() -> Self {
+    fn default() -> Self {
         Self {
             url: String::new(),
             hash: String::new(),

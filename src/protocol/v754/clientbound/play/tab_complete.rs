@@ -18,7 +18,7 @@ pub struct TabCompleteClientbound {
 }
 
 impl Parsable for TabCompleteClientbound {
-    fn empty() -> Self {
+    fn default() -> Self {
         Self {
             id: 0,
             start: 0,

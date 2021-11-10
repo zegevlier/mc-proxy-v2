@@ -10,7 +10,7 @@ pub struct UpdateScore {
 }
 
 impl Parsable for UpdateScore {
-    fn empty() -> Self {
+    fn default() -> Self {
         Self {
             entity_name: String::new(),
             action: 0,

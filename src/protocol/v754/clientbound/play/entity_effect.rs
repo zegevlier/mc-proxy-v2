@@ -15,7 +15,7 @@ pub struct EntityEffect {
 
 #[async_trait::async_trait]
 impl Parsable for EntityEffect {
-    fn empty() -> Self {
+    fn default() -> Self {
         Self {
             entity_id: 0,
             effect_id: 0,

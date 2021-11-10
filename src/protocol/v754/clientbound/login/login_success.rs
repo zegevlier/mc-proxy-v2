@@ -10,7 +10,7 @@ pub struct LoginSuccess {
 }
 
 impl Parsable for LoginSuccess {
-    fn empty() -> Self {
+    fn default() -> Self {
         Self {
             uuid: Uuid::from(0),
             username: String::new(),

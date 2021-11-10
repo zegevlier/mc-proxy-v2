@@ -20,7 +20,7 @@ pub struct PlayerPositionRotation {
 
 #[async_trait::async_trait]
 impl Parsable for PlayerPositionRotation {
-    fn empty() -> Self {
+    fn default() -> Self {
         Self {
             x: 0f64,
             feet_y: 0f64,

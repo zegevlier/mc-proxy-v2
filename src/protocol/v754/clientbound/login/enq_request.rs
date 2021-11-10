@@ -46,7 +46,7 @@ fn two_complement(bytes: &mut Vec<u8>) {
 
 #[async_trait::async_trait]
 impl Parsable for EncRequest {
-    fn empty() -> Self {
+    fn default() -> Self {
         Self {
             server_id: String::new(),
             public_key_length: 0,

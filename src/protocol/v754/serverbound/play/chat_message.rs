@@ -16,7 +16,7 @@ pub struct ChatMessageServerbound {
 
 #[async_trait::async_trait]
 impl Parsable for ChatMessageServerbound {
-    fn empty() -> Self {
+    fn default() -> Self {
         Self {
             message: String::new(),
         }

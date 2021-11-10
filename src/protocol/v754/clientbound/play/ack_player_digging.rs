@@ -19,7 +19,7 @@ pub struct AckPlayerDigging {
 }
 
 impl Parsable for AckPlayerDigging {
-    fn empty() -> Self {
+    fn default() -> Self {
         Self {
             x: 0,
             y: 0,

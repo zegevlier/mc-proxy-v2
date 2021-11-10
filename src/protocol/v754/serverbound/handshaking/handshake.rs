@@ -13,7 +13,7 @@ pub struct Handshake {
 }
 
 impl Parsable for Handshake {
-    fn empty() -> Self {
+    fn default() -> Self {
         Handshake {
             protocol_version: 0,
             server_address: String::new(),

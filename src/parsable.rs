@@ -8,7 +8,7 @@ use erased_serde::serialize_trait_object;
 
 #[async_trait]
 pub trait Parsable: erased_serde::Serialize + DynClone {
-    fn empty() -> Self
+    fn default() -> Self
     where
         Self: Sized;
 

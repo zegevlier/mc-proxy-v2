@@ -16,7 +16,7 @@ pub struct UpdateHealth {
 
 #[async_trait::async_trait]
 impl Parsable for UpdateHealth {
-    fn empty() -> Self {
+    fn default() -> Self {
         Self {
             health: 0f32,
             food: 0,

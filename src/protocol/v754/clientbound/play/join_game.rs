@@ -144,7 +144,7 @@ pub struct ParticleOptions {
 
 #[async_trait::async_trait]
 impl Parsable for JoinGame {
-    fn empty() -> Self {
+    fn default() -> Self {
         Self {
             player_entity_id: 0,
             is_hardcore: false,

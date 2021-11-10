@@ -31,7 +31,7 @@ pub struct PlayerBlockPlace {
 
 #[async_trait::async_trait]
 impl Parsable for PlayerBlockPlace {
-    fn empty() -> Self {
+    fn default() -> Self {
         Self {
             hand: 0,
             location: (0, 0, 0),

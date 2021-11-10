@@ -18,7 +18,7 @@ pub struct PlayerPosition {
 
 #[async_trait::async_trait]
 impl Parsable for PlayerPosition {
-    fn empty() -> Self {
+    fn default() -> Self {
         Self {
             x: 0f64,
             feet_y: 0f64,

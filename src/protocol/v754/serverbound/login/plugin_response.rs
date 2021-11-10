@@ -12,7 +12,7 @@ pub struct PluginResponse {
 }
 
 impl Parsable for PluginResponse {
-    fn empty() -> Self {
+    fn default() -> Self {
         Self {
             message_id: 0,
             success: false,

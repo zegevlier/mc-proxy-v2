@@ -15,7 +15,7 @@ pub struct SteerVehicle {
 
 #[async_trait::async_trait]
 impl Parsable for SteerVehicle {
-    fn empty() -> Self {
+    fn default() -> Self {
         Self {
             sideways: 0.0,
             forward: 0.0,

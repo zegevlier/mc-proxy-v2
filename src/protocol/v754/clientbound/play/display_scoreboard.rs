@@ -16,7 +16,7 @@ pub struct DisplayScoreboard {
 }
 
 impl Parsable for DisplayScoreboard {
-    fn empty() -> Self {
+    fn default() -> Self {
         Self {
             name: String::new(),
             position: ScoreboardPosition::List,

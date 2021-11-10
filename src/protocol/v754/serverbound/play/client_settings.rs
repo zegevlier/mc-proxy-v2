@@ -26,7 +26,7 @@ pub struct ClientSettings {
 
 #[async_trait::async_trait]
 impl Parsable for ClientSettings {
-    fn empty() -> Self {
+    fn default() -> Self {
         Self {
             locale: String::new(),
             view_distance: 0,

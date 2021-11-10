@@ -21,7 +21,7 @@ pub struct SpawnPainting {
 }
 
 impl Parsable for SpawnPainting {
-    fn empty() -> Self {
+    fn default() -> Self {
         Self {
             entity_id: 0,
             object_uuid: Uuid::from(0),

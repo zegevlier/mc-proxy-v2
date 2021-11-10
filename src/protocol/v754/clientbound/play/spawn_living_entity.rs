@@ -18,7 +18,7 @@ pub struct SpawnLivingEntity {
 }
 
 impl Parsable for SpawnLivingEntity {
-    fn empty() -> Self {
+    fn default() -> Self {
         Self {
             entity_id: 0,
             object_uuid: Uuid::from(0),

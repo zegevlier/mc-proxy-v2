@@ -14,7 +14,7 @@ pub struct EncResponse {
 
 #[async_trait::async_trait]
 impl Parsable for EncResponse {
-    fn empty() -> Self {
+    fn default() -> Self {
         Self {
             shared_secret_length: 0,
             shared_secret: Vec::new(),

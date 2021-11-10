@@ -11,7 +11,7 @@ pub struct PluginRequest {
 }
 
 impl Parsable for PluginRequest {
-    fn empty() -> Self {
+    fn default() -> Self {
         Self {
             message_id: 0,
             channel: String::new(),

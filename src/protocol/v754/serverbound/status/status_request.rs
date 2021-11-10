@@ -5,7 +5,7 @@ use serde::Serialize;
 pub struct StatusRequest {}
 
 impl Parsable for StatusRequest {
-    fn empty() -> Self {
+    fn default() -> Self {
         Self {}
     }
 

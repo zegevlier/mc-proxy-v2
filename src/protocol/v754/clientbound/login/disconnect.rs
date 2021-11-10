@@ -8,7 +8,7 @@ pub struct Disconnect {
 }
 
 impl Parsable for Disconnect {
-    fn empty() -> Self {
+    fn default() -> Self {
         Self {
             reason: String::new(),
         }

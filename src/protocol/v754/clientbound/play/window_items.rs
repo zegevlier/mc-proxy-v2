@@ -17,7 +17,7 @@ pub struct WindowItems {
 
 #[async_trait::async_trait]
 impl Parsable for WindowItems {
-    fn empty() -> Self {
+    fn default() -> Self {
         Self {
             window_id: 0,
             count: 0,

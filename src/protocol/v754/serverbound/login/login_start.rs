@@ -34,7 +34,7 @@ pub struct AuthSubResponse {
 
 #[async_trait::async_trait]
 impl Parsable for LoginStart {
-    fn empty() -> Self {
+    fn default() -> Self {
         Self {
             username: String::new(),
         }
@@ -88,12 +88,11 @@ impl Parsable for LoginStart {
 
             log::debug!("{}", message_data);
 
-            tokio::time::sleep_until(tokio::time::Instant::now() + std::time::Duration::from_millis(100)).await;
-            ws.send(Message::text(
-                &message_data,
-            ))
-            .await
-            .unwrap();
+            tokio::time::sleep_until(
+                tokio::time::Instant::now() + std::time::Duration::from_millis(100),
+            )
+            .await;
+            ws.send(Message::text(&message_data)).await.unwrap();
 
             // ws.send(Message::text("Hi!")).await.unwrap();
 

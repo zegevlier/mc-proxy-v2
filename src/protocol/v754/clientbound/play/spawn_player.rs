@@ -13,7 +13,7 @@ pub struct SpawnPlayer {
 }
 
 impl Parsable for SpawnPlayer {
-    fn empty() -> Self {
+    fn default() -> Self {
         Self {
             entity_id: 0,
             player_uuid: Uuid::from(0),

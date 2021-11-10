@@ -375,7 +375,7 @@ async fn handle_connection(
     };
 
     // It then continues to parse the packet like it is a handshaking packet.
-    let mut handshaking_packet = functions::serverbound::handshaking::Handshake::empty();
+    let mut handshaking_packet = functions::serverbound::handshaking::Handshake::default();
     if handshaking_packet.parse_packet(raw_first_packet).is_err() {
         log::error!("Invalid handshake packet! Closing connection...");
         // Again, returning OK because everything was dealt with, no loose ends.

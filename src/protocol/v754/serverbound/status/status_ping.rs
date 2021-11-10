@@ -7,7 +7,7 @@ pub struct StatusPing {
 }
 
 impl Parsable for StatusPing {
-    fn empty() -> Self {
+    fn default() -> Self {
         Self { payload: 0 }
     }
 

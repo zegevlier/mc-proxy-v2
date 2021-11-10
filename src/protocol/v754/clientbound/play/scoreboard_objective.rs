@@ -23,7 +23,7 @@ pub struct ScoreboardObjective {
 }
 
 impl Parsable for ScoreboardObjective {
-    fn empty() -> Self {
+    fn default() -> Self {
         Self {
             objective_name: String::new(),
             mode: ScoreboardMode::Create,

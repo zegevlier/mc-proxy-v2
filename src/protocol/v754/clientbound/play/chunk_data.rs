@@ -44,7 +44,7 @@ pub struct ChunkData {
 
 #[async_trait::async_trait]
 impl Parsable for ChunkData {
-    fn empty() -> Self {
+    fn default() -> Self {
         Self {
             chunk_x: 0,
             chunk_z: 0,
@@ -253,7 +253,7 @@ impl Parsable for ChunkData {
             raw_packet.encode_nbt(block_entity);
         }
 
-        let mut should_be_same = Self::empty();
+        let mut should_be_same = Self::default();
 
         should_be_same.parse_packet(raw_packet.clone()).unwrap();
 

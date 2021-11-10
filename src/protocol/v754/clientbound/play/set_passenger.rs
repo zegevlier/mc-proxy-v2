@@ -16,7 +16,7 @@ pub struct SetPassenger {
 
 #[async_trait::async_trait]
 impl Parsable for SetPassenger {
-    fn empty() -> Self {
+    fn default() -> Self {
         Self {
             entity_id: 0,
             passenger_count: 0,

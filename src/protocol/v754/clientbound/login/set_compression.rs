@@ -8,7 +8,7 @@ pub struct SetCompression {
 }
 
 impl Parsable for SetCompression {
-    fn empty() -> Self {
+    fn default() -> Self {
         Self { threshold: 0 }
     }
 

@@ -11,7 +11,7 @@ pub struct SpawnXpOrb {
 }
 
 impl Parsable for SpawnXpOrb {
-    fn empty() -> Self {
+    fn default() -> Self {
         Self {
             entity_id: 0,
             x: 0f64,

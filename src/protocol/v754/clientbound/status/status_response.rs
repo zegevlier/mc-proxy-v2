@@ -7,7 +7,7 @@ pub struct StatusResponse {
 }
 
 impl Parsable for StatusResponse {
-    fn empty() -> Self {
+    fn default() -> Self {
         Self {
             json_response: String::new(),
         }

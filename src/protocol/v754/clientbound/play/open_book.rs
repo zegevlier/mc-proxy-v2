@@ -11,7 +11,7 @@ pub struct OpenBook {
 
 #[async_trait::async_trait]
 impl Parsable for OpenBook {
-    fn empty() -> Self {
+    fn default() -> Self {
         Self { hand: 0 }
     }
 

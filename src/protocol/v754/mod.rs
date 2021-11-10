@@ -242,171 +242,189 @@ pub fn get_functions() -> Functions {
     // Serverbound
     functions.add(
         Fid::Handshake,
-        Box::new(sb::handshaking::Handshake::empty()),
+        Box::new(sb::handshaking::Handshake::default()),
     );
 
     // Status
     // Clientbound
     functions.add(
         Fid::StatusResponse,
-        Box::new(cb::status::StatusResponse::empty()),
+        Box::new(cb::status::StatusResponse::default()),
     );
 
-    functions.add(Fid::StatusPong, Box::new(cb::status::StatusPong::empty()));
+    functions.add(Fid::StatusPong, Box::new(cb::status::StatusPong::default()));
 
     // Serverbound
     functions.add(
         Fid::StatusRequest,
-        Box::new(sb::status::StatusRequest::empty()),
+        Box::new(sb::status::StatusRequest::default()),
     );
 
-    functions.add(Fid::StatusPing, Box::new(sb::status::StatusPing::empty()));
+    functions.add(Fid::StatusPing, Box::new(sb::status::StatusPing::default()));
 
     // Login
     // Clientbound
-    functions.add(Fid::Disconnect, Box::new(cb::login::Disconnect::empty()));
+    functions.add(Fid::Disconnect, Box::new(cb::login::Disconnect::default()));
 
-    functions.add(Fid::EncRequest, Box::new(cb::login::EncRequest::empty()));
+    functions.add(Fid::EncRequest, Box::new(cb::login::EncRequest::default()));
 
     functions.add(
         Fid::LoginSuccess,
-        Box::new(cb::login::LoginSuccess::empty()),
+        Box::new(cb::login::LoginSuccess::default()),
     );
 
     functions.add(
         Fid::SetCompression,
-        Box::new(cb::login::SetCompression::empty()),
+        Box::new(cb::login::SetCompression::default()),
     );
 
     functions.add(
         Fid::PluginRequest,
-        Box::new(cb::login::PluginRequest::empty()),
+        Box::new(cb::login::PluginRequest::default()),
     );
 
     // Serverbound
-    functions.add(Fid::LoginStart, Box::new(sb::login::LoginStart::empty()));
+    functions.add(Fid::LoginStart, Box::new(sb::login::LoginStart::default()));
 
-    functions.add(Fid::EncResponse, Box::new(sb::login::EncResponse::empty()));
+    functions.add(
+        Fid::EncResponse,
+        Box::new(sb::login::EncResponse::default()),
+    );
 
     functions.add(
         Fid::PluginResponse,
-        Box::new(sb::login::PluginResponse::empty()),
+        Box::new(sb::login::PluginResponse::default()),
     );
 
     // Play
     // Clientbound
-    functions.add(Fid::SpawnEntity, Box::new(cb::play::SpawnEntity::empty()));
+    functions.add(Fid::SpawnEntity, Box::new(cb::play::SpawnEntity::default()));
 
-    functions.add(Fid::SpawnXpOrb, Box::new(cb::play::SpawnXpOrb::empty()));
+    functions.add(Fid::SpawnXpOrb, Box::new(cb::play::SpawnXpOrb::default()));
 
     functions.add(
         Fid::SpawnLivingEntity,
-        Box::new(cb::play::SpawnLivingEntity::empty()),
+        Box::new(cb::play::SpawnLivingEntity::default()),
     );
 
     functions.add(
         Fid::SpawnPainting,
-        Box::new(cb::play::SpawnPainting::empty()),
+        Box::new(cb::play::SpawnPainting::default()),
     );
 
-    functions.add(Fid::SpawnPlayer, Box::new(cb::play::SpawnPlayer::empty()));
+    functions.add(Fid::SpawnPlayer, Box::new(cb::play::SpawnPlayer::default()));
 
     functions.add(
         Fid::AckPlayerDigging,
-        Box::new(cb::play::AckPlayerDigging::empty()),
+        Box::new(cb::play::AckPlayerDigging::default()),
     );
 
     functions.add(
         Fid::ChatMessageClientbound,
-        Box::new(cb::play::ChatMessageClientbound::empty()),
+        Box::new(cb::play::ChatMessageClientbound::default()),
     );
 
     functions.add(
         Fid::TabCompleteClientbound,
-        Box::new(cb::play::TabCompleteClientbound::empty()),
+        Box::new(cb::play::TabCompleteClientbound::default()),
     );
 
     functions.add(
         Fid::ResourcePackSend,
-        Box::new(cb::play::ResourcePackSend::empty()),
+        Box::new(cb::play::ResourcePackSend::default()),
     );
 
-    functions.add(Fid::UpdateHealth, Box::new(cb::play::UpdateHealth::empty()));
+    functions.add(
+        Fid::UpdateHealth,
+        Box::new(cb::play::UpdateHealth::default()),
+    );
 
     functions.add(
         Fid::PlayerAbilities,
-        Box::new(cb::play::PlayerAbilities::empty()),
+        Box::new(cb::play::PlayerAbilities::default()),
     );
 
-    functions.add(Fid::KeepAliveCb, Box::new(cb::play::KeepAliveCb::empty()));
+    functions.add(Fid::KeepAliveCb, Box::new(cb::play::KeepAliveCb::default()));
 
-    functions.add(Fid::UpdateScore, Box::new(cb::play::UpdateScore::empty()));
+    functions.add(Fid::UpdateScore, Box::new(cb::play::UpdateScore::default()));
 
-    functions.add(Fid::OpenBook, Box::new(cb::play::OpenBook::empty()));
+    functions.add(Fid::OpenBook, Box::new(cb::play::OpenBook::default()));
 
-    functions.add(Fid::WindowItems, Box::new(cb::play::WindowItems::empty()));
+    functions.add(Fid::WindowItems, Box::new(cb::play::WindowItems::default()));
 
     functions.add(
         Fid::DisplayScoreboard,
-        Box::new(cb::play::DisplayScoreboard::empty()),
+        Box::new(cb::play::DisplayScoreboard::default()),
     );
 
     functions.add(
         Fid::ScoreboardObjective,
-        Box::new(cb::play::ScoreboardObjective::empty()),
+        Box::new(cb::play::ScoreboardObjective::default()),
     );
 
-    functions.add(Fid::Teams, Box::new(cb::play::Teams::empty()));
+    functions.add(Fid::Teams, Box::new(cb::play::Teams::default()));
 
-    functions.add(Fid::EntityEffect, Box::new(cb::play::EntityEffect::empty()));
+    functions.add(
+        Fid::EntityEffect,
+        Box::new(cb::play::EntityEffect::default()),
+    );
 
-    functions.add(Fid::JoinGame, Box::new(cb::play::JoinGame::empty()));
+    functions.add(Fid::JoinGame, Box::new(cb::play::JoinGame::default()));
 
     // functions.add(
     //     Fid::PlayerPositionAndLook,
     //     Box::new(cb::play::PlayerPositionAndLook::empty()),
     // );
 
-    functions.add(Fid::SetPassenger, Box::new(cb::play::SetPassenger::empty()));
+    functions.add(
+        Fid::SetPassenger,
+        Box::new(cb::play::SetPassenger::default()),
+    );
 
-    functions.add(Fid::ChunkData, Box::new(cb::play::ChunkData::empty()));
+    functions.add(Fid::ChunkData, Box::new(cb::play::ChunkData::default()));
 
     // Serverbound
     functions.add(
         Fid::ChatMessageServerbound,
-        Box::new(sb::play::ChatMessageServerbound::empty()),
+        Box::new(sb::play::ChatMessageServerbound::default()),
     );
 
     functions.add(
         Fid::ClientSettings,
-        Box::new(sb::play::ClientSettings::empty()),
+        Box::new(sb::play::ClientSettings::default()),
     );
 
     functions.add(
         Fid::PlayerPosition,
-        Box::new(sb::play::PlayerPosition::empty()),
+        Box::new(sb::play::PlayerPosition::default()),
     );
 
     functions.add(
         Fid::PlayerPositionRotation,
-        Box::new(sb::play::PlayerPositionRotation::empty()),
+        Box::new(sb::play::PlayerPositionRotation::default()),
     );
 
     functions.add(
         Fid::ResourcePackStatus,
-        Box::new(sb::play::ResourcePackStatus::empty()),
+        Box::new(sb::play::ResourcePackStatus::default()),
     );
 
     functions.add(
         Fid::PlayerBlockPlace,
-        Box::new(sb::play::PlayerBlockPlace::empty()),
+        Box::new(sb::play::PlayerBlockPlace::default()),
     );
 
-    functions.add(Fid::KeepAliveSb, Box::new(sb::play::KeepAliveSb::empty()));
+    functions.add(Fid::KeepAliveSb, Box::new(sb::play::KeepAliveSb::default()));
 
-    functions.add(Fid::SteerVehicle, Box::new(sb::play::SteerVehicle::empty()));
+    functions.add(
+        Fid::SteerVehicle,
+        Box::new(sb::play::SteerVehicle::default()),
+    );
 
-    functions.add(Fid::EntityAction, Box::new(sb::play::EntityAction::empty()));
+    functions.add(
+        Fid::EntityAction,
+        Box::new(sb::play::EntityAction::default()),
+    );
 
     functions
 }

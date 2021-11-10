@@ -26,7 +26,7 @@ pub struct Teams {
 }
 
 impl Parsable for Teams {
-    fn empty() -> Self {
+    fn default() -> Self {
         Self {
             team_name: String::new(),
             mode: TeamMode::Create,

@@ -15,7 +15,7 @@ pub struct ResourcePackStatus {
 }
 
 impl Parsable for ResourcePackStatus {
-    fn empty() -> Self {
+    fn default() -> Self {
         Self {
             result: ResourcePackResponse::Success,
         }

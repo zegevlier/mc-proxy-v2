@@ -11,7 +11,7 @@ pub struct KeepAliveSb {
 
 #[async_trait::async_trait]
 impl Parsable for KeepAliveSb {
-    fn empty() -> Self {
+    fn default() -> Self {
         Self { keep_alive_id: 0 }
     }
 
