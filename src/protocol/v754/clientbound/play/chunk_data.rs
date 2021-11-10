@@ -175,7 +175,7 @@ impl Parsable for ChunkData {
     }
 
     fn packet_editing(&self) -> bool {
-        true
+        false
     }
 
     async fn edit_packet(

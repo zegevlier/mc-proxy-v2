@@ -34,12 +34,14 @@ use crate::{
 
 pub use crate::{
     plugin::EventHandler,
+    protocol::v754::Functions,
     types::{Ciphers, Direction, SharedState, State},
 };
 
 mod cipher;
 mod conf;
 mod logging;
+mod macros;
 mod packet;
 mod parsable;
 mod plugin;
@@ -131,7 +133,7 @@ async fn parser(
 ) -> Result<(), ()> {
     let mut unprocessed_data = RawPacket::new();
     // functions is a list of all the packets that can be parsed
-    let functions = functions::get_functions();
+    let functions = Functions::new();
     let config = conf::get_config();
 
     // If this loop ever breaks, the thread is closed.
