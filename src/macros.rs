@@ -23,30 +23,30 @@ macro_rules! functions_macro {
     (
         clientbound {
             handshaking {
-                $($ch_pid:expr => $ch_fid:ident),*
+                $($ch_pid:expr => $ch_fid:ident),*,
             }
             status {
-                $($cs_pid:expr => $cs_fid:ident),*
+                $($cs_pid:expr => $cs_fid:ident),*,
             }
             login {
-                $($cl_pid:expr => $cl_fid:ident),*
+                $($cl_pid:expr => $cl_fid:ident),*,
             }
             play {
-                $($cp_pid:expr => $cp_fid:ident),*
+                $($cp_pid:expr => $cp_fid:ident),*,
             }
         }
         serverbound {
             handshaking {
-                $($sh_pid:expr => $sh_fid:ident),*
+                $($sh_pid:expr => $sh_fid:ident),*,
             }
             status {
-                $($ss_pid:expr => $ss_fid:ident),*
+                $($ss_pid:expr => $ss_fid:ident),*,
             }
             login {
-                $($sl_pid:expr => $sl_fid:ident),*
+                $($sl_pid:expr => $sl_fid:ident),*,
             }
             play {
-                $($sp_pid:expr => $sp_fid:ident),*
+                $($sp_pid:expr => $sp_fid:ident),*,
             }
         }
     ) => {

@@ -11,7 +11,7 @@ impl plugin::EventHandler for JoinGameTest {
     fn edit_join_game(&mut self, _join_game: &JoinGame) -> Option<JoinGame> {
         let mut join_game: JoinGame = _join_game.to_owned();
         for biome_entry in join_game.dimension_codec.biome_registry.value.iter_mut() {
-            let current_colour = 0xffffff;
+            let current_colour = 0x000000;
             biome_entry.element.effects.sky_color = current_colour;
             biome_entry.element.effects.water_color = current_colour;
             biome_entry.element.effects.fog_color = current_colour;
