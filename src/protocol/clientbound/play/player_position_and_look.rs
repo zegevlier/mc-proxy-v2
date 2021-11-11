@@ -10,7 +10,6 @@ pub struct PlayerPositionAndLook {
     pitch: f32,
     flags: i8,
     teleport_id: i32,
-    dismount_vehicle: bool,
 }
 
 #[async_trait::async_trait]
@@ -24,7 +23,6 @@ impl Parsable for PlayerPositionAndLook {
             pitch: 0.0,
             flags: 0,
             teleport_id: 0,
-            dismount_vehicle: false,
         }
     }
 
@@ -36,21 +34,13 @@ impl Parsable for PlayerPositionAndLook {
         self.pitch = packet.decode_float()?;
         self.flags = packet.decode_byte()?;
         self.teleport_id = packet.decode_varint()?;
-        self.dismount_vehicle = packet.decode_bool()?;
         Ok(())
     }
 
     fn get_printable(&self) -> String {
         format!(
-            "{} {} {} {} {} {} {} {}",
-            self.x,
-            self.y,
-            self.z,
-            self.yaw,
-            self.pitch,
-            self.flags,
-            self.teleport_id,
-            self.dismount_vehicle
+            "{} {} {} {} {} {} {}",
+            self.x, self.y, self.z, self.yaw, self.pitch, self.flags, self.teleport_id
         )
     }
 }

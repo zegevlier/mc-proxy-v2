@@ -25,10 +25,11 @@ use miniz_oxide::inflate::decompress_to_vec_zlib;
 use parking_lot::Mutex;
 use trust_dns_resolver::{config::*, TokioAsyncResolver};
 
+use packet::{varint, RawPacket, VarInt};
+
 use crate::{
     logging::LogQueue,
-    parsable::Parsable,
-    raw_packet::RawPacket,
+    parsable::{Parsable, SafeDefault},
     types::{DataQueue, Queues},
 };
 
@@ -42,12 +43,10 @@ mod cipher;
 mod conf;
 mod logging;
 mod macros;
-mod packet;
 mod parsable;
 mod plugin;
 mod plugins;
 mod protocol;
-mod raw_packet;
 mod types;
 mod utils;
 
@@ -168,12 +167,12 @@ async fn parser(
         });
 
         // Sometimes multiple packets will be sent at once, so this keeps running until all the packets are dealth with.
-        while unprocessed_data.len() > 0 {
+        while !unprocessed_data.is_empty() {
             // A backup of the packet is made, so if the packet is incomplete it will be reset to that.
             let original_data = unprocessed_data.get_vec();
 
-            let packet_length = match unprocessed_data.decode_varint() {
-                Ok(packet_length) => packet_length as usize,
+            let packet_length = match unprocessed_data.decode::<VarInt>() {
+                Ok(packet_length) => packet_length.into(),
                 Err(_) => {
                     unprocessed_data.set(original_data);
                     break;
@@ -187,17 +186,16 @@ async fn parser(
             }
 
             // This packet will always have the exact amount of data to contain the packet, no more no less.
-            let mut packet =
-                raw_packet::RawPacket::from(unprocessed_data.read(packet_length).unwrap());
+            let mut packet = packet::RawPacket::from(unprocessed_data.read(packet_length).unwrap());
 
             // A copy of the packet is made, this is to not have to recreate it if it doesn't get parsed or edited.
             let mut original_packet = RawPacket::new();
-            original_packet.encode_varint(packet_length as i32);
+            original_packet.encode(&varint!(packet_length));
             original_packet.push_vec(packet.get_vec());
 
             // Uncompress if needed
             if shared_status.lock().compress > 0 {
-                let data_length = packet.decode_varint()?;
+                let data_length: VarInt = packet.decode().unwrap();
                 if data_length > 0 {
                     let decompressed_packet = match decompress_to_vec_zlib(&packet.get_vec()) {
                         Ok(decompressed_packet) => decompressed_packet,
@@ -210,7 +208,7 @@ async fn parser(
                 }
             }
 
-            let packet_id = packet.decode_varint()?;
+            let packet_id = packet.decode::<VarInt>()?;
 
             // Get the Fid of the current packet, if it doesn't get parsed set it to Unparsable
             let func_id =
@@ -246,7 +244,7 @@ async fn parser(
                             "{} [{}]{3:4$} {}",
                             direction.to_string().yellow(),
                             func_id.to_string().blue(),
-                            parsed_packet.get_printable(),
+                            parsed_packet,
                             "",
                             config.print_buffer - func_id.to_string().len()
                         );
@@ -255,7 +253,12 @@ async fn parser(
                     log_queue.push(parsed_packet.clone());
                     true
                 } else {
-                    log::error!("Could not parse packet!");
+                    log::error!(
+                        "Could not parse packet! {} {} {}",
+                        packet_id,
+                        func_id.to_string(),
+                        direction
+                    );
                     false
                 };
 
@@ -362,12 +365,12 @@ async fn handle_connection(
 
     // It tries to parse the first packet
     let mut initial_data = RawPacket::from(buffer);
-    let packet_length = initial_data.decode_varint()?;
+    let packet_length: usize = initial_data.decode::<VarInt>()?.into();
     let mut raw_first_packet = RawPacket::from(match initial_data.read(packet_length as usize) {
         Ok(p) => p,
         Err(_) => return Ok(()),
     });
-    let packet_id = raw_first_packet.decode_varint()?;
+    let packet_id: VarInt = raw_first_packet.decode()?;
 
     // If the packet ID is not 0, it is not a valid minecraft packet.
     if packet_id != 0 {

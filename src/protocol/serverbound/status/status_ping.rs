@@ -1,5 +1,7 @@
-use crate::{parsable::Parsable, raw_packet::RawPacket};
+use crate::parsable::Parsable;
 use serde::Serialize;
+
+use packet::RawPacket;
 
 #[derive(Clone, Serialize)]
 pub struct StatusPing {
@@ -7,16 +9,20 @@ pub struct StatusPing {
 }
 
 impl Parsable for StatusPing {
-    fn default() -> Self {
-        Self { payload: 0 }
-    }
-
     fn parse_packet(&mut self, mut packet: RawPacket) -> Result<(), ()> {
-        self.payload = packet.decode_long()?;
+        self.payload = packet.decode()?;
         Ok(())
     }
+}
 
-    fn get_printable(&self) -> String {
-        format!("{}", self.payload)
+impl std::fmt::Display for StatusPing {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.payload)
+    }
+}
+
+impl crate::parsable::SafeDefault for StatusPing {
+    fn default() -> Self {
+        Self { payload: 0 }
     }
 }

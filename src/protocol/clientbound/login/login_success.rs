@@ -1,7 +1,8 @@
-use crate::types::Uuid;
-use crate::{parsable::Parsable, raw_packet::RawPacket};
+use crate::parsable::Parsable;
 use crate::{SharedState, State};
 use serde::Serialize;
+
+use packet::{RawPacket, Uuid};
 
 #[derive(Clone, Serialize)]
 pub struct LoginSuccess {
@@ -10,26 +11,30 @@ pub struct LoginSuccess {
 }
 
 impl Parsable for LoginSuccess {
-    fn default() -> Self {
-        Self {
-            uuid: Uuid::from(0),
-            username: String::new(),
-        }
-    }
-
     fn parse_packet(&mut self, mut packet: RawPacket) -> Result<(), ()> {
-        self.uuid = packet.decode_uuid()?;
-        self.username = packet.decode_string()?;
+        self.uuid = packet.decode()?;
+        self.username = packet.decode()?;
         Ok(())
-    }
-
-    fn get_printable(&self) -> String {
-        format!("{} {}", self.uuid, self.username,)
     }
 
     fn update_status(&self, status: &mut SharedState) -> Result<(), ()> {
         status.state = State::Play;
         log::debug!("State updated to Play");
         Ok(())
+    }
+}
+
+impl std::fmt::Display for LoginSuccess {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{} {}", self.uuid, self.username,)
+    }
+}
+
+impl crate::parsable::SafeDefault for LoginSuccess {
+    fn default() -> Self {
+        Self {
+            uuid: Uuid::from(0),
+            username: String::new(),
+        }
     }
 }

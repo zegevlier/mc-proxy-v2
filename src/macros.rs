@@ -23,44 +23,52 @@ macro_rules! functions_macro {
     (
         clientbound {
             handshaking {
-                $($ch_pid:expr => $ch_fid:ident),*,
+                $($ch_pid:expr => $ch_fid:ident),*  $(,)?
             }
             status {
-                $($cs_pid:expr => $cs_fid:ident),*,
+                $($cs_pid:expr => $cs_fid:ident),*  $(,)?
             }
             login {
-                $($cl_pid:expr => $cl_fid:ident),*,
+                $($cl_pid:expr => $cl_fid:ident),*  $(,)?
             }
             play {
-                $($cp_pid:expr => $cp_fid:ident),*,
+                $($cp_pid:expr => $cp_fid:ident),*  $(,)?
             }
         }
         serverbound {
             handshaking {
-                $($sh_pid:expr => $sh_fid:ident),*,
+                $($sh_pid:expr => $sh_fid:ident),*  $(,)?
             }
             status {
-                $($ss_pid:expr => $ss_fid:ident),*,
+                $($ss_pid:expr => $ss_fid:ident),* $(,)?
             }
             login {
-                $($sl_pid:expr => $sl_fid:ident),*,
+                $($sl_pid:expr => $sl_fid:ident),*  $(,)?
             }
             play {
-                $($sp_pid:expr => $sp_fid:ident),*,
+                $($sp_pid:expr => $sp_fid:ident),*  $(,)?
             }
         }
     ) => {
-        pub fn fid_to_pid(fid: Fid) -> i32 {
+        use packet::VarInt;
+        use crate::parsable::SafeDefault;
+
+        pub struct Functions {
+            map: HashMap<Direction, HashMap<State, HashMap<VarInt, Fid>>>,
+            list: HashMap<Fid, Box<dyn Parsable + Send + Sync>>,
+        }
+
+        pub fn fid_to_pid(fid: Fid) -> VarInt {
             match fid {
-                Fid::Unparsable => -1,
-                $(Fid::$ch_fid => $ch_pid,)*
-                $(Fid::$cs_fid => $cs_pid,)*
-                $(Fid::$cl_fid => $cl_pid,)*
-                $(Fid::$cp_fid => $cp_pid,)*
-                $(Fid::$sh_fid => $sh_pid,)*
-                $(Fid::$ss_fid => $ss_pid,)*
-                $(Fid::$sl_fid => $sl_pid,)*
-                $(Fid::$sp_fid => $sp_pid,)*
+                Fid::Unparsable => VarInt::from(-1),
+                $(Fid::$ch_fid => VarInt::from($ch_pid),)*
+                $(Fid::$cs_fid => VarInt::from($cs_pid),)*
+                $(Fid::$cl_fid => VarInt::from($cl_pid),)*
+                $(Fid::$cp_fid => VarInt::from($cp_pid),)*
+                $(Fid::$sh_fid => VarInt::from($sh_pid),)*
+                $(Fid::$ss_fid => VarInt::from($ss_pid),)*
+                $(Fid::$sl_fid => VarInt::from($sl_pid),)*
+                $(Fid::$sp_fid => VarInt::from($sp_pid),)*
             }
         }
 
@@ -110,7 +118,7 @@ macro_rules! functions_macro {
                                     }
                                     (state.to_owned(), hashmap)
                                 })
-                                .collect::<HashMap<State, HashMap<i32, Fid>>>(),
+                                .collect::<HashMap<State, HashMap<VarInt, Fid>>>(),
                         )
                     })
                     .collect();
@@ -130,7 +138,7 @@ macro_rules! functions_macro {
                 }
             }
 
-            pub fn get_name(&self, direction: &Direction, state: &State, pid: &i32) -> Option<&Fid> {
+            pub fn get_name(&self, direction: &Direction, state: &State, pid: &VarInt) -> Option<&Fid> {
                 self.map
                     .get(direction)
                     .unwrap()

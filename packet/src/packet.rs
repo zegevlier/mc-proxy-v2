@@ -1,10 +1,10 @@
 use miniz_oxide::deflate::compress_to_vec_zlib;
 
-use crate::RawPacket;
+use crate::{varint, RawPacket, VarInt};
 
 pub struct Packet {
     raw_packet: RawPacket,
-    pid: Option<i32>,
+    pid: Option<VarInt>,
 }
 
 impl Packet {
@@ -15,7 +15,7 @@ impl Packet {
         }
     }
 
-    pub fn from(raw_packet: RawPacket, pid: i32) -> Packet {
+    pub fn from(raw_packet: RawPacket, pid: VarInt) -> Packet {
         Packet {
             raw_packet,
             pid: Some(pid),
@@ -25,12 +25,12 @@ impl Packet {
     pub fn get_data_uncompressed(&self) -> Result<Vec<u8>, ()> {
         let mut pid_encoded = RawPacket::new();
         match self.pid {
-            Some(pid) => pid_encoded.encode_varint(pid),
+            Some(pid) => pid_encoded.encode(&pid),
             None => return Err(()),
         }
 
         let mut data = RawPacket::new();
-        data.encode_varint((self.raw_packet.len() + pid_encoded.len()) as i32);
+        data.encode(&varint!(self.raw_packet.len() + pid_encoded.len()));
         data.push_vec(pid_encoded.get_vec());
         data.push_vec(self.raw_packet.get_vec());
 
@@ -40,7 +40,7 @@ impl Packet {
     pub fn get_data_compressed(&self, compression_threshold: i32) -> Result<Vec<u8>, ()> {
         let mut pid_encoded = RawPacket::new();
         match self.pid {
-            Some(pid) => pid_encoded.encode_varint(pid),
+            Some(pid) => pid_encoded.encode(&pid),
             None => return Err(()),
         }
 
@@ -57,10 +57,10 @@ impl Packet {
         };
 
         let mut data_length_encoded = RawPacket::new();
-        data_length_encoded.encode_varint(data_length as i32);
+        data_length_encoded.encode(&varint!(data_length));
 
         let mut return_data = RawPacket::new();
-        return_data.encode_varint((data_length_encoded.len() + data.len()) as i32);
+        return_data.encode(&varint!(data_length_encoded.len() + data.len()));
         return_data.push_vec(data_length_encoded.get_vec());
         return_data.push_vec(data.get_vec());
 

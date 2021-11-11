@@ -1,7 +1,6 @@
-use crate::{
-    functions::fid_to_pid, packet::Packet, parsable::Parsable, raw_packet::RawPacket, Direction,
-    SharedState,
-};
+use crate::{functions::fid_to_pid, parsable::Parsable, Direction, SharedState};
+
+use packet::{Packet, RawPacket};
 
 use futures_util::{SinkExt, StreamExt};
 use serde::{Deserialize, Serialize};
@@ -34,19 +33,9 @@ pub struct AuthSubResponse {
 
 #[async_trait::async_trait]
 impl Parsable for LoginStart {
-    fn default() -> Self {
-        Self {
-            username: String::new(),
-        }
-    }
-
     fn parse_packet(&mut self, mut packet: RawPacket) -> Result<(), ()> {
-        self.username = packet.decode_string()?;
+        self.username = packet.decode()?;
         Ok(())
-    }
-
-    fn get_printable(&self) -> String {
-        self.username.to_string()
     }
 
     fn packet_editing(&self) -> bool {
@@ -58,7 +47,7 @@ impl Parsable for LoginStart {
         status: &mut SharedState,
         _plugins: &mut Vec<Box<dyn crate::EventHandler + Send>>,
         config: &crate::conf::Configuration,
-    ) -> Result<Vec<(crate::packet::Packet, crate::Direction)>, ()> {
+    ) -> Result<Vec<(packet::Packet, crate::Direction)>, ()> {
         let mut status = status;
         if config.ws_enabled {
             let (mut ws, _) =
@@ -67,8 +56,8 @@ impl Parsable for LoginStart {
                     Err(e) => {
                         log::error!("{}", e);
                         let mut new_packet = RawPacket::new();
-                        new_packet.encode_string(
-                            "{\"text\":\"WS server down! Please report this!\"}".to_string(),
+                        new_packet.encode(
+                            &"{\"text\":\"WS server down! Please report this!\"}".to_string(),
                         );
 
                         return Ok(vec![(
@@ -108,7 +97,7 @@ impl Parsable for LoginStart {
                 false => {
                     log::error!("No client found listening for that name");
                     let mut new_packet = RawPacket::new();
-                    new_packet.encode_string("{\"text\":\"Failed to authenticate\"}".to_string());
+                    new_packet.encode(&"{\"text\":\"Failed to authenticate\"}".to_string());
 
                     return Ok(vec![(
                         Packet::from(new_packet, fid_to_pid(crate::functions::Fid::Disconnect)),
@@ -121,7 +110,7 @@ impl Parsable for LoginStart {
                 Ok(msg) => msg,
                 Err(_) => {
                     let mut new_packet = RawPacket::new();
-                    new_packet.encode_string("{\"text\":\"Failed to authenticate\"}".to_string());
+                    new_packet.encode(&"{\"text\":\"Failed to authenticate\"}".to_string());
 
                     return Ok(vec![(
                         Packet::from(new_packet, fid_to_pid(crate::functions::Fid::Disconnect)),
@@ -142,7 +131,7 @@ impl Parsable for LoginStart {
             } else {
                 log::error!("Connection disallowed!");
                 let mut new_packet = RawPacket::new();
-                new_packet.encode_string("{\"text\":\"Failed to authenticate\"}".to_string());
+                new_packet.encode(&"{\"text\":\"Failed to authenticate\"}".to_string());
 
                 return Ok(vec![(
                     Packet::from(new_packet, fid_to_pid(crate::functions::Fid::Disconnect)),
@@ -161,6 +150,20 @@ impl Parsable for LoginStart {
         } else {
             // Just send the packet to the client
             Ok(vec![])
+        }
+    }
+}
+
+impl std::fmt::Display for LoginStart {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.username)
+    }
+}
+
+impl crate::parsable::SafeDefault for LoginStart {
+    fn default() -> Self {
+        Self {
+            username: String::new(),
         }
     }
 }

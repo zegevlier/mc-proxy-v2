@@ -9,7 +9,7 @@ version = "0.1.0"
 [dependencies]
 aes = "0.7.5"
 async-trait = "0.1.51"
-cipher = {version = "0.3", features = ["dev"]}
+cipher = {version = "0.3.0", features = ["dev"]}
 colored = "2.0.0"
 config = "0.11.0"
 deadqueue = {version = "0.2.0", features = ["unlimited"]}
@@ -21,18 +21,19 @@ hematite-nbt = "0.5.2"
 hex = "0.4.3"
 log = "0.4.14"
 maplit = "1.0.2"
-miniz_oxide = "0.4.4"
+miniz_oxide = "0.5.1"
 num-bigint-dig = "0.7.0"
+packet = {path = "./packet"}
 parking_lot = "0.11.2"
 rand = "0.8.4"
-regex = "1.5.3"
+regex = "1.5.4"
 reqwest = {version = "0.11.6", features = ["json", "blocking"]}
 rsa = "0.5.0"
-rsa-der = "0.2.1"
+rsa-der = "0.3.0"
 rust-crypto = "0.2.36"
 rustc-serialize = "0.3.24"
 serde = {version = "1.0.130", features = ["derive"]}
-serde_json = "1.0.68"
-tokio = {version = "1.12.0", features = ["net", "rt-multi-thread", "macros", "io-util", "time"]}
+serde_json = "1.0.69"
+tokio = {version = "1.13.0", features = ["net", "rt-multi-thread", "macros", "io-util", "time"]}
 tokio-tungstenite = {version = "0.15.0", features = ["native-tls"]}
 trust-dns-resolver = "0.20.3"

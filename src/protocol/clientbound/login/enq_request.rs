@@ -1,13 +1,15 @@
+use crate::parsable::Parsable;
 use crate::{
     conf::Configuration,
     functions::{fid_to_pid, Fid},
     utils, Ciphers,
 };
-use crate::{packet::Packet, parsable::Parsable, raw_packet::RawPacket};
 use crate::{Direction, SharedState};
 use hex::encode;
 use rand::Rng;
 use regex::Regex;
+
+use packet::{Packet, RawPacket, VarInt};
 
 use crypto::digest::Digest;
 use crypto::sha1::Sha1;
@@ -25,9 +27,9 @@ use serde::Serialize;
 #[derive(Clone, Serialize)]
 pub struct EncRequest {
     server_id: String,
-    public_key_length: i32,
+    public_key_length: VarInt,
     public_key: Vec<u8>,
-    verify_token_length: i32,
+    verify_token_length: VarInt,
     verify_token: Vec<u8>,
 }
 
@@ -46,34 +48,13 @@ fn two_complement(bytes: &mut Vec<u8>) {
 
 #[async_trait::async_trait]
 impl Parsable for EncRequest {
-    fn default() -> Self {
-        Self {
-            server_id: String::new(),
-            public_key_length: 0,
-            public_key: Vec::new(),
-            verify_token_length: 0,
-            verify_token: Vec::new(),
-        }
-    }
-
     fn parse_packet(&mut self, mut packet: RawPacket) -> Result<(), ()> {
-        self.server_id = packet.decode_string()?;
-        self.public_key_length = packet.decode_varint()?;
-        self.public_key = packet.read(self.public_key_length as usize)?;
-        self.verify_token_length = packet.decode_varint()?;
-        self.verify_token = packet.read(self.verify_token_length as usize)?;
+        self.server_id = packet.decode()?;
+        self.public_key_length = packet.decode()?;
+        self.public_key = packet.read(self.public_key_length.into())?;
+        self.verify_token_length = packet.decode()?;
+        self.verify_token = packet.read(self.verify_token_length.into())?;
         Ok(())
-    }
-
-    fn get_printable(&self) -> String {
-        format!(
-            "{} {} {} {}",
-            // self.server_id,
-            self.public_key_length,
-            utils::make_string_fixed_length(encode(self.public_key.clone()), 20),
-            self.verify_token_length,
-            utils::make_string_fixed_length(encode(self.verify_token.clone()), 20)
-        )
     }
 
     fn packet_editing(&self) -> bool {
@@ -145,13 +126,13 @@ impl Parsable for EncRequest {
         let padding = PaddingScheme::new_pkcs1v15_encrypt();
 
         let mut unformatted_packet = crate::RawPacket::new();
-        unformatted_packet.encode_varint(128);
+        unformatted_packet.encode(&packet::varint!(128));
         unformatted_packet.push_vec(
             public_key
                 .encrypt(&mut rng, padding, &status.secret_key[..])
                 .unwrap(),
         );
-        unformatted_packet.encode_varint(128);
+        unformatted_packet.encode(&packet::varint!(128));
         let padding = PaddingScheme::new_pkcs1v15_encrypt();
 
         unformatted_packet.push_vec(
@@ -179,5 +160,31 @@ impl Parsable for EncRequest {
         ciphers.sp_cipher.enable(&status.secret_key);
         log::debug!("Enabled ciphers");
         Ok(())
+    }
+}
+
+impl std::fmt::Display for EncRequest {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{} {} {} {}",
+            // self.server_id,
+            self.public_key_length,
+            utils::make_string_fixed_length(encode(self.public_key.clone()), 20),
+            self.verify_token_length,
+            utils::make_string_fixed_length(encode(self.verify_token.clone()), 20)
+        )
+    }
+}
+
+impl crate::parsable::SafeDefault for EncRequest {
+    fn default() -> Self {
+        Self {
+            server_id: String::new(),
+            public_key_length: Default::default(),
+            public_key: Vec::new(),
+            verify_token_length: Default::default(),
+            verify_token: Vec::new(),
+        }
     }
 }

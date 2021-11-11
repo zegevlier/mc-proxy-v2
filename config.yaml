@@ -18,7 +18,7 @@ logging_packets:
   # - SpawnPainting
   # - SpawnPlayer
   # - AckPlayerDigging
-  - ChatMessageClientbound
+  # - ChatMessageClientbound
   # - TabCompleteClientbound
   # - ChatMessageServerbound
   - ResourcePackSend
@@ -39,6 +39,7 @@ logging_packets:
   - OpenBook
   # - ChunkData
   - PlayerBlockPlace
+  - PlayerPositionAndLook
 
 player_uuid: f54c74dd3362422c80f9da71eca4aaa3
 player_auth_token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI2NTY0M2EzYmU0NGY4NmVlODE4OWEwMDllMGNlYTNmYSIsInlnZ3QiOiI0ZTc0MDk5NWI2MzQ0YmM5OTAxOGY4MjI1YmQ0ZjU0NSIsInNwciI6ImY1NGM3NGRkMzM2MjQyMmM4MGY5ZGE3MWVjYTRhYWEzIiwiaXNzIjoiWWdnZHJhc2lsLUF1dGgiLCJleHAiOjE2MDY5Mjg0MzAsImlhdCI6MTYwNjc1NTYzMH0.flsDw7RhPNJWAq2UEWO8tKKyPOn8V5NhzCXa9UxmvNc

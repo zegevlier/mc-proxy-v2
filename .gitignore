@@ -3,3 +3,4 @@
 /cfb8/Cargo.lock
 /server
 /logs
+*target

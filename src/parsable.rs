@@ -1,24 +1,27 @@
-use crate::{
-    conf::Configuration, packet::Packet, plugin::EventHandler, raw_packet::RawPacket, Ciphers,
-    Direction, SharedState,
-};
+use std::fmt::Display;
+
+use crate::{conf::Configuration, plugin::EventHandler, Ciphers, Direction, SharedState};
+
+use packet::Packet;
+
 use async_trait::async_trait;
 use dyn_clone::DynClone;
 use erased_serde::serialize_trait_object;
+use packet::RawPacket;
 
-#[async_trait]
-pub trait Parsable: erased_serde::Serialize + DynClone {
+pub trait SafeDefault {
     fn default() -> Self
     where
         Self: Sized;
+}
 
+#[async_trait]
+pub trait Parsable: erased_serde::Serialize + DynClone + Display + SafeDefault {
     fn parse_packet(&mut self, packet: RawPacket) -> Result<(), ()>;
 
     fn encode_packet(&self) -> Result<Packet, ()> {
         unimplemented!()
     }
-
-    fn get_printable(&self) -> String;
 
     #[allow(unused_variables)]
     fn update_status(&self, status: &mut SharedState) -> Result<(), ()> {
