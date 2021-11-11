@@ -8,11 +8,22 @@ impl crate::ProtoEnc for String {
 }
 
 impl crate::ProtoDec for String {
-    fn decode(p: &mut crate::RawPacket) -> crate::Result<String>
+    fn decode_ret(p: &mut crate::RawPacket) -> crate::Result<String>
     where
         Self: Sized,
     {
         let string_length = p.decode::<VarInt>()?.into();
         Ok(String::from_utf8(p.read(string_length)?).unwrap())
+    }
+
+    fn decode(&mut self, p: &mut crate::RawPacket) -> crate::Result<()> {
+        *self = Self::decode_ret(p)?;
+        Ok(())
+    }
+}
+
+impl crate::SafeDefault for String {
+    fn default() -> Self {
+        "".to_string()
     }
 }

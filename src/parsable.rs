@@ -7,18 +7,16 @@ use packet::Packet;
 use async_trait::async_trait;
 use dyn_clone::DynClone;
 use erased_serde::serialize_trait_object;
-use packet::RawPacket;
-
-pub trait SafeDefault {
-    fn default() -> Self
-    where
-        Self: Sized;
-}
 
 #[async_trait]
-pub trait Parsable: erased_serde::Serialize + DynClone + Display + SafeDefault {
-    fn parse_packet(&mut self, packet: RawPacket) -> Result<(), ()>;
-
+pub trait Parsable:
+    erased_serde::Serialize
+    + DynClone
+    + Display
+    + packet::SafeDefault
+    + packet::ProtoDec
+    + packet::ProtoEnc
+{
     fn encode_packet(&self) -> Result<Packet, ()> {
         unimplemented!()
     }

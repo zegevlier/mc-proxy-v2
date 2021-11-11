@@ -1,6 +1,6 @@
 use crate::parsable::Parsable;
 use crate::{SharedState, State};
-use packet::RawPacket;
+use packet::{RawPacket, SafeDefault};
 use serde::Serialize;
 
 #[derive(Clone, Serialize)]
@@ -9,11 +9,6 @@ pub struct Disconnect {
 }
 
 impl Parsable for Disconnect {
-    fn parse_packet(&mut self, mut packet: RawPacket) -> Result<(), ()> {
-        self.reason = packet.decode()?;
-        Ok(())
-    }
-
     fn update_status(&self, status: &mut SharedState) -> Result<(), ()> {
         status.state = State::Handshaking;
         log::debug!("State updated to Handshaking");
@@ -27,10 +22,23 @@ impl std::fmt::Display for Disconnect {
     }
 }
 
-impl crate::parsable::SafeDefault for Disconnect {
+impl SafeDefault for Disconnect {
     fn default() -> Self {
         Self {
             reason: String::new(),
         }
+    }
+}
+
+impl packet::ProtoDec for Disconnect {
+    fn decode(&mut self, p: &mut RawPacket) -> packet::Result<()> {
+        self.reason = p.decode()?;
+        Ok(())
+    }
+}
+
+impl packet::ProtoEnc for Disconnect {
+    fn encode(&self, p: &mut RawPacket) {
+        p.encode(&self.reason);
     }
 }

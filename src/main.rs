@@ -25,11 +25,11 @@ use miniz_oxide::inflate::decompress_to_vec_zlib;
 use parking_lot::Mutex;
 use trust_dns_resolver::{config::*, TokioAsyncResolver};
 
-use packet::{varint, RawPacket, VarInt};
+use packet::{varint, ProtoDec, RawPacket, VarInt};
 
 use crate::{
     logging::LogQueue,
-    parsable::{Parsable, SafeDefault},
+    parsable::Parsable,
     types::{DataQueue, Queues},
 };
 
@@ -235,7 +235,7 @@ async fn parser(
 
                 // The success variable is used becase some code needs to be executed regardless of if the packet parsed correct
                 // otherwise the connection would fail as soon as one packet doesn't get parsed correctly.
-                let success = if parsed_packet.parse_packet(packet).is_ok() {
+                let success = if parsed_packet.decode(&mut packet).is_ok() {
                     if config.logging_packets.contains(&func_id.to_string())
                         || config.logging_packets.contains(&"*".to_string())
                     {
@@ -380,12 +380,15 @@ async fn handle_connection(
     };
 
     // It then continues to parse the packet like it is a handshaking packet.
-    let mut handshaking_packet = functions::serverbound::handshaking::Handshake::default();
-    if handshaking_packet.parse_packet(raw_first_packet).is_err() {
+    let handshaking_packet =
+        functions::serverbound::handshaking::Handshake::decode_ret(&mut raw_first_packet);
+    if handshaking_packet.is_err() {
         log::error!("Invalid handshake packet! Closing connection...");
         // Again, returning OK because everything was dealt with, no loose ends.
         return Ok(());
     };
+
+    let handshaking_packet = handshaking_packet.unwrap();
 
     // It then gets the IP address of the actual server to connect to, minus the domain suffix.
     let ip = match handshaking_packet

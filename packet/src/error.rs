@@ -7,6 +7,7 @@ pub enum Error {
     Message(String),
     Eof,
     VarIntTooBig,
+    InvalidVarintEnum,
 }
 
 impl Display for Error {
@@ -15,6 +16,7 @@ impl Display for Error {
             Error::Message(msg) => formatter.write_str(msg),
             Error::Eof => formatter.write_str("unexpected end of input"),
             Error::VarIntTooBig => formatter.write_str("varint too big"),
+            Error::InvalidVarintEnum => formatter.write_str("invalid varint enum"),
         }
     }
 }

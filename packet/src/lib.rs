@@ -9,7 +9,7 @@ pub use packet::Packet;
 pub use raw_packet::RawPacket;
 pub use traits::{ProtoDec, ProtoEnc};
 
-pub use types::{Uuid, VarInt};
+pub use types::{SafeDefault, Uuid, VarInt};
 
 #[cfg(test)]
 mod tests {

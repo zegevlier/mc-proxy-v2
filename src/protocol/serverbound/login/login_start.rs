@@ -1,6 +1,6 @@
 use crate::{functions::fid_to_pid, parsable::Parsable, Direction, SharedState};
 
-use packet::{Packet, RawPacket};
+use packet::{Packet, RawPacket, SafeDefault};
 
 use futures_util::{SinkExt, StreamExt};
 use serde::{Deserialize, Serialize};
@@ -33,11 +33,6 @@ pub struct AuthSubResponse {
 
 #[async_trait::async_trait]
 impl Parsable for LoginStart {
-    fn parse_packet(&mut self, mut packet: RawPacket) -> Result<(), ()> {
-        self.username = packet.decode()?;
-        Ok(())
-    }
-
     fn packet_editing(&self) -> bool {
         true
     }
@@ -160,10 +155,23 @@ impl std::fmt::Display for LoginStart {
     }
 }
 
-impl crate::parsable::SafeDefault for LoginStart {
+impl SafeDefault for LoginStart {
     fn default() -> Self {
         Self {
             username: String::new(),
         }
+    }
+}
+
+impl packet::ProtoDec for LoginStart {
+    fn decode(&mut self, p: &mut RawPacket) -> packet::Result<()> {
+        self.username = p.decode()?;
+        Ok(())
+    }
+}
+
+impl packet::ProtoEnc for LoginStart {
+    fn encode(&self, p: &mut RawPacket) {
+        p.encode(&self.username);
     }
 }

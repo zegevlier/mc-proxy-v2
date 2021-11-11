@@ -3,7 +3,7 @@ use crate::parsable::Parsable;
 use crate::{SharedState, State};
 use serde::Serialize;
 
-use packet::{varint, Packet, RawPacket, VarInt};
+use packet::{varint, Packet, RawPacket, SafeDefault, VarInt};
 
 #[derive(Clone, Serialize)]
 pub struct Handshake {
@@ -14,18 +14,6 @@ pub struct Handshake {
 }
 
 impl Parsable for Handshake {
-    fn parse_packet(&mut self, mut packet: RawPacket) -> Result<(), ()> {
-        self.protocol_version = packet.decode()?;
-        self.server_address = packet.decode()?;
-        self.server_port = packet.decode()?;
-        self.next_state = match packet.decode::<VarInt>()?.to::<i32>() {
-            1 => State::Status,
-            2 => State::Login,
-            _ => return Err(()),
-        };
-        Ok(())
-    }
-
     fn encode_packet(&self) -> Result<Packet, ()> {
         let mut raw_packet = RawPacket::new();
         raw_packet.encode(&self.protocol_version);
@@ -59,7 +47,7 @@ impl std::fmt::Display for Handshake {
     }
 }
 
-impl crate::parsable::SafeDefault for Handshake {
+impl SafeDefault for Handshake {
     fn default() -> Self {
         Handshake {
             protocol_version: Default::default(),
@@ -67,5 +55,32 @@ impl crate::parsable::SafeDefault for Handshake {
             server_port: 0,
             next_state: State::Handshaking,
         }
+    }
+}
+
+impl packet::ProtoDec for Handshake {
+    fn decode(&mut self, p: &mut RawPacket) -> packet::Result<()> {
+        self.protocol_version = p.decode()?;
+        self.server_address = p.decode()?;
+        self.server_port = p.decode()?;
+        self.next_state = match p.decode::<VarInt>()?.to::<i32>() {
+            1 => State::Status,
+            2 => State::Login,
+            _ => return Err(packet::Error::InvalidVarintEnum),
+        };
+        Ok(())
+    }
+}
+
+impl packet::ProtoEnc for Handshake {
+    fn encode(&self, p: &mut RawPacket) {
+        p.encode(&self.protocol_version);
+        p.encode(&self.server_address);
+        p.encode(&self.server_port);
+        p.encode(&varint!(match self.next_state {
+            State::Status => 1,
+            State::Login => 2,
+            _ => return,
+        }));
     }
 }

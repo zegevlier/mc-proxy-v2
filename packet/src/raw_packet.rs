@@ -98,7 +98,7 @@ impl RawPacket {
     where
         T: Sized + ProtoDec,
     {
-        T::decode(self)
+        T::decode_ret(self)
     }
 }
 

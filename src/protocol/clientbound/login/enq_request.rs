@@ -9,7 +9,7 @@ use hex::encode;
 use rand::Rng;
 use regex::Regex;
 
-use packet::{Packet, RawPacket, VarInt};
+use packet::{Packet, RawPacket, SafeDefault, VarInt};
 
 use crypto::digest::Digest;
 use crypto::sha1::Sha1;
@@ -48,15 +48,6 @@ fn two_complement(bytes: &mut Vec<u8>) {
 
 #[async_trait::async_trait]
 impl Parsable for EncRequest {
-    fn parse_packet(&mut self, mut packet: RawPacket) -> Result<(), ()> {
-        self.server_id = packet.decode()?;
-        self.public_key_length = packet.decode()?;
-        self.public_key = packet.read(self.public_key_length.into())?;
-        self.verify_token_length = packet.decode()?;
-        self.verify_token = packet.read(self.verify_token_length.into())?;
-        Ok(())
-    }
-
     fn packet_editing(&self) -> bool {
         true
     }
@@ -177,7 +168,7 @@ impl std::fmt::Display for EncRequest {
     }
 }
 
-impl crate::parsable::SafeDefault for EncRequest {
+impl SafeDefault for EncRequest {
     fn default() -> Self {
         Self {
             server_id: String::new(),
@@ -186,5 +177,26 @@ impl crate::parsable::SafeDefault for EncRequest {
             verify_token_length: Default::default(),
             verify_token: Vec::new(),
         }
+    }
+}
+
+impl packet::ProtoDec for EncRequest {
+    fn decode(&mut self, p: &mut RawPacket) -> packet::Result<()> {
+        self.server_id = p.decode()?;
+        self.public_key_length = p.decode()?;
+        self.public_key = p.read(self.public_key_length.into())?;
+        self.verify_token_length = p.decode()?;
+        self.verify_token = p.read(self.verify_token_length.into())?;
+        Ok(())
+    }
+}
+
+impl packet::ProtoEnc for EncRequest {
+    fn encode(&self, p: &mut RawPacket) {
+        p.encode(&self.server_id);
+        p.encode(&self.public_key_length);
+        p.push_slice(&self.public_key);
+        p.encode(&self.verify_token_length);
+        p.push_slice(&self.verify_token);
     }
 }

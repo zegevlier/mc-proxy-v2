@@ -51,7 +51,7 @@ macro_rules! functions_macro {
         }
     ) => {
         use packet::VarInt;
-        use crate::parsable::SafeDefault;
+        use packet::SafeDefault;
 
         pub struct Functions {
             map: HashMap<Direction, HashMap<State, HashMap<VarInt, Fid>>>,

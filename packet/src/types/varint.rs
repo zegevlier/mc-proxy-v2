@@ -42,7 +42,7 @@ impl crate::ProtoEnc for VarInt {
 }
 
 impl crate::ProtoDec for VarInt {
-    fn decode(p: &mut crate::RawPacket) -> crate::Result<VarInt>
+    fn decode_ret(p: &mut crate::RawPacket) -> crate::Result<VarInt>
     where
         Self: Sized,
     {
@@ -63,6 +63,11 @@ impl crate::ProtoDec for VarInt {
             }
         }
         Ok(result.into())
+    }
+
+    fn decode(&mut self, p: &mut crate::RawPacket) -> crate::Result<()> {
+        *self = Self::decode_ret(p)?;
+        Ok(())
     }
 }
 
@@ -120,6 +125,12 @@ impl std::cmp::PartialOrd<i32> for VarInt {
 impl std::fmt::Display for VarInt {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(f, "{}", self.value)
+    }
+}
+
+impl crate::SafeDefault for VarInt {
+    fn default() -> Self {
+        Self { value: 0 }
     }
 }
 

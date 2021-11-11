@@ -1,7 +1,7 @@
 use crate::parsable::Parsable;
 use hex::encode;
 
-use packet::{RawPacket, VarInt};
+use packet::{RawPacket, SafeDefault, VarInt};
 
 use crate::utils;
 use serde::Serialize;
@@ -15,15 +15,7 @@ pub struct EncResponse {
 }
 
 #[async_trait::async_trait]
-impl Parsable for EncResponse {
-    fn parse_packet(&mut self, mut packet: RawPacket) -> Result<(), ()> {
-        self.shared_secret_length = packet.decode()?;
-        self.shared_secret = packet.read(self.shared_secret_length.into())?;
-        self.verify_token_length = packet.decode()?;
-        self.verify_token = packet.read(self.verify_token_length.into())?;
-        Ok(())
-    }
-}
+impl Parsable for EncResponse {}
 
 impl std::fmt::Display for EncResponse {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -38,7 +30,7 @@ impl std::fmt::Display for EncResponse {
     }
 }
 
-impl crate::parsable::SafeDefault for EncResponse {
+impl SafeDefault for EncResponse {
     fn default() -> Self {
         Self {
             shared_secret_length: Default::default(),
@@ -46,5 +38,24 @@ impl crate::parsable::SafeDefault for EncResponse {
             verify_token_length: Default::default(),
             verify_token: Vec::new(),
         }
+    }
+}
+
+impl packet::ProtoDec for EncResponse {
+    fn decode(&mut self, p: &mut RawPacket) -> packet::Result<()> {
+        self.shared_secret_length = p.decode()?;
+        self.shared_secret = p.read(self.shared_secret_length.into())?;
+        self.verify_token_length = p.decode()?;
+        self.verify_token = p.read(self.verify_token_length.into())?;
+        Ok(())
+    }
+}
+
+impl packet::ProtoEnc for EncResponse {
+    fn encode(&self, p: &mut RawPacket) {
+        p.encode(&self.shared_secret_length);
+        p.push_slice(&self.shared_secret);
+        p.encode(&self.verify_token_length);
+        p.push_slice(&self.verify_token);
     }
 }

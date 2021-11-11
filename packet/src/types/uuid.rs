@@ -13,13 +13,18 @@ impl crate::ProtoEnc for Uuid {
 }
 
 impl crate::ProtoDec for Uuid {
-    fn decode(p: &mut crate::RawPacket) -> crate::Result<Self>
+    fn decode_ret(p: &mut crate::RawPacket) -> crate::Result<Self>
     where
         Self: Sized,
     {
         Ok(Uuid::from(u128::from_be_bytes(
             p.read(16)?.try_into().unwrap(),
         )))
+    }
+
+    fn decode(&mut self, p: &mut crate::RawPacket) -> crate::Result<()> {
+        *self = Self::decode_ret(p)?;
+        Ok(())
     }
 }
 
@@ -41,5 +46,11 @@ impl std::fmt::Display for Uuid {
 impl Uuid {
     pub fn from(v: u128) -> Self {
         Self { value: v }
+    }
+}
+
+impl crate::SafeDefault for Uuid {
+    fn default() -> Self {
+        Self { value: 0 }
     }
 }
