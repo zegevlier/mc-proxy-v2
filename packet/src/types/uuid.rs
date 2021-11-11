@@ -1,7 +1,7 @@
 use serde::{Serialize, Serializer};
 use std::convert::TryInto;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Deserialize)]
 pub struct Uuid {
     value: u128,
 }
