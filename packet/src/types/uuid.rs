@@ -7,8 +7,9 @@ pub struct Uuid {
 }
 
 impl crate::ProtoEnc for Uuid {
-    fn encode(&self, p: &mut crate::RawPacket) {
+    fn encode(&self, p: &mut crate::RawPacket) -> crate::Result<()> {
         p.push_slice(&self.value.to_be_bytes());
+        Ok(())
     }
 }
 

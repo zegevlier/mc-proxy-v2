@@ -117,13 +117,13 @@ impl Parsable for EncRequest {
         let padding = PaddingScheme::new_pkcs1v15_encrypt();
 
         let mut unformatted_packet = crate::RawPacket::new();
-        unformatted_packet.encode(&packet::varint!(128));
+        unformatted_packet.encode(&packet::varint!(128))?;
         unformatted_packet.push_vec(
             public_key
                 .encrypt(&mut rng, padding, &status.secret_key[..])
                 .unwrap(),
         );
-        unformatted_packet.encode(&packet::varint!(128));
+        unformatted_packet.encode(&packet::varint!(128))?;
         let padding = PaddingScheme::new_pkcs1v15_encrypt();
 
         unformatted_packet.push_vec(
@@ -192,11 +192,12 @@ impl packet::ProtoDec for EncRequest {
 }
 
 impl packet::ProtoEnc for EncRequest {
-    fn encode(&self, p: &mut RawPacket) {
-        p.encode(&self.server_id);
-        p.encode(&self.public_key_length);
+    fn encode(&self, p: &mut RawPacket) -> packet::Result<()> {
+        p.encode(&self.server_id)?;
+        p.encode(&self.public_key_length)?;
         p.push_slice(&self.public_key);
-        p.encode(&self.verify_token_length);
+        p.encode(&self.verify_token_length)?;
         p.push_slice(&self.verify_token);
+        Ok(())
     }
 }

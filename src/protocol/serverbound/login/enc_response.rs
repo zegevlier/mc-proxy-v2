@@ -52,10 +52,11 @@ impl packet::ProtoDec for EncResponse {
 }
 
 impl packet::ProtoEnc for EncResponse {
-    fn encode(&self, p: &mut RawPacket) {
-        p.encode(&self.shared_secret_length);
+    fn encode(&self, p: &mut RawPacket) -> packet::Result<()> {
+        p.encode(&self.shared_secret_length)?;
         p.push_slice(&self.shared_secret);
-        p.encode(&self.verify_token_length);
+        p.encode(&self.verify_token_length)?;
         p.push_slice(&self.verify_token);
+        Ok(())
     }
 }

@@ -2,27 +2,27 @@
 macro_rules! packet {
     ($name:ident, all, {$($field_name:ident : $field_type:ty),* $(,)?}) => {
         packet!($name, struc, $($field_name : $field_type),*);
-        // packet!($name, disp, $($field_name : $field_type),*);
+        packet!($name, disp, $($field_name : $field_type),*);
         packet!($name, def, $($field_name : $field_type),*);
         packet!($name, dec, $($field_name : $field_type),*);
         packet!($name, enc, $($field_name : $field_type),*);
     };
     ($name:ident, struc, $($field_name:ident : $field_type:ty),* $(,)?) => {
-        use crate::parsable::Parsable;
-        use packet::{RawPacket, SafeDefault};
+        use crate::{parsable::Parsable, functions::fid_to_pid};
+        use packet::{RawPacket, SafeDefault, Packet};
 
         #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
         pub struct $name {
             $(pub $field_name: $field_type),*
         }
     };
-    // ($name:ident, disp, $($field_name:ident : $field_type:ty),* $(,)?) => {
-    //     impl std::fmt::Display for StatusRequest {
-    //         fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    //             write!(f, "")
-    //         }
-    //     }
-    // };
+    ($name:ident, disp, $($field_name:ident : $field_type:ty),* $(,)?) => {
+        impl std::fmt::Display for $name {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                write!(f, "{}", [$(self.$field_name.to_string()),*].join(" "))
+            }
+        }
+    };
     ($name:ident, def, $($field_name:ident : $field_type:ty),* $(,)?) => {
         impl SafeDefault for $name {
             fn default() -> Self {
@@ -42,8 +42,15 @@ macro_rules! packet {
     };
     ($name:ident, enc, $($field_name:ident : $field_type:ty),* $(,)?) => {
         impl packet::ProtoEnc for $name {
-            fn encode(&self, p: &mut RawPacket) {
-                $(p.encode(&self.$field_name);)*
+            fn encode(&self, p: &mut RawPacket) -> packet::Result<()> {
+                $(p.encode(&self.$field_name)?;)*
+                Ok(())
+            }
+
+            fn encode_packet(&self) -> packet::Result<Packet> {
+                let mut p = RawPacket::new();
+                self.encode(&mut p)?;
+                Ok(Packet::from(p, fid_to_pid(crate::functions::Fid::$name)))
             }
         }
     };

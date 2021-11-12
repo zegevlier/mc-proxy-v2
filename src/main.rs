@@ -25,11 +25,10 @@ use miniz_oxide::inflate::decompress_to_vec_zlib;
 use parking_lot::Mutex;
 use trust_dns_resolver::{config::*, TokioAsyncResolver};
 
-use packet::{varint, ProtoDec, RawPacket, VarInt};
+use packet::{varint, ProtoDec, ProtoEnc, RawPacket, VarInt};
 
 use crate::{
     logging::LogQueue,
-    parsable::Parsable,
     types::{DataQueue, Queues},
 };
 
@@ -190,7 +189,7 @@ async fn parser(
 
             // A copy of the packet is made, this is to not have to recreate it if it doesn't get parsed or edited.
             let mut original_packet = RawPacket::new();
-            original_packet.encode(&varint!(packet_length));
+            original_packet.encode(&varint!(packet_length))?;
             original_packet.push_vec(packet.get_vec());
 
             // Uncompress if needed
@@ -435,6 +434,10 @@ async fn handle_connection(
         next_state: handshaking_packet.next_state,
     }
     .encode_packet()?
+    // let mut new_packet = packet::Packet::from(
+    // new_raw_packet,
+    // functions::fid_to_pid(crate::functions::Fid::Handshake),
+    // )
     .get_data_uncompressed()?;
 
     // It adds the remaining data that was sent in the first packet, to make sure no data gets lost.

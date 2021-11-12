@@ -8,6 +8,7 @@ pub enum Error {
     Eof,
     VarIntTooBig,
     InvalidVarintEnum,
+    PacketIdNotSet,
 }
 
 impl Display for Error {
@@ -17,6 +18,7 @@ impl Display for Error {
             Error::Eof => formatter.write_str("unexpected end of input"),
             Error::VarIntTooBig => formatter.write_str("varint too big"),
             Error::InvalidVarintEnum => formatter.write_str("invalid varint enum"),
+            Error::PacketIdNotSet => formatter.write_str("packet id not set"),
         }
     }
 }

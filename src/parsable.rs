@@ -17,10 +17,6 @@ pub trait Parsable:
     + packet::ProtoDec
     + packet::ProtoEnc
 {
-    fn encode_packet(&self) -> Result<Packet, ()> {
-        unimplemented!()
-    }
-
     #[allow(unused_variables)]
     fn update_status(&self, status: &mut SharedState) -> Result<(), ()> {
         Ok(())

@@ -38,7 +38,8 @@ impl packet::ProtoDec for Disconnect {
 }
 
 impl packet::ProtoEnc for Disconnect {
-    fn encode(&self, p: &mut RawPacket) {
-        p.encode(&self.reason);
+    fn encode(&self, p: &mut RawPacket) -> packet::Result<()> {
+        p.encode(&self.reason)?;
+        Ok(())
     }
 }

@@ -22,27 +22,27 @@ impl Packet {
         }
     }
 
-    pub fn get_data_uncompressed(&self) -> Result<Vec<u8>, ()> {
+    pub fn get_data_uncompressed(&self) -> crate::Result<Vec<u8>> {
         let mut pid_encoded = RawPacket::new();
         match self.pid {
-            Some(pid) => pid_encoded.encode(&pid),
-            None => return Err(()),
-        }
+            Some(pid) => pid_encoded.encode(&pid)?,
+            None => return Err(crate::Error::PacketIdNotSet),
+        };
 
         let mut data = RawPacket::new();
-        data.encode(&varint!(self.raw_packet.len() + pid_encoded.len()));
+        data.encode(&varint!(self.raw_packet.len() + pid_encoded.len()))?;
         data.push_vec(pid_encoded.get_vec());
         data.push_vec(self.raw_packet.get_vec());
 
         Ok(data.get_vec())
     }
 
-    pub fn get_data_compressed(&self, compression_threshold: i32) -> Result<Vec<u8>, ()> {
+    pub fn get_data_compressed(&self, compression_threshold: i32) -> crate::Result<Vec<u8>> {
         let mut pid_encoded = RawPacket::new();
         match self.pid {
-            Some(pid) => pid_encoded.encode(&pid),
-            None => return Err(()),
-        }
+            Some(pid) => pid_encoded.encode(&pid)?,
+            None => return Err(crate::Error::PacketIdNotSet),
+        };
 
         let mut data = RawPacket::new();
         data.push_vec(pid_encoded.get_vec());
@@ -57,10 +57,10 @@ impl Packet {
         };
 
         let mut data_length_encoded = RawPacket::new();
-        data_length_encoded.encode(&varint!(data_length));
+        data_length_encoded.encode(&varint!(data_length))?;
 
         let mut return_data = RawPacket::new();
-        return_data.encode(&varint!(data_length_encoded.len() + data.len()));
+        return_data.encode(&varint!(data_length_encoded.len() + data.len()))?;
         return_data.push_vec(data_length_encoded.get_vec());
         return_data.push_vec(data.get_vec());
 

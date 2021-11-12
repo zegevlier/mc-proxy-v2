@@ -1,9 +1,10 @@
 use crate::{varint, VarInt};
 
 impl crate::ProtoEnc for String {
-    fn encode(&self, p: &mut crate::RawPacket) {
-        p.encode(&varint!(self.len()));
+    fn encode(&self, p: &mut crate::RawPacket) -> crate::Result<()> {
+        p.encode(&varint!(self.len()))?;
         p.push_slice(self.as_bytes());
+        Ok(())
     }
 }
 

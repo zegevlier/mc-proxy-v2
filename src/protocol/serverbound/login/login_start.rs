@@ -53,7 +53,7 @@ impl Parsable for LoginStart {
                         let mut new_packet = RawPacket::new();
                         new_packet.encode(
                             &"{\"text\":\"WS server down! Please report this!\"}".to_string(),
-                        );
+                        )?;
 
                         return Ok(vec![(
                             Packet::from(new_packet, fid_to_pid(crate::functions::Fid::Disconnect)),
@@ -92,7 +92,7 @@ impl Parsable for LoginStart {
                 false => {
                     log::error!("No client found listening for that name");
                     let mut new_packet = RawPacket::new();
-                    new_packet.encode(&"{\"text\":\"Failed to authenticate\"}".to_string());
+                    new_packet.encode(&"{\"text\":\"Failed to authenticate\"}".to_string())?;
 
                     return Ok(vec![(
                         Packet::from(new_packet, fid_to_pid(crate::functions::Fid::Disconnect)),
@@ -105,7 +105,7 @@ impl Parsable for LoginStart {
                 Ok(msg) => msg,
                 Err(_) => {
                     let mut new_packet = RawPacket::new();
-                    new_packet.encode(&"{\"text\":\"Failed to authenticate\"}".to_string());
+                    new_packet.encode(&"{\"text\":\"Failed to authenticate\"}".to_string())?;
 
                     return Ok(vec![(
                         Packet::from(new_packet, fid_to_pid(crate::functions::Fid::Disconnect)),
@@ -126,7 +126,7 @@ impl Parsable for LoginStart {
             } else {
                 log::error!("Connection disallowed!");
                 let mut new_packet = RawPacket::new();
-                new_packet.encode(&"{\"text\":\"Failed to authenticate\"}".to_string());
+                new_packet.encode(&"{\"text\":\"Failed to authenticate\"}".to_string())?;
 
                 return Ok(vec![(
                     Packet::from(new_packet, fid_to_pid(crate::functions::Fid::Disconnect)),
@@ -171,7 +171,8 @@ impl packet::ProtoDec for LoginStart {
 }
 
 impl packet::ProtoEnc for LoginStart {
-    fn encode(&self, p: &mut RawPacket) {
-        p.encode(&self.username);
+    fn encode(&self, p: &mut RawPacket) -> packet::Result<()> {
+        p.encode(&self.username)?;
+        Ok(())
     }
 }

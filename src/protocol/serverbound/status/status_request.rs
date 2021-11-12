@@ -27,5 +27,7 @@ impl packet::ProtoDec for StatusRequest {
 }
 
 impl packet::ProtoEnc for StatusRequest {
-    fn encode(&self, _p: &mut RawPacket) {}
+    fn encode(&self, _p: &mut RawPacket) -> packet::Result<()> {
+        Ok(())
+    }
 }

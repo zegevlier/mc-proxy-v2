@@ -39,7 +39,8 @@ impl packet::ProtoDec for SetCompression {
 }
 
 impl packet::ProtoEnc for SetCompression {
-    fn encode(&self, p: &mut RawPacket) {
-        p.encode(&self.threshold);
+    fn encode(&self, p: &mut RawPacket) -> packet::Result<()> {
+        p.encode(&self.threshold)?;
+        Ok(())
     }
 }

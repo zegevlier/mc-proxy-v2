@@ -29,7 +29,8 @@ impl packet::ProtoDec for StatusPing {
 }
 
 impl packet::ProtoEnc for StatusPing {
-    fn encode(&self, p: &mut RawPacket) {
-        p.encode(&self.payload);
+    fn encode(&self, p: &mut RawPacket) -> packet::Result<()> {
+        p.encode(&self.payload)?;
+        Ok(())
     }
 }

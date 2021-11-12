@@ -1,7 +1,11 @@
-use crate::{error::Result, RawPacket, SafeDefault};
+use crate::{error::Result, Packet, RawPacket, SafeDefault};
 
 pub trait ProtoEnc {
-    fn encode(&self, p: &mut RawPacket);
+    fn encode(&self, p: &mut RawPacket) -> Result<()>;
+
+    fn encode_packet(&self) -> Result<Packet> {
+        unimplemented!()
+    }
 }
 
 pub trait ProtoDec: SafeDefault {

@@ -25,7 +25,7 @@ impl Default for VarInt {
 }
 
 impl crate::ProtoEnc for VarInt {
-    fn encode(&self, p: &mut crate::RawPacket) {
+    fn encode(&self, p: &mut crate::RawPacket) -> crate::Result<()> {
         let mut value = u32::from_le_bytes(self.value.to_le_bytes());
         loop {
             let mut temp: u8 = (value & 0x7F) as u8;
@@ -38,6 +38,7 @@ impl crate::ProtoEnc for VarInt {
                 break;
             }
         }
+        Ok(())
     }
 }
 
@@ -169,7 +170,7 @@ mod tests {
     fn encode() {
         let mut packet = RawPacket::new();
         for (p, v) in get_test_values() {
-            packet.encode(&VarInt::from(v));
+            packet.encode(&VarInt::from(v)).unwrap();
             assert_eq!(packet.get_vec(), p);
             packet.clear()
         }

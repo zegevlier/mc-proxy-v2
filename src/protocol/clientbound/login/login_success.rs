@@ -19,8 +19,8 @@ impl Parsable for LoginSuccess {
     }
 }
 
-impl std::fmt::Display for LoginSuccess {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} {}", self.uuid, self.username,)
-    }
-}
+// impl std::fmt::Display for LoginSuccess {
+//     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+//         write!(f, "{} {}", self.uuid, self.username,)
+//     }
+// }

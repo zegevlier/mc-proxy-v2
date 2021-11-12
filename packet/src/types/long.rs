@@ -1,8 +1,9 @@
 use std::convert::TryInto;
 
 impl crate::ProtoEnc for i64 {
-    fn encode(&self, p: &mut crate::RawPacket) {
+    fn encode(&self, p: &mut crate::RawPacket) -> crate::Result<()> {
         p.push_slice(&self.to_be_bytes());
+        Ok(())
     }
 }
 
