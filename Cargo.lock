@@ -361,7 +361,7 @@ dependencies = [
  "cfg-if",
  "crc32fast",
  "libc",
- "miniz_oxide",
+ "miniz_oxide 0.4.4",
 ]
 
 [[package]]
@@ -804,7 +804,7 @@ dependencies = [
  "hex",
  "log",
  "maplit",
- "miniz_oxide",
+ "miniz_oxide 0.5.1",
  "num-bigint-dig",
  "parking_lot",
  "rand 0.8.4",
@@ -841,6 +841,15 @@ checksum = "a92518e98c078586bc6c934028adcca4c92a53d6a958196de835170a01d84e4b"
 dependencies = [
  "adler",
  "autocfg 1.0.1",
+]
+
+[[package]]
+name = "miniz_oxide"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d2b29bd4bc3f33391105ebee3589c19197c4271e3e5a9ec9bfe8127eeff8f082"
+dependencies = [
+ "adler",
 ]
 
 [[package]]
