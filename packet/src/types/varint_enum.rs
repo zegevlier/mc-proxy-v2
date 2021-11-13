@@ -2,7 +2,7 @@
 
 #[macro_export]
 macro_rules! varint_enum {
-    ($name:ident {
+    ($name:ident; $($thing:meta),* $(;)? {
         $(
             $discriminant:literal = $variant:ident
             $(
@@ -16,7 +16,7 @@ macro_rules! varint_enum {
     }) => {
         use $crate::Varint;
         #[derive(
-            Debug, Clone, PartialEq, Eq, PartialOrd, Hash, serde::Serialize, serde::Deserialize,
+            Debug, Clone, PartialEq, Eq, PartialOrd, Hash, serde::Serialize, serde::Deserialize, $($thing),*
         )]
         pub enum $name {
             Unknown,
@@ -33,7 +33,7 @@ macro_rules! varint_enum {
         }
 
         impl crate::ProtoEnc for $name {
-            fn encode(&self, p: &mut crate::RawPacket) -> crate::Result<()> {
+            fn encode(&self, p: &mut crate::RawPacket) -> $crate::Result<()> {
                 match self {
                     $(
                         $name::$variant
@@ -48,14 +48,14 @@ macro_rules! varint_enum {
                             $($(p.encode($field)?);*)?
                         },
                     )*
-                    $name::Unknown => return Err($crate::error::Error::UnknownEnum),
+                    $name::Unknown => return Err($crate::Error::UnknownEnum),
                 }
                 Ok(())
             }
         }
 
         impl crate::ProtoDec for $name {
-            fn decode_ret(p: &mut crate::RawPacket) -> crate::Result<Self>
+            fn decode_ret(p: &mut crate::RawPacket) -> $crate::Result<Self>
             where
                 Self: Sized,
             {
@@ -75,13 +75,13 @@ macro_rules! varint_enum {
                 })
             }
 
-            fn decode(&mut self, p: &mut crate::RawPacket) -> crate::Result<()> {
+            fn decode(&mut self, p: &mut crate::RawPacket) -> $crate::Result<()> {
                 *self = Self::decode_ret(p)?;
                 Ok(())
             }
         }
 
-        impl crate::SafeDefault for $name {
+        impl $crate::SafeDefault for $name {
             fn default() -> Self {
                 $name::Unknown
             }
@@ -96,7 +96,7 @@ mod tests {
     #[test]
     fn test_varint_enum() {
         varint_enum! {
-            State {
+            State; {
                 0 = Login,
                 1 = Play,
             }
@@ -112,7 +112,7 @@ mod tests {
     #[test]
     fn test_varint_enum_with_fields() {
         varint_enum! {
-            State {
+            State; {
                 0 = Login {
                     name: String,
                 },

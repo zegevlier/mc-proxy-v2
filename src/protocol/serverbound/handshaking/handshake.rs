@@ -1,15 +1,14 @@
-use crate::parsable::Parsable;
-use crate::{SharedState, State};
-use serde::Serialize;
+use crate::{packet, SharedState, State};
 
-use packet::{varint, Packet, RawPacket, SafeDefault, Varint};
+use packet::Varint;
 
-#[derive(Clone, Serialize)]
-pub struct Handshake {
-    pub protocol_version: Varint,
-    pub server_address: String,
-    pub server_port: u16,
-    pub next_state: State,
+packet! {
+    Handshake, -disp, {
+        protocol_version: Varint,
+        server_address: String,
+        server_port: u16,
+        next_state: State,
+    }
 }
 
 impl Parsable for Handshake {
@@ -27,60 +26,5 @@ impl std::fmt::Display for Handshake {
             "{} {}:{} {:?}",
             self.protocol_version, self.server_address, self.server_port, self.next_state
         )
-    }
-}
-
-impl SafeDefault for Handshake {
-    fn default() -> Self {
-        Handshake {
-            protocol_version: Default::default(),
-            server_address: String::new(),
-            server_port: 0,
-            next_state: State::Handshaking,
-        }
-    }
-}
-
-impl packet::ProtoDec for Handshake {
-    fn decode(&mut self, p: &mut RawPacket) -> packet::Result<()> {
-        self.protocol_version = p.decode()?;
-        self.server_address = p.decode()?;
-        self.server_port = p.decode()?;
-        self.next_state = match p.decode::<Varint>()?.to::<i32>() {
-            1 => State::Status,
-            2 => State::Login,
-            _ => return Err(packet::Error::InvalidVarintEnum),
-        };
-        Ok(())
-    }
-}
-
-impl packet::ProtoEnc for Handshake {
-    fn encode(&self, p: &mut RawPacket) -> packet::Result<()> {
-        p.encode(&self.protocol_version)?;
-        p.encode(&self.server_address)?;
-        p.encode(&self.server_port)?;
-        p.encode(&varint!(match self.next_state {
-            State::Status => 1,
-            State::Login => 2,
-            _ => return Err(packet::Error::InvalidVarintEnum),
-        }))?;
-        Ok(())
-    }
-
-    fn encode_packet(&self) -> packet::Result<Packet> {
-        let mut raw_packet = RawPacket::new();
-        raw_packet.encode(&self.protocol_version)?;
-        raw_packet.encode(&self.server_address.to_owned())?;
-        raw_packet.encode(&self.server_port)?;
-        raw_packet.encode(&varint!(match self.next_state {
-            State::Status => 1,
-            State::Login => 2,
-            _ => return Err(packet::Error::InvalidVarintEnum),
-        }))?;
-        Ok(Packet::from(
-            raw_packet,
-            crate::functions::fid_to_pid(crate::functions::Fid::Handshake),
-        ))
     }
 }
