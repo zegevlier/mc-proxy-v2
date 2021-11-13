@@ -25,7 +25,7 @@ macro_rules! packet {
     ($name:ident, disp, $($field_name:ident),* $(,)?) => {
         impl std::fmt::Display for $name {
             fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                write!(f, "{}", [$(self.$field_name.to_string()),*].join(" "))
+                write!(f, "{}", <[&str]>::join(&[$(&format!("{}", self.$field_name)),*], " "))
             }
         }
     };
@@ -40,6 +40,7 @@ macro_rules! packet {
     };
     ($name:ident, dec, $($field_name:ident),* $(,)?) => {
         impl packet::ProtoDec for $name {
+            #[allow(unused_variables)]
             fn decode(&mut self, p: &mut RawPacket) -> packet::Result<()> {
                 $(self.$field_name = p.decode()?;)*
                 Ok(())
@@ -48,6 +49,7 @@ macro_rules! packet {
     };
     ($name:ident, enc, $($field_name:ident),* $(,)?) => {
         impl packet::ProtoEnc for $name {
+            #[allow(unused_variables)]
             fn encode(&self, p: &mut RawPacket) -> packet::Result<()> {
                 $(p.encode(&self.$field_name)?;)*
                 Ok(())

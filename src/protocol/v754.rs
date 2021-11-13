@@ -15,15 +15,15 @@ functions_macro! {
         handshaking {
         }
         status {
-            // 0x00 => StatusResponse,
-            // 0x01 => StatusPong,
+            0x00 => StatusResponse,
+            0x01 => StatusPong,
         }
         login {
             0x00 => Disconnect,
             0x01 => EncRequest,
             0x02 => LoginSuccess,
             0x03 => SetCompression,
-            // 0x04 => PluginRequest,
+            0x04 => PluginRequest,
         }
         play {
             // 0x00 => SpawnEntity,
@@ -56,13 +56,13 @@ functions_macro! {
             0x00 => Handshake
         }
         status {
-            // 0x00 => StatusRequest,
-            // 0x01 => StatusPing,
+            0x00 => StatusRequest,
+            0x01 => StatusPing,
         }
         login {
             0x00 => LoginStart,
             0x01 => EncResponse,
-            // 0x02 => PluginResponse,
+            0x02 => PluginResponse,
         }
         play {
             // 0x03 => ChatMessageServerbound,

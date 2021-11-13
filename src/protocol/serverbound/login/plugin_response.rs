@@ -1,34 +1,18 @@
-use crate::{parsable::Parsable, raw_packet::RawPacket};
+use crate::{packet, utils};
 use hex::encode;
 
-use crate::utils;
-use serde::Serialize;
-
-#[derive(Clone, Serialize)]
-pub struct PluginResponse {
+packet! { PluginResponse, -disp, {
     message_id: i32,
     success: bool,
     data: Vec<u8>,
-}
+}}
 
-impl Parsable for PluginResponse {
-    fn default() -> Self {
-        Self {
-            message_id: 0,
-            success: false,
-            data: Vec::new(),
-        }
-    }
+impl Parsable for PluginResponse {}
 
-    fn parse_packet(&mut self, mut packet: RawPacket) -> Result<(), ()> {
-        self.message_id = packet.decode_varint()?;
-        self.success = packet.decode_bool()?;
-        self.data = packet.get_vec();
-        Ok(())
-    }
-
-    fn get_printable(&self) -> String {
-        format!(
+impl std::fmt::Display for PluginResponse {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
             "{} {} {}",
             self.message_id,
             self.success,

@@ -1,17 +1,17 @@
 logging_packets:
   - Handshake
-  # - StatusResponse
-  # - StatusPong
-  # - StatusRequest
-  # - StatusPing
+  - StatusResponse
+  - StatusPong
+  - StatusRequest
+  - StatusPing
   - Disconnect
   - EncRequest
   - LoginSuccess
   - SetCompression
-  # - PluginRequest
+  - PluginRequest
   - LoginStart
   - EncResponse
-  # - PluginResponse
+  - PluginResponse
   # - SpawnEntity
   # - SpawnXpOrb
   # - SpawnLivingEntity

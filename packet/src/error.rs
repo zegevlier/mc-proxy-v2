@@ -10,6 +10,7 @@ pub enum Error {
     InvalidVarintEnum,
     PacketIdNotSet,
     UnknownEnum,
+    InvalidData,
 }
 
 impl Display for Error {
@@ -21,6 +22,7 @@ impl Display for Error {
             Error::InvalidVarintEnum => formatter.write_str("invalid varint enum"),
             Error::PacketIdNotSet => formatter.write_str("packet id not set"),
             Error::UnknownEnum => formatter.write_str("unknown enum"),
+            Error::InvalidData => formatter.write_str("invalid data"),
         }
     }
 }
