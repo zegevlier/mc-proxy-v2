@@ -2,10 +2,10 @@
 macro_rules! packet {
     ($name:ident, all, {$($field_name:ident : $field_type:ty),* $(,)?}) => {
         packet!($name, struc, $($field_name : $field_type),*);
-        packet!($name, disp, $($field_name : $field_type),*);
-        packet!($name, def, $($field_name : $field_type),*);
-        packet!($name, dec, $($field_name : $field_type),*);
-        packet!($name, enc, $($field_name : $field_type),*);
+        packet!($name, disp, $($field_name),*);
+        packet!($name, def, $($field_name),*);
+        packet!($name, dec, $($field_name),*);
+        packet!($name, enc, $($field_name),*);
     };
     ($name:ident, struc, $($field_name:ident : $field_type:ty),* $(,)?) => {
         use crate::{parsable::Parsable, functions::fid_to_pid};
@@ -16,14 +16,14 @@ macro_rules! packet {
             $(pub $field_name: $field_type),*
         }
     };
-    ($name:ident, disp, $($field_name:ident : $field_type:ty),* $(,)?) => {
+    ($name:ident, disp, $($field_name:ident),* $(,)?) => {
         impl std::fmt::Display for $name {
             fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                 write!(f, "{}", [$(self.$field_name.to_string()),*].join(" "))
             }
         }
     };
-    ($name:ident, def, $($field_name:ident : $field_type:ty),* $(,)?) => {
+    ($name:ident, def, $($field_name:ident),* $(,)?) => {
         impl SafeDefault for $name {
             fn default() -> Self {
                 Self {
@@ -32,7 +32,7 @@ macro_rules! packet {
             }
         }
     };
-    ($name:ident, dec, $($field_name:ident : $field_type:ty),* $(,)?) => {
+    ($name:ident, dec, $($field_name:ident),* $(,)?) => {
         impl packet::ProtoDec for $name {
             fn decode(&mut self, p: &mut RawPacket) -> packet::Result<()> {
                 $(self.$field_name = p.decode()?;)*
@@ -40,7 +40,7 @@ macro_rules! packet {
             }
         }
     };
-    ($name:ident, enc, $($field_name:ident : $field_type:ty),* $(,)?) => {
+    ($name:ident, enc, $($field_name:ident),* $(,)?) => {
         impl packet::ProtoEnc for $name {
             fn encode(&self, p: &mut RawPacket) -> packet::Result<()> {
                 $(p.encode(&self.$field_name)?;)*

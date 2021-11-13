@@ -12,7 +12,6 @@ pub struct RawPacket {
 
 impl Read for RawPacket {
     fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
-        // (&mut self.data[..]).read(buf)
         let n = Read::read(&mut &self.data[0..], buf)?;
         self.data.drain(0..n);
         Ok(n)
@@ -94,6 +93,7 @@ impl RawPacket {
     pub fn encode(&mut self, value: &dyn ProtoEnc) -> crate::Result<()> {
         value.encode(self)
     }
+
     pub fn decode<T>(&mut self) -> Result<T>
     where
         T: Sized + ProtoDec,
