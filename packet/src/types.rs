@@ -4,6 +4,8 @@ mod uuid;
 pub use uuid::Uuid;
 mod chat;
 pub use chat::Chat;
+mod len_prefixed_vec;
+pub use len_prefixed_vec::LenPrefixedVec;
 
 mod nums;
 mod string;

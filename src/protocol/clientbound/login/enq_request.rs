@@ -1,36 +1,26 @@
-use crate::parsable::Parsable;
-use crate::{
-    conf::Configuration,
-    functions::{fid_to_pid, Fid},
-    utils, Ciphers,
-};
-use crate::{Direction, SharedState};
+use crate::{conf::Configuration, packet, utils, Ciphers, Direction, SharedState};
+use packet::{LenPrefixedVec, ProtoEnc};
+
+use std::{collections::HashMap, iter};
+
 use hex::encode;
 use rand::Rng;
 use regex::Regex;
 
-use packet::{Packet, RawPacket, SafeDefault, Varint};
-
-use crypto::digest::Digest;
-use crypto::sha1::Sha1;
-
-use std::collections::HashMap;
-use std::iter;
+use crypto::{digest::Digest, sha1::Sha1};
 
 use num_bigint_dig::BigUint;
 use reqwest::Client;
 use rsa::{PaddingScheme, PublicKey, RsaPublicKey};
 use rsa_der::public_key_from_der;
 use rustc_serialize::hex::ToHex;
-use serde::Serialize;
 
-#[derive(Clone, Serialize)]
-pub struct EncRequest {
-    server_id: String,
-    public_key_length: Varint,
-    public_key: Vec<u8>,
-    verify_token_length: Varint,
-    verify_token: Vec<u8>,
+packet! {EncRequest, -disp,
+    {
+        server_id: String,
+        public_key: LenPrefixedVec<u8>,
+        verify_token: LenPrefixedVec<u8>,
+    }
 }
 
 const LEADING_ZERO_REGEX: &str = r#"^0+"#;
@@ -64,7 +54,7 @@ impl Parsable for EncRequest {
 
         hash.input(self.server_id.as_bytes());
         hash.input(&status.secret_key);
-        hash.input(&self.public_key);
+        hash.input(&self.public_key.v);
 
         let mut hex: Vec<u8> = iter::repeat(0).take((hash.output_bits() + 7) / 8).collect();
         hash.result(&mut hex);
@@ -111,34 +101,32 @@ impl Parsable for EncRequest {
 
         // Then get a 204 no content back
         let mut rng = rand::rngs::OsRng;
-        let (n, e) = public_key_from_der(&self.public_key).unwrap();
+        let (n, e) = public_key_from_der(&self.public_key.v).unwrap();
         let public_key =
             RsaPublicKey::new(BigUint::from_bytes_be(&n), BigUint::from_bytes_be(&e)).unwrap();
-        let padding = PaddingScheme::new_pkcs1v15_encrypt();
 
-        let mut unformatted_packet = crate::RawPacket::new();
-        unformatted_packet.encode(&packet::varint!(128))?;
-        unformatted_packet.push_vec(
-            public_key
-                .encrypt(&mut rng, padding, &status.secret_key[..])
-                .unwrap(),
-        );
-        unformatted_packet.encode(&packet::varint!(128))?;
-        let padding = PaddingScheme::new_pkcs1v15_encrypt();
-
-        unformatted_packet.push_vec(
-            public_key
-                .encrypt(&mut rng, padding, &self.verify_token[..])
-                .unwrap(),
-        );
-        let response_packet = Packet::from(unformatted_packet, fid_to_pid(Fid::EncResponse));
+        let response_packet = crate::functions::serverbound::login::EncResponse {
+            shared_secret: LenPrefixedVec::from(
+                public_key
+                    .encrypt(
+                        &mut rng,
+                        PaddingScheme::new_pkcs1v15_encrypt(),
+                        &status.secret_key[..],
+                    )
+                    .unwrap(),
+            ),
+            verify_token: LenPrefixedVec::from(
+                public_key
+                    .encrypt(
+                        &mut rng,
+                        PaddingScheme::new_pkcs1v15_encrypt(),
+                        &self.verify_token.v[..],
+                    )
+                    .unwrap(),
+            ),
+        }
+        .encode_packet()?;
         log::debug!("Sending serverbound encryption response");
-
-        // Send to proxy_server packet:
-        // Shared key length (varint)
-        // Shared key encrypted with public key (byte array)
-        // Verify token length (varint)
-        // Verify token encrypted with public key (byte array)
 
         // Reset the access_token to not keep it in memory needlessly.
         status.access_token = String::new();
@@ -158,46 +146,10 @@ impl std::fmt::Display for EncRequest {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "{} {} {} {}",
-            // self.server_id,
-            self.public_key_length,
-            utils::make_string_fixed_length(encode(self.public_key.clone()), 20),
-            self.verify_token_length,
-            utils::make_string_fixed_length(encode(self.verify_token.clone()), 20)
+            "{} {} {}",
+            self.server_id,
+            utils::make_string_fixed_length(encode(self.public_key.v.clone()), 20),
+            utils::make_string_fixed_length(encode(self.verify_token.v.clone()), 20)
         )
-    }
-}
-
-impl SafeDefault for EncRequest {
-    fn default() -> Self {
-        Self {
-            server_id: String::new(),
-            public_key_length: Default::default(),
-            public_key: Vec::new(),
-            verify_token_length: Default::default(),
-            verify_token: Vec::new(),
-        }
-    }
-}
-
-impl packet::ProtoDec for EncRequest {
-    fn decode(&mut self, p: &mut RawPacket) -> packet::Result<()> {
-        self.server_id = p.decode()?;
-        self.public_key_length = p.decode()?;
-        self.public_key = p.read(self.public_key_length.into())?;
-        self.verify_token_length = p.decode()?;
-        self.verify_token = p.read(self.verify_token_length.into())?;
-        Ok(())
-    }
-}
-
-impl packet::ProtoEnc for EncRequest {
-    fn encode(&self, p: &mut RawPacket) -> packet::Result<()> {
-        p.encode(&self.server_id)?;
-        p.encode(&self.public_key_length)?;
-        p.push_slice(&self.public_key);
-        p.encode(&self.verify_token_length)?;
-        p.push_slice(&self.verify_token);
-        Ok(())
     }
 }

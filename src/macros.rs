@@ -7,6 +7,12 @@ macro_rules! packet {
         packet!($name, dec, $($field_name),*);
         packet!($name, enc, $($field_name),*);
     };
+    ($name:ident, -disp, {$($field_name:ident : $field_type:ty),* $(,)?}) => {
+        packet!($name, struc, $($field_name : $field_type),*);
+        packet!($name, def, $($field_name),*);
+        packet!($name, dec, $($field_name),*);
+        packet!($name, enc, $($field_name),*);
+    };
     ($name:ident, struc, $($field_name:ident : $field_type:ty),* $(,)?) => {
         use crate::{parsable::Parsable, functions::fid_to_pid};
         use packet::{RawPacket, SafeDefault, Packet};
