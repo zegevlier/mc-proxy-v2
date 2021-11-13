@@ -1,13 +1,13 @@
 logging_packets:
   - Handshake
-  - StatusResponse
-  - StatusPong
-  - StatusRequest
-  - StatusPing
+  # - StatusResponse
+  # - StatusPong
+  # - StatusRequest
+  # - StatusPing
   - Disconnect
   - EncRequest
   - LoginSuccess
-  # - SetCompression
+  - SetCompression
   # - PluginRequest
   - LoginStart
   - EncResponse
@@ -21,7 +21,7 @@ logging_packets:
   # - ChatMessageClientbound
   # - TabCompleteClientbound
   # - ChatMessageServerbound
-  - ResourcePackSend
+  # - ResourcePackSend
   # - ClientSettings
   # - UpdateHealth
   # - PlayerPosition
@@ -35,11 +35,11 @@ logging_packets:
   # - Teams
   # - ResourcePackStatus
   # - EntityEffect
-  - JoinGame
-  - OpenBook
+  # - JoinGame
+  # - OpenBook
   # - ChunkData
-  - PlayerBlockPlace
-  - PlayerPositionAndLook
+  # - PlayerBlockPlace
+  # - PlayerPositionAndLook
 
 player_uuid: f54c74dd3362422c80f9da71eca4aaa3
 player_auth_token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI2NTY0M2EzYmU0NGY4NmVlODE4OWEwMDllMGNlYTNmYSIsInlnZ3QiOiI0ZTc0MDk5NWI2MzQ0YmM5OTAxOGY4MjI1YmQ0ZjU0NSIsInNwciI6ImY1NGM3NGRkMzM2MjQyMmM4MGY5ZGE3MWVjYTRhYWEzIiwiaXNzIjoiWWdnZHJhc2lsLUF1dGgiLCJleHAiOjE2MDY5Mjg0MzAsImlhdCI6MTYwNjc1NTYzMH0.flsDw7RhPNJWAq2UEWO8tKKyPOn8V5NhzCXa9UxmvNc
