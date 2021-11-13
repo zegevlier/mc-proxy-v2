@@ -592,8 +592,10 @@ async fn main() -> std::io::Result<()> {
             ip
         );
         // Start the client-handling thread (this will complete quickly)
-        handle_connection(socket, ip, next_connection_id)
-            .await
-            .unwrap();
+        tokio::spawn(async move {
+            handle_connection(socket, ip, next_connection_id)
+                .await
+                .unwrap();
+        });
     }
 }
