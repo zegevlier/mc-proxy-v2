@@ -112,55 +112,46 @@ macro_rules! functions_macro {
 
         impl Functions {
             pub fn new() -> Self {
-                let map: HashMap<Direction, HashMap<State, Vec<Fid>>> = hashmap! {
+                let map: HashMap<Direction, HashMap<State, HashMap<VarInt, Fid>>> = hashmap! {
                     Direction::Clientbound => hashmap! {
-                        State::Handshaking => vec! [
-                            $(Fid::$ch_fid),*
+                        State::Handshaking => hashmap! [
+                            $(VarInt::from($ch_pid) => Fid::$ch_fid),*
                         ],
-                        State::Status => vec! [
-                            $(Fid::$cs_fid),*
+                        State::Status => hashmap! [
+                            $(VarInt::from($cs_pid) => Fid::$cs_fid),*
                         ],
-                        State::Login => vec! [
-                            $(Fid::$cl_fid),*
+                        State::Login => hashmap! [
+                            $(VarInt::from($cl_pid) => Fid::$cl_fid),*
                         ],
-                        State::Play => vec! [
-                            $(Fid::$cp_fid),*
+                        State::Play => hashmap! [
+                            $(VarInt::from($cp_pid) => Fid::$cp_fid),*
                         ],
                     },
                     Direction::Serverbound => hashmap! {
-                        State::Handshaking => vec! [
-                            $(Fid::$sh_fid),*
+                        State::Handshaking => hashmap! [
+                            $(VarInt::from($sh_pid) => Fid::$sh_fid),*
                         ],
-                        State::Status => vec! [
-                            $(Fid::$ss_fid),*
+                        State::Status => hashmap! [
+                            $(VarInt::from($ss_pid) => Fid::$ss_fid),*
                         ],
-                        State::Login => vec! [
-                            $(Fid::$sl_fid),*
+                        State::Login => hashmap! [
+                            $(VarInt::from($sl_pid) => Fid::$sl_fid),*
                         ],
-                        State::Play => vec! [
-                            $(Fid::$sp_fid),*
+                        State::Play => hashmap! [
+                            $(VarInt::from($sp_pid) => Fid::$sp_fid),*
                         ],
                     }
                 };
-                let map = map
-                    .iter()
-                    .map(|(direction, state_fid_vec)| {
-                        (
-                            direction.to_owned(),
-                            state_fid_vec
-                                .iter()
-                                .map(|(state, fid_vec)| {
-                                    let mut hashmap = HashMap::new();
-                                    for fid in fid_vec.to_owned() {
-                                        hashmap.insert(fid_to_pid(fid), fid);
-                                    }
-                                    (state.to_owned(), hashmap)
-                                })
-                                .collect::<HashMap<State, HashMap<VarInt, Fid>>>(),
-                        )
-                    })
-                    .collect();
-                let mut list: HashMap<Fid, Box<dyn Parsable + Send + Sync>> = HashMap::new();
+                let mut list: HashMap<Fid, Box<dyn Parsable + Send + Sync>> = HashMap::with_capacity(
+                    $crate::functions_macro!(@COUNT; $($sh_fid),*) +
+                    $crate::functions_macro!(@COUNT; $($ss_fid),*) +
+                    $crate::functions_macro!(@COUNT; $($sl_fid),*) +
+                    $crate::functions_macro!(@COUNT; $($sp_fid),*) +
+                    $crate::functions_macro!(@COUNT; $($ch_fid),*) +
+                    $crate::functions_macro!(@COUNT; $($cs_fid),*) +
+                    $crate::functions_macro!(@COUNT; $($cl_fid),*) +
+                    $crate::functions_macro!(@COUNT; $($cp_fid),*)
+                );
                 $(list.insert(Fid::$sh_fid, Box::new(serverbound::handshaking::$sh_fid::default()));)*
                 $(list.insert(Fid::$ss_fid, Box::new(serverbound::status::$ss_fid::default()));)*
                 $(list.insert(Fid::$sl_fid, Box::new(serverbound::login::$sl_fid::default()));)*
@@ -169,7 +160,6 @@ macro_rules! functions_macro {
                 $(list.insert(Fid::$cs_fid, Box::new(clientbound::status::$cs_fid::default()));)*
                 $(list.insert(Fid::$cl_fid, Box::new(clientbound::login::$cl_fid::default()));)*
                 $(list.insert(Fid::$cp_fid, Box::new(clientbound::play::$cp_fid::default()));)*
-
                 Self {
                     map,
                     list
@@ -195,5 +185,11 @@ macro_rules! functions_macro {
                 Self::new()
             }
         }
+    };
+    (@COUNT; $($thing:ident),*  $(,)?) => {
+        <[()]>::len(&[$($crate::functions_macro!(@SUB; $thing)),*])
+    };
+    (@SUB; $thing:ident) => {
+        ()
     };
 }
