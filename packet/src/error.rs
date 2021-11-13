@@ -9,6 +9,7 @@ pub enum Error {
     VarIntTooBig,
     InvalidVarintEnum,
     PacketIdNotSet,
+    UnknownEnum,
 }
 
 impl Display for Error {
@@ -19,6 +20,7 @@ impl Display for Error {
             Error::VarIntTooBig => formatter.write_str("varint too big"),
             Error::InvalidVarintEnum => formatter.write_str("invalid varint enum"),
             Error::PacketIdNotSet => formatter.write_str("packet id not set"),
+            Error::UnknownEnum => formatter.write_str("unknown enum"),
         }
     }
 }

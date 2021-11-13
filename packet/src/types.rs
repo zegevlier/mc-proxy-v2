@@ -9,6 +9,7 @@ pub use len_prefixed_vec::LenPrefixedVec;
 
 mod nums;
 mod string;
+mod varint_enum;
 
 pub trait SafeDefault {
     fn default() -> Self
