@@ -1,4 +1,4 @@
-use crate::{varint, VarInt};
+use crate::{varint, Varint};
 
 impl crate::ProtoEnc for String {
     fn encode(&self, p: &mut crate::RawPacket) -> crate::Result<()> {
@@ -13,7 +13,7 @@ impl crate::ProtoDec for String {
     where
         Self: Sized,
     {
-        let string_length = p.decode::<VarInt>()?.into();
+        let string_length = p.decode::<Varint>()?.into();
         Ok(String::from_utf8(p.read(string_length)?).unwrap())
     }
 

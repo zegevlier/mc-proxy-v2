@@ -9,7 +9,7 @@ use hex::encode;
 use rand::Rng;
 use regex::Regex;
 
-use packet::{Packet, RawPacket, SafeDefault, VarInt};
+use packet::{Packet, RawPacket, SafeDefault, Varint};
 
 use crypto::digest::Digest;
 use crypto::sha1::Sha1;
@@ -27,9 +27,9 @@ use serde::Serialize;
 #[derive(Clone, Serialize)]
 pub struct EncRequest {
     server_id: String,
-    public_key_length: VarInt,
+    public_key_length: Varint,
     public_key: Vec<u8>,
-    verify_token_length: VarInt,
+    verify_token_length: Varint,
     verify_token: Vec<u8>,
 }
 

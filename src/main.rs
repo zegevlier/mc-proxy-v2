@@ -25,7 +25,7 @@ use miniz_oxide::inflate::decompress_to_vec_zlib;
 use parking_lot::{Mutex, RwLock};
 use trust_dns_resolver::{config::*, TokioAsyncResolver};
 
-use packet::{varint, ProtoDec, ProtoEnc, RawPacket, VarInt};
+use packet::{varint, ProtoDec, ProtoEnc, RawPacket, Varint};
 
 use crate::{
     logging::LogQueue,
@@ -170,7 +170,7 @@ async fn parser(
             // A backup of the packet is made, so if the packet is incomplete it will be reset to that.
             let original_data = unprocessed_data.get_vec();
 
-            let packet_length = match unprocessed_data.decode::<VarInt>() {
+            let packet_length = match unprocessed_data.decode::<Varint>() {
                 Ok(packet_length) => packet_length.into(),
                 Err(_) => {
                     unprocessed_data.set(original_data);
@@ -194,7 +194,7 @@ async fn parser(
 
             // Uncompress if needed
             if shared_status.read().compress > 0 {
-                let data_length: VarInt = packet.decode().unwrap();
+                let data_length: Varint = packet.decode().unwrap();
                 if data_length > 0 {
                     let decompressed_packet = match decompress_to_vec_zlib(&packet.get_vec()) {
                         Ok(decompressed_packet) => decompressed_packet,
@@ -207,7 +207,7 @@ async fn parser(
                 }
             }
 
-            let packet_id = packet.decode::<VarInt>()?;
+            let packet_id = packet.decode::<Varint>()?;
 
             // Get the Fid of the current packet, if it doesn't get parsed set it to Unparsable
             let func_id =
@@ -364,12 +364,12 @@ async fn handle_connection(
 
     // It tries to parse the first packet
     let mut initial_data = RawPacket::from(buffer);
-    let packet_length: usize = initial_data.decode::<VarInt>()?.into();
+    let packet_length: usize = initial_data.decode::<Varint>()?.into();
     let mut raw_first_packet = RawPacket::from(match initial_data.read(packet_length as usize) {
         Ok(p) => p,
         Err(_) => return Ok(()),
     });
-    let packet_id: VarInt = raw_first_packet.decode()?;
+    let packet_id: Varint = raw_first_packet.decode()?;
 
     // If the packet ID is not 0, it is not a valid minecraft packet.
     if packet_id != 0 {

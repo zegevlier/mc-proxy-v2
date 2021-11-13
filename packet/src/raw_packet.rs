@@ -2,7 +2,7 @@ use std::io::{Read, Write};
 
 use crate::{
     error::{Error, Result},
-    ProtoDec, ProtoEnc, VarInt,
+    ProtoDec, ProtoEnc, Varint,
 };
 
 #[derive(Debug, Clone, Eq, PartialEq, PartialOrd)]
@@ -85,7 +85,7 @@ impl RawPacket {
 
     pub fn prepend_length(&mut self) {
         let mut prepending = Self::new();
-        prepending.encode(&VarInt::from(self.data.len())).unwrap();
+        prepending.encode(&Varint::from(self.data.len())).unwrap();
         prepending.push_vec(self.data.clone());
         self.set(prepending.get_vec());
     }

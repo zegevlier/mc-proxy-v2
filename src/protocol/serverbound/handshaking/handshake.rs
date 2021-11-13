@@ -2,11 +2,11 @@ use crate::parsable::Parsable;
 use crate::{SharedState, State};
 use serde::Serialize;
 
-use packet::{varint, Packet, RawPacket, SafeDefault, VarInt};
+use packet::{varint, Packet, RawPacket, SafeDefault, Varint};
 
 #[derive(Clone, Serialize)]
 pub struct Handshake {
-    pub protocol_version: VarInt,
+    pub protocol_version: Varint,
     pub server_address: String,
     pub server_port: u16,
     pub next_state: State,
@@ -46,7 +46,7 @@ impl packet::ProtoDec for Handshake {
         self.protocol_version = p.decode()?;
         self.server_address = p.decode()?;
         self.server_port = p.decode()?;
-        self.next_state = match p.decode::<VarInt>()?.to::<i32>() {
+        self.next_state = match p.decode::<Varint>()?.to::<i32>() {
             1 => State::Status,
             2 => State::Login,
             _ => return Err(packet::Error::InvalidVarintEnum),

@@ -1,30 +1,30 @@
 #[macro_export]
 macro_rules! varint {
     ($v:expr) => {
-        VarInt::from($v)
+        Varint::from($v)
     };
 }
 
 #[derive(
     Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Hash, serde::Serialize, serde::Deserialize,
 )]
-pub struct VarInt {
+pub struct Varint {
     value: i32,
 }
 
-impl VarInt {
+impl Varint {
     pub fn new(value: i32) -> Self {
         Self { value }
     }
 }
 
-impl Default for VarInt {
+impl Default for Varint {
     fn default() -> Self {
         Self { value: 0 }
     }
 }
 
-impl crate::ProtoEnc for VarInt {
+impl crate::ProtoEnc for Varint {
     fn encode(&self, p: &mut crate::RawPacket) -> crate::Result<()> {
         let mut value = u32::from_le_bytes(self.value.to_le_bytes());
         loop {
@@ -42,8 +42,8 @@ impl crate::ProtoEnc for VarInt {
     }
 }
 
-impl crate::ProtoDec for VarInt {
-    fn decode_ret(p: &mut crate::RawPacket) -> crate::Result<VarInt>
+impl crate::ProtoDec for Varint {
+    fn decode_ret(p: &mut crate::RawPacket) -> crate::Result<Varint>
     where
         Self: Sized,
     {
@@ -72,64 +72,64 @@ impl crate::ProtoDec for VarInt {
     }
 }
 
-impl From<i32> for VarInt {
+impl From<i32> for Varint {
     fn from(value: i32) -> Self {
         Self::new(value)
     }
 }
 
-impl From<VarInt> for i32 {
-    fn from(value: VarInt) -> Self {
+impl From<Varint> for i32 {
+    fn from(value: Varint) -> Self {
         value.value
     }
 }
 
-impl From<usize> for VarInt {
+impl From<usize> for Varint {
     fn from(value: usize) -> Self {
         Self::new(value as i32)
     }
 }
 
-impl From<VarInt> for usize {
-    fn from(value: VarInt) -> Self {
+impl From<Varint> for usize {
+    fn from(value: Varint) -> Self {
         value.value as usize
     }
 }
 
-impl VarInt {
+impl Varint {
     pub fn to<T>(&self) -> T
     where
-        T: From<VarInt>,
+        T: From<Varint>,
     {
         T::from(*self)
     }
 }
 
-impl std::cmp::Ord for VarInt {
+impl std::cmp::Ord for Varint {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
         self.value.cmp(&other.value)
     }
 }
 
-impl std::cmp::PartialEq<i32> for VarInt {
+impl std::cmp::PartialEq<i32> for Varint {
     fn eq(&self, other: &i32) -> bool {
         self.value.eq(&other)
     }
 }
 
-impl std::cmp::PartialOrd<i32> for VarInt {
+impl std::cmp::PartialOrd<i32> for Varint {
     fn partial_cmp(&self, other: &i32) -> Option<std::cmp::Ordering> {
         self.value.partial_cmp(&other)
     }
 }
 
-impl std::fmt::Display for VarInt {
+impl std::fmt::Display for Varint {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(f, "{}", self.value)
     }
 }
 
-impl crate::SafeDefault for VarInt {
+impl crate::SafeDefault for Varint {
     fn default() -> Self {
         Self { value: 0 }
     }
@@ -161,7 +161,7 @@ mod tests {
         let mut packet = RawPacket::new();
         for (p, v) in get_test_values() {
             packet.set(p);
-            assert_eq!(packet.decode(), Ok(VarInt::from(v)));
+            assert_eq!(packet.decode(), Ok(Varint::from(v)));
             packet.clear()
         }
     }
@@ -170,7 +170,7 @@ mod tests {
     fn encode() {
         let mut packet = RawPacket::new();
         for (p, v) in get_test_values() {
-            packet.encode(&VarInt::from(v)).unwrap();
+            packet.encode(&Varint::from(v)).unwrap();
             assert_eq!(packet.get_vec(), p);
             packet.clear()
         }

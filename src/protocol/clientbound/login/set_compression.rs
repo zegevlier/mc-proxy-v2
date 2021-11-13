@@ -1,13 +1,13 @@
 use crate::parsable::Parsable;
 use crate::SharedState;
 
-use packet::{RawPacket, SafeDefault, VarInt};
+use packet::{RawPacket, SafeDefault, Varint};
 
 use serde::Serialize;
 
 #[derive(Clone, Serialize)]
 pub struct SetCompression {
-    threshold: VarInt,
+    threshold: Varint,
 }
 
 impl Parsable for SetCompression {

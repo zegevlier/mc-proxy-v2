@@ -88,57 +88,57 @@ macro_rules! functions_macro {
             }
         }
     ) => {
-        use packet::VarInt;
+        use packet::Varint;
         use packet::SafeDefault;
 
         pub struct Functions {
-            map: HashMap<Direction, HashMap<State, HashMap<VarInt, Fid>>>,
+            map: HashMap<Direction, HashMap<State, HashMap<Varint, Fid>>>,
             list: HashMap<Fid, Box<dyn Parsable + Send + Sync>>,
         }
 
-        pub fn fid_to_pid(fid: Fid) -> VarInt {
+        pub fn fid_to_pid(fid: Fid) -> Varint {
             match fid {
-                Fid::Unparsable => VarInt::from(-1),
-                $(Fid::$ch_fid => VarInt::from($ch_pid),)*
-                $(Fid::$cs_fid => VarInt::from($cs_pid),)*
-                $(Fid::$cl_fid => VarInt::from($cl_pid),)*
-                $(Fid::$cp_fid => VarInt::from($cp_pid),)*
-                $(Fid::$sh_fid => VarInt::from($sh_pid),)*
-                $(Fid::$ss_fid => VarInt::from($ss_pid),)*
-                $(Fid::$sl_fid => VarInt::from($sl_pid),)*
-                $(Fid::$sp_fid => VarInt::from($sp_pid),)*
+                Fid::Unparsable => Varint::from(-1),
+                $(Fid::$ch_fid => Varint::from($ch_pid),)*
+                $(Fid::$cs_fid => Varint::from($cs_pid),)*
+                $(Fid::$cl_fid => Varint::from($cl_pid),)*
+                $(Fid::$cp_fid => Varint::from($cp_pid),)*
+                $(Fid::$sh_fid => Varint::from($sh_pid),)*
+                $(Fid::$ss_fid => Varint::from($ss_pid),)*
+                $(Fid::$sl_fid => Varint::from($sl_pid),)*
+                $(Fid::$sp_fid => Varint::from($sp_pid),)*
             }
         }
 
         impl Functions {
             pub fn new() -> Self {
-                let map: HashMap<Direction, HashMap<State, HashMap<VarInt, Fid>>> = hashmap! {
+                let map: HashMap<Direction, HashMap<State, HashMap<Varint, Fid>>> = hashmap! {
                     Direction::Clientbound => hashmap! {
                         State::Handshaking => hashmap! [
-                            $(VarInt::from($ch_pid) => Fid::$ch_fid),*
+                            $(Varint::from($ch_pid) => Fid::$ch_fid),*
                         ],
                         State::Status => hashmap! [
-                            $(VarInt::from($cs_pid) => Fid::$cs_fid),*
+                            $(Varint::from($cs_pid) => Fid::$cs_fid),*
                         ],
                         State::Login => hashmap! [
-                            $(VarInt::from($cl_pid) => Fid::$cl_fid),*
+                            $(Varint::from($cl_pid) => Fid::$cl_fid),*
                         ],
                         State::Play => hashmap! [
-                            $(VarInt::from($cp_pid) => Fid::$cp_fid),*
+                            $(Varint::from($cp_pid) => Fid::$cp_fid),*
                         ],
                     },
                     Direction::Serverbound => hashmap! {
                         State::Handshaking => hashmap! [
-                            $(VarInt::from($sh_pid) => Fid::$sh_fid),*
+                            $(Varint::from($sh_pid) => Fid::$sh_fid),*
                         ],
                         State::Status => hashmap! [
-                            $(VarInt::from($ss_pid) => Fid::$ss_fid),*
+                            $(Varint::from($ss_pid) => Fid::$ss_fid),*
                         ],
                         State::Login => hashmap! [
-                            $(VarInt::from($sl_pid) => Fid::$sl_fid),*
+                            $(Varint::from($sl_pid) => Fid::$sl_fid),*
                         ],
                         State::Play => hashmap! [
-                            $(VarInt::from($sp_pid) => Fid::$sp_fid),*
+                            $(Varint::from($sp_pid) => Fid::$sp_fid),*
                         ],
                     }
                 };
@@ -166,7 +166,7 @@ macro_rules! functions_macro {
                 }
             }
 
-            pub fn get_name(&self, direction: &Direction, state: &State, pid: &VarInt) -> Option<&Fid> {
+            pub fn get_name(&self, direction: &Direction, state: &State, pid: &Varint) -> Option<&Fid> {
                 self.map
                     .get(direction)
                     .unwrap()

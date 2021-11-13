@@ -1,16 +1,16 @@
 use crate::parsable::Parsable;
 use hex::encode;
 
-use packet::{RawPacket, SafeDefault, VarInt};
+use packet::{RawPacket, SafeDefault, Varint};
 
 use crate::utils;
 use serde::Serialize;
 
 #[derive(Clone, Serialize)]
 pub struct EncResponse {
-    shared_secret_length: VarInt,
+    shared_secret_length: Varint,
     shared_secret: Vec<u8>,
-    verify_token_length: VarInt,
+    verify_token_length: Varint,
     verify_token: Vec<u8>,
 }
 

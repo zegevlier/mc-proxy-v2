@@ -1,5 +1,5 @@
 mod varint;
-pub use varint::VarInt;
+pub use varint::Varint;
 mod uuid;
 pub use uuid::Uuid;
 

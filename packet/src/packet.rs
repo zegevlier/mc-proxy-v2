@@ -1,10 +1,10 @@
 use miniz_oxide::deflate::compress_to_vec_zlib;
 
-use crate::{varint, RawPacket, VarInt};
+use crate::{varint, RawPacket, Varint};
 
 pub struct Packet {
     raw_packet: RawPacket,
-    pid: Option<VarInt>,
+    pid: Option<Varint>,
 }
 
 impl Packet {
@@ -15,7 +15,7 @@ impl Packet {
         }
     }
 
-    pub fn from(raw_packet: RawPacket, pid: VarInt) -> Packet {
+    pub fn from(raw_packet: RawPacket, pid: Varint) -> Packet {
         Packet {
             raw_packet,
             pid: Some(pid),
