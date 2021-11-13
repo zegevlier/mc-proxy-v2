@@ -22,7 +22,7 @@ use colored::*;
 use env_logger::Builder;
 use log::LevelFilter;
 use miniz_oxide::inflate::decompress_to_vec_zlib;
-use parking_lot::Mutex;
+use parking_lot::{Mutex, RwLock};
 use trust_dns_resolver::{config::*, TokioAsyncResolver};
 
 use packet::{varint, ProtoDec, ProtoEnc, RawPacket, VarInt};
@@ -122,7 +122,7 @@ async fn sender(mut tx: OwnedWriteHalf, queue: Arc<DataQueue>, is_closed: Arc<At
 
 async fn parser(
     queues: Queues,
-    shared_status: Arc<Mutex<SharedState>>,
+    shared_status: Arc<RwLock<SharedState>>,
     ciphers: Arc<Mutex<Ciphers>>,
     direction: Direction,
     is_closed: Arc<AtomicBool>,
@@ -193,7 +193,7 @@ async fn parser(
             original_packet.push_vec(packet.get_vec());
 
             // Uncompress if needed
-            if shared_status.lock().compress > 0 {
+            if shared_status.read().compress > 0 {
                 let data_length: VarInt = packet.decode().unwrap();
                 if data_length > 0 {
                     let decompressed_packet = match decompress_to_vec_zlib(&packet.get_vec()) {
@@ -211,7 +211,7 @@ async fn parser(
 
             // Get the Fid of the current packet, if it doesn't get parsed set it to Unparsable
             let func_id =
-                match functions.get_name(&direction, &shared_status.lock().state, &packet_id) {
+                match functions.get_name(&direction, &shared_status.read().state, &packet_id) {
                     Some(func_name) => func_name,
                     None => &functions::Fid::Unparsable,
                 };
@@ -263,12 +263,12 @@ async fn parser(
 
                 if success {
                     parsed_packet
-                        .update_status(&mut shared_status.lock())
+                        .update_status(&mut shared_status.write())
                         .unwrap();
 
                     // Packet editing takes a lot more time, so it only gets executed if it is needed.
                     if parsed_packet.packet_editing() {
-                        let mut shared_status_copy = shared_status.lock().clone();
+                        let mut shared_status_copy = shared_status.read().clone();
                         let mut shared_plugins = plugins.lock().clone();
                         match parsed_packet
                             .edit_packet(&mut shared_status_copy, &mut shared_plugins, &config)
@@ -313,7 +313,7 @@ async fn parser(
                                             .unwrap()
                                     };
                                 }
-                                shared_status.lock().set(shared_status_copy);
+                                shared_status.write().set(shared_status_copy);
                                 let mut locked_plugins = plugins.lock();
                                 // This should probably be optimized?
                                 locked_plugins.clear();
@@ -332,7 +332,7 @@ async fn parser(
 
                 if success
                     && parsed_packet
-                        .post_send_update(&mut ciphers.lock(), &shared_status.lock())
+                        .post_send_update(&mut ciphers.lock(), &shared_status.read())
                         .is_err()
                 {
                     panic!("Post send update failed, panicing.")
@@ -472,7 +472,7 @@ async fn handle_connection(
     queues.client_proxy.push(new_packet);
 
     // It creates a shared status where all data that is mutable or request specific is kept.
-    let shared_status: Arc<Mutex<SharedState>> = Arc::new(Mutex::new(SharedState {
+    let shared_status: Arc<RwLock<SharedState>> = Arc::new(RwLock::new(SharedState {
         // These values might not get used.
         access_token: config.player_auth_token,
         uuid: config.player_uuid,
@@ -490,7 +490,7 @@ async fn handle_connection(
 
     // Start a thread for logging the packets
     tokio::spawn({
-        let log_path = format!("./logs/{}.txt", &shared_status.lock().connection_id);
+        let log_path = format!("./logs/{}.txt", &shared_status.read().connection_id);
         let log_queue = log_queue.clone();
         async move { logging::logger(&log_path, log_queue).await }
     });
