@@ -25,7 +25,7 @@ macro_rules! num {
 
         impl crate::SafeDefault for $type {
             fn default() -> Self {
-                0
+                0 as $type
             }
         }
     };
@@ -39,3 +39,5 @@ num!(i8, 1);
 num!(i16, 2);
 num!(i32, 4);
 num!(i64, 8);
+num!(f32, 4);
+num!(f64, 8);
