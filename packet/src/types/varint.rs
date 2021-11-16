@@ -57,7 +57,7 @@ impl crate::ProtoDec for Varint {
 
             num_read += 1;
             if num_read > 5 {
-                return Err(crate::Error::VarIntTooBig);
+                return Err(crate::Error::VarnumTooBig);
             }
             if (read & 0x80) == 0 {
                 break;

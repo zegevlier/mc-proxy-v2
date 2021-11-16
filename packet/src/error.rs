@@ -6,7 +6,7 @@ pub type Result<T> = std::result::Result<T, Error>;
 pub enum Error {
     Message(String),
     Eof,
-    VarIntTooBig,
+    VarnumTooBig,
     InvalidVarintEnum,
     PacketIdNotSet,
     UnknownEnum,
@@ -18,7 +18,7 @@ impl Display for Error {
         match self {
             Error::Message(msg) => formatter.write_str(msg),
             Error::Eof => formatter.write_str("unexpected end of input"),
-            Error::VarIntTooBig => formatter.write_str("varint too big"),
+            Error::VarnumTooBig => formatter.write_str("varint too big"),
             Error::InvalidVarintEnum => formatter.write_str("invalid varint enum"),
             Error::PacketIdNotSet => formatter.write_str("packet id not set"),
             Error::UnknownEnum => formatter.write_str("unknown enum"),

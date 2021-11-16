@@ -9,10 +9,6 @@ pub use error::{Error, Result};
 pub use raw_packet::RawPacket;
 pub use traits::{ProtoDec, ProtoEnc};
 
-pub use types::{Chat, LenPrefixedVec, SafeDefault, Uuid, Varint};
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {}
-}
+pub use types::{
+    BoolPrefixedOption, Chat, Identifier, LenPrefixedVec, SafeDefault, Uuid, Varint, Varlong,
+};
