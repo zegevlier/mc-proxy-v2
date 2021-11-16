@@ -1,4 +1,3 @@
-use crate::cipher::Cipher;
 use serde::Serialize;
 use std::{fmt, sync::Arc};
 
@@ -60,26 +59,6 @@ impl SharedState {
 }
 
 impl Default for SharedState {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-pub struct Ciphers {
-    pub ps_cipher: Cipher,
-    pub sp_cipher: Cipher,
-}
-
-impl Ciphers {
-    pub fn new() -> Ciphers {
-        Ciphers {
-            ps_cipher: Cipher::new(),
-            sp_cipher: Cipher::new(),
-        }
-    }
-}
-
-impl Default for Ciphers {
     fn default() -> Self {
         Self::new()
     }

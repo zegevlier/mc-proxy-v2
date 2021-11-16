@@ -6,5 +6,9 @@ version = "0.1.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+async-trait = "0.1.51"
+cipher = {path = "../cipher"}
+dyn-clone = "1.0.4"
+erased-serde = "0.3.16"
 miniz_oxide = "0.5.0"
 serde = {version = "1.0.130", features = ["derive"]}

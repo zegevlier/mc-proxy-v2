@@ -32,13 +32,12 @@ use crate::{
     types::{DataQueue, Queues},
 };
 
-pub use crate::{
+pub(crate) use crate::{
     plugin::EventHandler,
     protocol::v754::Functions,
-    types::{Ciphers, Direction, SharedState, State},
+    types::{Direction, SharedState, State},
 };
 
-mod cipher;
 mod conf;
 mod logging;
 mod macros;
@@ -123,7 +122,7 @@ async fn sender(mut tx: OwnedWriteHalf, queue: Arc<DataQueue>, is_closed: Arc<At
 async fn parser(
     queues: Queues,
     shared_status: Arc<RwLock<SharedState>>,
-    ciphers: Arc<Mutex<Ciphers>>,
+    ciphers: Arc<Mutex<cipher::Ciphers>>,
     direction: Direction,
     is_closed: Arc<AtomicBool>,
     plugins: Arc<Mutex<Vec<Box<dyn EventHandler + Send>>>>,
@@ -356,7 +355,7 @@ async fn handle_connection(
     let config = conf::get_config();
 
     // This shared state stores all *mutable* data that is needed in more than one thread.
-    let shared_ciphers: Arc<Mutex<Ciphers>> = Arc::new(Mutex::new(Ciphers::new()));
+    let shared_ciphers: Arc<Mutex<cipher::Ciphers>> = Arc::new(Mutex::new(cipher::Ciphers::new()));
 
     // This part reads data from the client (the first packet) into a buffer
     let mut buffer = Vec::new();

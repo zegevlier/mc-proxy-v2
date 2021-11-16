@@ -1,8 +1,9 @@
+use cipher::Ciphers;
 use std::fmt::Display;
 
-use crate::{conf::Configuration, plugin::EventHandler, Ciphers, Direction, SharedState};
+use crate::{conf::Configuration, plugin::EventHandler, Direction, SharedState};
 
-use packet::Packet;
+use packet::{Packet, ProtoDec, ProtoEnc, SafeDefault};
 
 use async_trait::async_trait;
 use dyn_clone::DynClone;
@@ -10,12 +11,7 @@ use erased_serde::serialize_trait_object;
 
 #[async_trait]
 pub trait Parsable:
-    erased_serde::Serialize
-    + DynClone
-    + Display
-    + packet::SafeDefault
-    + packet::ProtoDec
-    + packet::ProtoEnc
+    erased_serde::Serialize + DynClone + Display + SafeDefault + ProtoDec + ProtoEnc
 {
     #[allow(unused_variables)]
     fn update_status(&self, status: &mut SharedState) -> Result<(), ()> {

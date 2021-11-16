@@ -1,4 +1,4 @@
-use crate::{conf::Configuration, packet, utils, Ciphers, Direction, SharedState};
+use crate::{conf::Configuration, packet, utils, Direction, SharedState};
 use packet::{LenPrefixedVec, ProtoEnc};
 
 use std::{collections::HashMap, iter};
@@ -134,7 +134,11 @@ impl Parsable for EncRequest {
         Ok(vec![(response_packet, Direction::Serverbound)])
     }
 
-    fn post_send_update(&self, ciphers: &mut Ciphers, status: &SharedState) -> Result<(), ()> {
+    fn post_send_update(
+        &self,
+        ciphers: &mut cipher::Ciphers,
+        status: &SharedState,
+    ) -> Result<(), ()> {
         ciphers.ps_cipher.enable(&status.secret_key);
         ciphers.sp_cipher.enable(&status.secret_key);
         log::debug!("Enabled ciphers");

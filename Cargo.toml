@@ -7,9 +7,8 @@ version = "0.1.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-aes = "0.7.5"
 async-trait = "0.1.51"
-cipher = {version = "0.3.0", features = ["dev"]}
+cipher = {path = "./cipher"}
 colored = "2.0.0"
 config = "0.11.0"
 deadqueue = {version = "0.2.0", features = ["unlimited"]}

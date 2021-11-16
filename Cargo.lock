@@ -15,7 +15,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9e8b47f52ea9bae42228d07ec09eb676433d7c4ed1ebdf0f1d1c29ed446f1ab8"
 dependencies = [
  "cfg-if",
- "cipher",
+ "cipher 0.3.0",
  "cpufeatures",
  "opaque-debug",
 ]
@@ -137,6 +137,14 @@ name = "cfg-if"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
+
+[[package]]
+name = "cipher"
+version = "0.1.0"
+dependencies = [
+ "aes",
+ "cipher 0.3.0",
+]
 
 [[package]]
 name = "cipher"
@@ -773,9 +781,8 @@ checksum = "a3e378b66a060d48947b590737b30a1be76706c8dd7b8ba0f2fe3989c68a853f"
 name = "mc-proxy-v2"
 version = "0.1.0"
 dependencies = [
- "aes",
  "async-trait",
- "cipher",
+ "cipher 0.1.0",
  "colored",
  "config",
  "deadqueue",
@@ -1025,6 +1032,10 @@ dependencies = [
 name = "packet"
 version = "0.1.0"
 dependencies = [
+ "async-trait",
+ "cipher 0.1.0",
+ "dyn-clone",
+ "erased-serde",
  "miniz_oxide 0.5.1",
  "serde 1.0.130",
 ]
