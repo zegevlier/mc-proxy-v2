@@ -1,13 +1,13 @@
 use crate::{conf::Configuration, packet, utils, Direction, SharedState};
 use packet::{LenPrefixedVec, ProtoEnc};
 
-use std::{collections::HashMap, iter};
+use std::{collections::HashMap};
 
 use hex::encode;
 use rand::Rng;
 use regex::Regex;
 
-use crypto::{digest::Digest, sha1::Sha1};
+use sha1::{Sha1, Digest};
 
 use num_bigint_dig::BigUint;
 use reqwest::Client;
@@ -55,14 +55,14 @@ impl Parsable for EncRequest {
     ) -> Result<Vec<(Packet, Direction)>, ()> {
         status.secret_key = rand::thread_rng().gen::<[u8; 16]>();
 
-        let mut hash = Sha1::new();
+        let mut hasher = Sha1::new();
 
-        hash.input(self.server_id.as_bytes());
-        hash.input(&status.secret_key);
-        hash.input(&self.public_key.v);
+        hasher.update(self.server_id.as_bytes());
+        hasher.update(&status.secret_key);
+        hasher.update(&self.public_key.v);
 
-        let mut hex: Vec<u8> = iter::repeat(0).take((hash.output_bits() + 7) / 8).collect();
-        hash.result(&mut hex);
+        // let mut hex: Vec<u8> = iter::repeat(0).take((hasher.output_bits() + 7) / 8).collect();
+        let mut hex: Vec<u8> = hasher.finalize().to_vec();
 
         let regex = Regex::new(LEADING_ZERO_REGEX).unwrap();
 
