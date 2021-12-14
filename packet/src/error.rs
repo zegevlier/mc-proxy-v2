@@ -28,9 +28,7 @@ impl Display for Error {
 }
 
 impl From<Error> for () {
-    fn from(_: Error) -> Self {
-        ()
-    }
+    fn from(_: Error) -> Self {}
 }
 
 impl std::error::Error for Error {}

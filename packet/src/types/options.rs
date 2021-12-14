@@ -62,9 +62,9 @@ impl<T> From<Option<T>> for BoolPrefixedOption<T> {
     }
 }
 
-impl<T> Into<Option<T>> for BoolPrefixedOption<T> {
-    fn into(self) -> Option<T> {
-        self.v
+impl<T> From<BoolPrefixedOption<T>> for Option<T> {
+    fn from(val: BoolPrefixedOption<T>) -> Self {
+        val.v
     }
 }
 

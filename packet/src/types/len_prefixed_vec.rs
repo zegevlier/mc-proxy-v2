@@ -20,6 +20,10 @@ impl<T> LenPrefixedVec<T> {
     pub fn len(&self) -> usize {
         self.v.len()
     }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
 }
 
 impl crate::ProtoEnc for LenPrefixedVec<u8> {
@@ -63,10 +67,10 @@ impl<T: LPVable + crate::ProtoDec> crate::ProtoDec for LenPrefixedVec<T> {
     {
         let len: usize = p.decode::<Varint>()?.into();
         let mut ret = Self {
-            v: Vec::with_capacity(len.into()),
+            v: Vec::with_capacity(len),
         };
 
-        for _ in 0..len.into() {
+        for _ in 0..len {
             ret.v.push(p.decode()?);
         }
         Ok(ret)
@@ -96,9 +100,9 @@ impl<T> From<Vec<T>> for LenPrefixedVec<T> {
     }
 }
 
-impl<T> Into<Vec<T>> for LenPrefixedVec<T> {
-    fn into(self) -> Vec<T> {
-        self.v
+impl<T> From<LenPrefixedVec<T>> for Vec<T> {
+    fn from(val: LenPrefixedVec<T>) -> Self {
+        val.v
     }
 }
 

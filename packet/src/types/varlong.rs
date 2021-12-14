@@ -6,7 +6,7 @@ macro_rules! varlong {
 }
 
 #[derive(
-    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Hash, serde::Serialize, serde::Deserialize,
+    Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize,
 )]
 pub struct Varlong {
     value: i64,
@@ -105,6 +105,12 @@ impl Varlong {
     }
 }
 
+impl std::cmp::PartialOrd for Varlong {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
 impl std::cmp::Ord for Varlong {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
         self.value.cmp(&other.value)
@@ -113,13 +119,13 @@ impl std::cmp::Ord for Varlong {
 
 impl std::cmp::PartialEq<i64> for Varlong {
     fn eq(&self, other: &i64) -> bool {
-        self.value.eq(&other)
+        self.value.eq(other)
     }
 }
 
 impl std::cmp::PartialOrd<i64> for Varlong {
     fn partial_cmp(&self, other: &i64) -> Option<std::cmp::Ordering> {
-        self.value.partial_cmp(&other)
+        self.value.partial_cmp(other)
     }
 }
 

@@ -6,7 +6,7 @@ macro_rules! varint {
 }
 
 #[derive(
-    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Hash, serde::Serialize, serde::Deserialize,
+    Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize,
 )]
 pub struct Varint {
     value: i32,
@@ -105,6 +105,12 @@ impl Varint {
     }
 }
 
+impl std::cmp::PartialOrd for Varint {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
 impl std::cmp::Ord for Varint {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
         self.value.cmp(&other.value)
@@ -113,13 +119,13 @@ impl std::cmp::Ord for Varint {
 
 impl std::cmp::PartialEq<i32> for Varint {
     fn eq(&self, other: &i32) -> bool {
-        self.value.eq(&other)
+        self.value.eq(other)
     }
 }
 
 impl std::cmp::PartialOrd<i32> for Varint {
     fn partial_cmp(&self, other: &i32) -> Option<std::cmp::Ordering> {
-        self.value.partial_cmp(&other)
+        self.value.partial_cmp(other)
     }
 }
 
