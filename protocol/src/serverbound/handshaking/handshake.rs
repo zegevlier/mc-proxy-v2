@@ -1,4 +1,5 @@
-use crate::{packet, SharedState, State};
+use crate::packet;
+use mcore::types::{SharedState, State};
 
 use packet::Varint;
 

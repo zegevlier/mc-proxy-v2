@@ -5,6 +5,12 @@ pub mod v754;
 pub mod clientbound;
 pub mod serverbound;
 
+pub(crate) mod macros;
+pub(crate) mod parsable;
+pub(crate) mod utils;
+
+pub use v754 as current_protocol;
+
 #[derive(Hash, Eq, PartialEq, Debug, Clone, Copy)]
 pub enum Fid {
     Unparsable,

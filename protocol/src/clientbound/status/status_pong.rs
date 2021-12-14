@@ -1,14 +1,13 @@
-use crate::{packet, SharedState, State};
-use packet::Chat;
+use crate::packet;
+use mcore::types::{SharedState, State};
 
 packet! {
-    Disconnect, all,
-    {
-        reason: Chat,
+    StatusPong, all, {
+        payload: i64,
     }
 }
 
-impl Parsable for Disconnect {
+impl Parsable for StatusPong {
     fn update_status(&self, status: &mut SharedState) -> Result<(), ()> {
         status.state = State::Handshaking;
         log::debug!("State updated to Handshaking");

@@ -5,10 +5,8 @@ pub use super::{clientbound, serverbound, Fid};
 use maplit::hashmap;
 
 use crate::functions_macro;
-use crate::{
-    parsable::Parsable,
-    types::{Direction, State},
-};
+use crate::parsable::Parsable;
+use mcore::types::{Direction, State};
 
 functions_macro! {
     clientbound {

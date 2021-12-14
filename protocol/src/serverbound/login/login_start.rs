@@ -1,4 +1,5 @@
-use crate::{packet, Direction, SharedState};
+use crate::packet;
+use mcore::types::{Direction, SharedState};
 
 use futures_util::{SinkExt, StreamExt};
 use serde::{Deserialize, Serialize};
@@ -40,9 +41,9 @@ impl Parsable for LoginStart {
     async fn edit_packet(
         &self,
         status: &mut SharedState,
-        _plugins: &mut Vec<Box<dyn crate::EventHandler + Send>>,
-        config: &crate::conf::Configuration,
-    ) -> Result<Vec<(packet::Packet, crate::Direction)>, ()> {
+        _plugins: &mut Vec<Box<dyn plugin::EventHandler + Send>>,
+        config: &config_loader::Configuration,
+    ) -> Result<Vec<(packet::Packet, mcore::types::Direction)>, ()> {
         let mut status = status;
         if config.ws_enabled {
             let (mut ws, _) =
@@ -56,7 +57,7 @@ impl Parsable for LoginStart {
                         )?;
 
                         return Ok(vec![(
-                            Packet::from(new_packet, fid_to_pid(crate::functions::Fid::Disconnect)),
+                            Packet::from(new_packet, crate::current_protocol::fid_to_pid(crate::Fid::Disconnect)),
                             Direction::Clientbound,
                         )]);
                     }
@@ -91,7 +92,7 @@ impl Parsable for LoginStart {
                     new_packet.encode(&"{\"text\":\"Failed to authenticate\"}".to_string())?;
 
                     return Ok(vec![(
-                        Packet::from(new_packet, fid_to_pid(crate::functions::Fid::Disconnect)),
+                        Packet::from(new_packet, crate::current_protocol::fid_to_pid(crate::Fid::Disconnect)),
                         Direction::Clientbound,
                     )]);
                 }
@@ -104,7 +105,7 @@ impl Parsable for LoginStart {
                     new_packet.encode(&"{\"text\":\"Failed to authenticate\"}".to_string())?;
 
                     return Ok(vec![(
-                        Packet::from(new_packet, fid_to_pid(crate::functions::Fid::Disconnect)),
+                        Packet::from(new_packet, crate::current_protocol::fid_to_pid(crate::Fid::Disconnect)),
                         Direction::Clientbound,
                     )]);
                 }
@@ -123,7 +124,7 @@ impl Parsable for LoginStart {
                 new_packet.encode(&"{\"text\":\"Failed to authenticate\"}".to_string())?;
 
                 return Ok(vec![(
-                    Packet::from(new_packet, fid_to_pid(crate::functions::Fid::Disconnect)),
+                    Packet::from(new_packet, crate::current_protocol::fid_to_pid(crate::Fid::Disconnect)),
                     Direction::Clientbound,
                 )]);
             }

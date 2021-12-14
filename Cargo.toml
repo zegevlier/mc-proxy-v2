@@ -1,6 +1,10 @@
 [workspace]
 members = [
+    "maion-core",
     "cipher",
     "proxy",
     "packet",
+    "protocol",
+    "plugin",
+    "config-loader",
 ]

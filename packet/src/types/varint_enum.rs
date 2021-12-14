@@ -32,8 +32,8 @@ macro_rules! varint_enum {
             )*
         }
 
-        impl crate::ProtoEnc for $name {
-            fn encode(&self, p: &mut crate::RawPacket) -> $crate::Result<()> {
+        impl $crate::ProtoEnc for $name {
+            fn encode(&self, p: &mut $crate::RawPacket) -> $crate::Result<()> {
                 match self {
                     $(
                         $name::$variant
@@ -54,8 +54,8 @@ macro_rules! varint_enum {
             }
         }
 
-        impl crate::ProtoDec for $name {
-            fn decode_ret(p: &mut crate::RawPacket) -> $crate::Result<Self>
+        impl $crate::ProtoDec for $name {
+            fn decode_ret(p: &mut $crate::RawPacket) -> $crate::Result<Self>
             where
                 Self: Sized,
             {
@@ -75,7 +75,7 @@ macro_rules! varint_enum {
                 })
             }
 
-            fn decode(&mut self, p: &mut crate::RawPacket) -> $crate::Result<()> {
+            fn decode(&mut self, p: &mut $crate::RawPacket) -> $crate::Result<()> {
                 *self = Self::decode_ret(p)?;
                 Ok(())
             }

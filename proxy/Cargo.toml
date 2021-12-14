@@ -11,8 +11,8 @@ async-trait = "0.1.52"
 cipher = {path = "../cipher"}
 colored = "2.0.0"
 config = "0.11.0"
-deadqueue = {version = "0.2.0", features = ["unlimited"]}
 dyn-clone = "1.0.4"
+deadqueue = {version = "0.2.0", features = ["unlimited"]}
 env_logger = "0.9.0"
 erased-serde = "0.3.16"
 futures-util = "0.3.17"
@@ -36,3 +36,7 @@ serde_json = "1.0.73"
 tokio = {version = "1.14.0", features = ["net", "rt-multi-thread", "macros", "io-util", "time"]}
 tokio-tungstenite = {version = "0.16.1", features = ["native-tls"]}
 trust-dns-resolver = "0.20.3"
+protocol = {path = "../protocol"}
+mcore = {path = "../maion-core"}
+plugin = {path = "../plugin"}
+config_loader = {path = "../config-loader"}

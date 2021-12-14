@@ -1,5 +1,4 @@
 use config::{Config, File, FileFormat};
-use serde::Deserialize;
 
 pub struct Configuration {
     pub logging_packets: Vec<String>,
@@ -13,7 +12,7 @@ pub struct Configuration {
     pub domain_suffix: String,
 }
 
-#[derive(Deserialize)]
+#[derive(serde::Deserialize)]
 pub struct ReadConfiguration {
     pub logging_packets: Vec<String>,
     pub player_uuid: String,

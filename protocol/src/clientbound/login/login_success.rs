@@ -1,5 +1,5 @@
 use crate::packet;
-use crate::{SharedState, State};
+use mcore::types::{SharedState, State};
 
 use packet::Uuid;
 

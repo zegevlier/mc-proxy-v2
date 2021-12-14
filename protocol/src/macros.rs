@@ -11,7 +11,7 @@ macro_rules! packet {
         packet!($name, enc, $($field_name),*);
     };
     ($name:ident, struc, $($field_name:ident : $field_type:ty),* $(,)?) => {
-        use crate::{parsable::Parsable, functions::fid_to_pid};
+        use crate::parsable::Parsable;
         use packet::{RawPacket, SizedDefault, Packet};
 
         #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
@@ -56,7 +56,7 @@ macro_rules! packet {
             fn encode_packet(&self) -> packet::Result<Packet> {
                 let mut p = RawPacket::new();
                 self.encode(&mut p)?;
-                Ok(Packet::from(p, fid_to_pid(crate::functions::Fid::$name)))
+                Ok(Packet::from(p, $crate::current_protocol::fid_to_pid($crate::Fid::$name)))
             }
         }
     };

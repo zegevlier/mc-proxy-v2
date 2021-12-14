@@ -1,10 +1,8 @@
-use packet::{ProtoEnc, Chat};
+use packet::{Chat, ProtoEnc};
 
-use crate::{
-    conf::Configuration,
-    packet,
-    types::{Direction, SharedState},
-};
+use crate::packet;
+use config_loader::Configuration;
+use mcore::types::{Direction, SharedState};
 
 packet! {
     ChatMessageServerbound, all, {
@@ -21,7 +19,7 @@ impl Parsable for ChatMessageServerbound {
     async fn edit_packet(
         &self,
         _status: &mut SharedState,
-        plugins: &mut Vec<Box<dyn crate::plugin::EventHandler + Send>>,
+        plugins: &mut Vec<Box<dyn plugin::EventHandler + Send>>,
         _config: &Configuration,
     ) -> Result<Vec<(Packet, Direction)>, ()> {
         let mut return_vec = None;

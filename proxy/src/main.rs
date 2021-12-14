@@ -32,23 +32,13 @@ use crate::{
     types::{DataQueue, Queues},
 };
 
-pub(crate) use crate::{
-    plugin::EventHandler,
-    protocol::v754::Functions,
-    types::{Direction, SharedState, State},
-};
+pub(crate) use mcore::types::{Direction, SharedState};
+pub(crate) use plugin::EventHandler;
 
-mod conf;
 mod logging;
-mod macros;
 mod parsable;
-mod plugin;
-mod plugins;
-mod protocol;
 mod types;
 mod utils;
-
-pub use crate::protocol::v754 as functions;
 
 const SHUTDOWN_CHECK_TIMEOUT: u64 = 100;
 
@@ -130,8 +120,8 @@ async fn parser(
 ) -> Result<(), ()> {
     let mut unprocessed_data = RawPacket::new();
     // functions is a list of all the packets that can be parsed
-    let functions = Functions::new();
-    let config = conf::get_config();
+    let functions = protocol::current_protocol::Functions::new();
+    let config = config_loader::get_config();
 
     // If this loop ever breaks, the thread is closed.
     loop {
@@ -212,13 +202,13 @@ async fn parser(
             let func_id =
                 match functions.get_name(&direction, &shared_status.read().state, &packet_id) {
                     Some(func_name) => func_name,
-                    None => &functions::Fid::Unparsable,
+                    None => &protocol::Fid::Unparsable,
                 };
 
             let mut out_data = original_packet.get_vec();
             let mut to_direction = direction;
 
-            if func_id == &functions::Fid::Unparsable {
+            if func_id == &protocol::Fid::Unparsable {
                 // Encrypt the data if it wont get parsed. Othwerise, ecryption is done later.
                 if direction == Direction::Serverbound {
                     out_data = ciphers.lock().ps_cipher.encrypt(out_data)
@@ -352,7 +342,7 @@ async fn handle_connection(
     user_ip: String,
     connection_id: String,
 ) -> Result<(), ()> {
-    let config = conf::get_config();
+    let config = config_loader::get_config();
 
     // This shared state stores all *mutable* data that is needed in more than one thread.
     let shared_ciphers: Arc<Mutex<cipher::Ciphers>> = Arc::new(Mutex::new(cipher::Ciphers::new()));
@@ -379,7 +369,7 @@ async fn handle_connection(
 
     // It then continues to parse the packet like it is a handshaking packet.
     let handshaking_packet =
-        functions::serverbound::handshaking::Handshake::decode_ret(&mut raw_first_packet);
+        protocol::serverbound::handshaking::Handshake::decode_ret(&mut raw_first_packet);
     if handshaking_packet.is_err() {
         log::error!("Invalid handshake packet! Closing connection...");
         // Again, returning OK because everything was dealt with, no loose ends.
@@ -426,7 +416,7 @@ async fn handle_connection(
     };
 
     // It converts the updated data back to a packet.
-    let mut new_packet = functions::serverbound::handshaking::Handshake {
+    let mut new_packet = protocol::serverbound::handshaking::Handshake {
         protocol_version: handshaking_packet.protocol_version,
         server_address: address.clone(),
         server_port: 25565,
@@ -485,7 +475,7 @@ async fn handle_connection(
     //    so they don't get created if they don't need to.
     let log_queue = Arc::new(LogQueue::new());
     let is_closed = Arc::new(AtomicBool::new(false));
-    let plugins = Arc::new(Mutex::new(plugins::get_plugins()));
+    let plugins = Arc::new(Mutex::new(plugin::get_plugins()));
 
     // Start a thread for logging the packets
     tokio::spawn({

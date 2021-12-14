@@ -1,4 +1,6 @@
-use crate::{conf::Configuration, packet, utils, Direction, SharedState};
+use crate::{packet, utils};
+use config_loader::Configuration;
+use mcore::types::{Direction, SharedState};
 use packet::{LenPrefixedVec, ProtoEnc};
 
 use std::collections::HashMap;
@@ -50,7 +52,7 @@ impl Parsable for EncRequest {
     async fn edit_packet(
         &self,
         status: &mut SharedState,
-        _plugins: &mut Vec<Box<dyn crate::plugin::EventHandler + Send>>,
+        _plugins: &mut Vec<Box<dyn plugin::EventHandler + Send>>,
         _config: &Configuration,
     ) -> Result<Vec<(Packet, Direction)>, ()> {
         status.secret_key = rand::thread_rng().gen::<[u8; 16]>();
@@ -110,7 +112,7 @@ impl Parsable for EncRequest {
         let public_key =
             RsaPublicKey::new(BigUint::from_bytes_be(&n), BigUint::from_bytes_be(&e)).unwrap();
 
-        let response_packet = crate::functions::serverbound::login::EncResponse {
+        let response_packet = crate::serverbound::login::EncResponse {
             shared_secret: LenPrefixedVec::from(
                 public_key
                     .encrypt(

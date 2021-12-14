@@ -1,7 +1,10 @@
 use dyn_clone::DynClone;
-use packet::{Packet, Chat};
+use packet::{Chat, Packet};
 
-use crate::{types::Direction};
+use mcore::types::Direction;
+
+mod plugins;
+pub use plugins::get_plugins;
 
 // Need to be remade into a from that dynamically loads the plugins
 // Probably going to be using https://adventures.michaelfbryan.com/posts/plugins-in-rust/
