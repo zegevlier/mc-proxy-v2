@@ -3,14 +3,6 @@ use std::{fmt, sync::Arc};
 
 pub type DataQueue = deadqueue::unlimited::Queue<Vec<u8>>;
 
-// #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash, Serialize)]
-// pub enum State {
-//     Handshaking,
-//     Status,
-//     Login,
-//     Play,
-// }
-
 packet::varint_enum!(
     State; Copy; {
         0 = Handshaking,

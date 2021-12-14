@@ -1,14 +1,11 @@
 #[macro_export]
 macro_rules! packet {
     ($name:ident, all, {$($field_name:ident : $field_type:ty),* $(,)?}) => {
-        packet!($name, struc, $($field_name : $field_type),*);
-        packet!($name, disp, $($field_name),*);
-        packet!($name, def, $($field_name),*);
-        packet!($name, dec, $($field_name),*);
-        packet!($name, enc, $($field_name),*);
+        packet!($name, all, {$($field_name : $field_type),*} |_this| (<[&str]>::join(&[$(&_this.$field_name.to_string()),*], " ")));
     };
-    ($name:ident, -disp, {$($field_name:ident : $field_type:ty),* $(,)?}) => {
+    ($name:ident, all, {$($field_name:ident : $field_type:ty),* $(,)?} $fmt_closure:expr) => {
         packet!($name, struc, $($field_name : $field_type),*);
+        packet!($name, disp, $($field_name),* | $fmt_closure);
         packet!($name, def, $($field_name),*);
         packet!($name, dec, $($field_name),*);
         packet!($name, enc, $($field_name),*);
@@ -22,10 +19,11 @@ macro_rules! packet {
             $(pub $field_name: $field_type),*
         }
     };
-    ($name:ident, disp, $($field_name:ident),* $(,)?) => {
+    ($name:ident, disp, $($field_name:ident),* $(,)? | $fmt_closure:expr) => {
         impl std::fmt::Display for $name {
             fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                write!(f, "{}", <[&str]>::join(&[$(&format!("{}", self.$field_name)),*], " "))
+                let x: &dyn Fn(&Self) -> String = &$fmt_closure;
+                f.write_str(&x(self))
             }
         }
     };

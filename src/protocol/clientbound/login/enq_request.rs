@@ -15,11 +15,16 @@ use rsa::{PaddingScheme, PublicKey, RsaPublicKey};
 use rsa_der::public_key_from_der;
 use rustc_serialize::hex::ToHex;
 
-packet! {EncRequest, -disp,
-    {
+packet! {
+    EncRequest, all, {
         server_id: String,
         public_key: LenPrefixedVec<u8>,
         verify_token: LenPrefixedVec<u8>,
+    } |this| {
+        format!("{} {} {}",
+        this.server_id,
+        utils::make_string_fixed_length(encode(this.public_key.v.clone()), 20),
+        utils::make_string_fixed_length(encode(this.verify_token.v.clone()), 20))
     }
 }
 
@@ -146,14 +151,11 @@ impl Parsable for EncRequest {
     }
 }
 
-impl std::fmt::Display for EncRequest {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{} {} {}",
-            self.server_id,
-            utils::make_string_fixed_length(encode(self.public_key.v.clone()), 20),
-            utils::make_string_fixed_length(encode(self.verify_token.v.clone()), 20)
-        )
-    }
-}
+// impl std::fmt::Display for EncRequest {
+//     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+//         write!(
+//             f,
+            
+//         )
+//     }
+// }
