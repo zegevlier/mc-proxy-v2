@@ -10,5 +10,5 @@ pub use raw_packet::RawPacket;
 pub use traits::{ProtoDec, ProtoEnc};
 
 pub use types::{
-    BoolPrefixedOption, Chat, Identifier, LenPrefixedVec, SafeDefault, Uuid, Varint, Varlong,
+    BoolPrefixedOption, Chat, Identifier, LenPrefixedVec, SizedDefault, Uuid, Varint, Varlong,
 };

@@ -65,7 +65,7 @@ functions_macro! {
             0x02 => PluginResponse,
         }
         play {
-            // 0x03 => ChatMessageServerbound,
+            0x03 => ChatMessageServerbound,
             // 0x05 => ClientSettings,
             // 0x12 => PlayerPosition,
             // 0x13 => PlayerPositionRotation,

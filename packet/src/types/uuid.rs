@@ -50,7 +50,7 @@ impl Uuid {
     }
 }
 
-impl crate::SafeDefault for Uuid {
+impl crate::SizedDefault for Uuid {
     fn default() -> Self {
         Self { value: 0 }
     }

@@ -81,7 +81,7 @@ macro_rules! varint_enum {
             }
         }
 
-        impl $crate::SafeDefault for $name {
+        impl $crate::SizedDefault for $name {
             fn default() -> Self {
                 $name::Unknown
             }

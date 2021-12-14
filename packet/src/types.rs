@@ -19,7 +19,7 @@ mod string;
 mod varint_enum;
 mod vecs;
 
-pub trait SafeDefault {
+pub trait SizedDefault {
     fn default() -> Self
     where
         Self: Sized;

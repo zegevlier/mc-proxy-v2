@@ -1,7 +1,7 @@
 use crate::packet;
 
-packet! { StatusResponse, all,
-    {
+packet! { 
+    StatusResponse, all, {
         json_response: String,
     }
 }

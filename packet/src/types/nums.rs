@@ -23,7 +23,7 @@ macro_rules! num {
             }
         }
 
-        impl crate::SafeDefault for $type {
+        impl crate::SizedDefault for $type {
             fn default() -> Self {
                 0 as $type
             }

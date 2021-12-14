@@ -21,6 +21,7 @@ pub enum Fid {
     LoginStart,
     EncResponse,
     PluginResponse,
+    ChatMessageServerbound,
     // SpawnEntity,
     // SpawnXpOrb,
     // SpawnLivingEntity,

@@ -19,7 +19,7 @@ impl crate::ProtoDec for Vec<u8> {
     }
 }
 
-impl crate::SafeDefault for Vec<u8> {
+impl crate::SizedDefault for Vec<u8> {
     fn default() -> Self {
         Vec::new()
     }

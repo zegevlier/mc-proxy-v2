@@ -102,7 +102,7 @@ impl<T> Into<Vec<T>> for LenPrefixedVec<T> {
     }
 }
 
-impl<T> crate::SafeDefault for LenPrefixedVec<T> {
+impl<T> crate::SizedDefault for LenPrefixedVec<T> {
     fn default() -> Self {
         Self { v: Vec::new() }
     }

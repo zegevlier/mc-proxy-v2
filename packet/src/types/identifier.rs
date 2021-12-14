@@ -41,7 +41,7 @@ impl From<String> for Identifier {
     }
 }
 
-impl crate::SafeDefault for Identifier {
+impl crate::SizedDefault for Identifier {
     fn default() -> Self {
         Self {
             value: "".to_string(),

@@ -1,7 +1,7 @@
 use crate::{packet, SharedState, State};
 
-packet! { StatusPong, all,
-    {
+packet! { 
+    StatusPong, all, {
         payload: i64,
     }
 }

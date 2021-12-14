@@ -1,36 +1,19 @@
-//, rainbowfy};
+use packet::{ProtoEnc, Chat};
+
 use crate::{
     conf::Configuration,
-    functions::{fid_to_pid, Fid},
-    packet::Packet,
-    parsable::Parsable,
-    raw_packet::RawPacket,
+    packet,
+    types::{Direction, SharedState},
 };
-use crate::{Direction, SharedState};
-use serde::Serialize;
 
-#[derive(Clone, Serialize)]
-pub struct ChatMessageServerbound {
-    pub message: String,
+packet! {
+    ChatMessageServerbound, all, {
+        message: Chat
+    }
 }
 
 #[async_trait::async_trait]
 impl Parsable for ChatMessageServerbound {
-    fn default() -> Self {
-        Self {
-            message: String::new(),
-        }
-    }
-
-    fn parse_packet(&mut self, mut packet: RawPacket) -> Result<(), ()> {
-        self.message = packet.decode_string()?;
-        Ok(())
-    }
-
-    fn get_printable(&self) -> String {
-        self.message.clone()
-    }
-
     fn packet_editing(&self) -> bool {
         true
     }
@@ -43,7 +26,7 @@ impl Parsable for ChatMessageServerbound {
     ) -> Result<Vec<(Packet, Direction)>, ()> {
         let mut return_vec = None;
         for plugin in plugins {
-            match plugin.on_message(self) {
+            match plugin.on_message(&self.message) {
                 Some(plugin_vec) => {
                     return_vec = Some(plugin_vec);
                     break;
@@ -52,10 +35,11 @@ impl Parsable for ChatMessageServerbound {
             }
         }
         if return_vec.is_none() {
-            let mut raw_packet = RawPacket::new();
-            raw_packet.encode_string(self.message.to_string());
             return_vec = Some(vec![(
-                Packet::from(raw_packet, fid_to_pid(Fid::ChatMessageServerbound)),
+                Self {
+                    message: self.message.clone(),
+                }
+                .encode_packet()?,
                 Direction::Serverbound,
             )]);
         }

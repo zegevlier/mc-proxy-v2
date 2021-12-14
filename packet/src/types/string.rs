@@ -23,7 +23,7 @@ impl crate::ProtoDec for String {
     }
 }
 
-impl crate::SafeDefault for String {
+impl crate::SizedDefault for String {
     fn default() -> Self {
         "".to_string()
     }

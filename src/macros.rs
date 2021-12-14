@@ -12,7 +12,7 @@ macro_rules! packet {
     };
     ($name:ident, struc, $($field_name:ident : $field_type:ty),* $(,)?) => {
         use crate::{parsable::Parsable, functions::fid_to_pid};
-        use packet::{RawPacket, SafeDefault, Packet};
+        use packet::{RawPacket, SizedDefault, Packet};
 
         #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
         pub struct $name {
@@ -28,10 +28,10 @@ macro_rules! packet {
         }
     };
     ($name:ident, def, $($field_name:ident),* $(,)?) => {
-        impl SafeDefault for $name {
+        impl SizedDefault for $name {
             fn default() -> Self {
                 Self {
-                    $($field_name: SafeDefault::default()),*
+                    $($field_name: SizedDefault::default()),*
                 }
             }
         }
@@ -95,7 +95,7 @@ macro_rules! functions_macro {
         }
     ) => {
         use packet::Varint;
-        use packet::SafeDefault;
+        use packet::SizedDefault;
 
         pub struct Functions {
             map: HashMap<Direction, HashMap<State, HashMap<Varint, Fid>>>,

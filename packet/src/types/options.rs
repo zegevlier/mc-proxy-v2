@@ -68,7 +68,7 @@ impl<T> Into<Option<T>> for BoolPrefixedOption<T> {
     }
 }
 
-impl<T> crate::SafeDefault for BoolPrefixedOption<T> {
+impl<T> crate::SizedDefault for BoolPrefixedOption<T> {
     fn default() -> Self {
         Self { v: None }
     }

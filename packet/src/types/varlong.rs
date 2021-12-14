@@ -129,7 +129,7 @@ impl std::fmt::Display for Varlong {
     }
 }
 
-impl crate::SafeDefault for Varlong {
+impl crate::SizedDefault for Varlong {
     fn default() -> Self {
         Self { value: 0 }
     }

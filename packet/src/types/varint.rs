@@ -129,7 +129,7 @@ impl std::fmt::Display for Varint {
     }
 }
 
-impl crate::SafeDefault for Varint {
+impl crate::SizedDefault for Varint {
     fn default() -> Self {
         Self { value: 0 }
     }

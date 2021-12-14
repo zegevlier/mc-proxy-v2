@@ -1,4 +1,3 @@
-// use aes::cipher::AsyncStreamCipher;
 mod cfb8;
 mod single;
 

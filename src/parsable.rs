@@ -3,7 +3,7 @@ use std::fmt::Display;
 
 use crate::{conf::Configuration, plugin::EventHandler, Direction, SharedState};
 
-use packet::{Packet, ProtoDec, ProtoEnc, SafeDefault};
+use packet::{Packet, ProtoDec, ProtoEnc, SizedDefault};
 
 use async_trait::async_trait;
 use dyn_clone::DynClone;
@@ -11,7 +11,7 @@ use erased_serde::serialize_trait_object;
 
 #[async_trait]
 pub trait Parsable:
-    erased_serde::Serialize + DynClone + Display + SafeDefault + ProtoDec + ProtoEnc
+    erased_serde::Serialize + DynClone + Display + SizedDefault + ProtoDec + ProtoEnc
 {
     #[allow(unused_variables)]
     fn update_status(&self, status: &mut SharedState) -> Result<(), ()> {

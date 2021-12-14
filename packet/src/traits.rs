@@ -1,4 +1,4 @@
-use crate::{error::Result, Packet, RawPacket, SafeDefault};
+use crate::{error::Result, Packet, RawPacket, SizedDefault};
 
 pub trait ProtoEnc {
     fn encode(&self, p: &mut RawPacket) -> Result<()>;
@@ -8,7 +8,7 @@ pub trait ProtoEnc {
     }
 }
 
-pub trait ProtoDec: SafeDefault {
+pub trait ProtoDec: SizedDefault {
     fn decode_ret(p: &mut RawPacket) -> Result<Self>
     where
         Self: Sized,

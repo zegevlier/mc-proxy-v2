@@ -26,7 +26,7 @@ impl crate::ProtoDec for bool {
     }
 }
 
-impl crate::SafeDefault for bool {
+impl crate::SizedDefault for bool {
     fn default() -> Self {
         false
     }

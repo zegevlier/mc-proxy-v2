@@ -33,6 +33,10 @@ impl Chat {
     pub fn new(value: String) -> Self {
         Chat { value }
     }
+
+    pub fn get_string(&self) -> &String {
+        &self.value
+    }
 }
 
 impl From<String> for Chat {
@@ -41,7 +45,7 @@ impl From<String> for Chat {
     }
 }
 
-impl crate::SafeDefault for Chat {
+impl crate::SizedDefault for Chat {
     fn default() -> Self {
         Self {
             value: "".to_string(),
