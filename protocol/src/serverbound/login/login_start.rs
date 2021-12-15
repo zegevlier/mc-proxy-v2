@@ -44,7 +44,7 @@ impl Parsable for LoginStart {
         status: &mut SharedState,
         _plugins: &mut Vec<Box<dyn plugin::EventHandler + Send>>,
         config: &config_loader::Configuration,
-    ) -> Result<Vec<(packet::Packet, mcore::types::Direction)>, ()> {
+    ) -> packet::Result<Vec<(packet::Packet, mcore::types::Direction)>> {
         let mut status = status;
         if config.ws_enabled {
             let (mut ws, _) =

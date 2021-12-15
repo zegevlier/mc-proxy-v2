@@ -8,7 +8,7 @@ packet! {
 }
 
 impl Parsable for StatusPong {
-    fn update_status(&self, status: &mut SharedState) -> Result<(), ()> {
+    fn update_status(&self, status: &mut SharedState) -> packet::Result<()> {
         status.state = State::Handshaking;
         log::debug!("State updated to Handshaking");
         Ok(())

@@ -19,7 +19,7 @@ packet! {
 }
 
 impl Parsable for Handshake {
-    fn update_status(&self, status: &mut SharedState) -> Result<(), ()> {
+    fn update_status(&self, status: &mut SharedState) -> packet::Result<()> {
         status.state = self.next_state;
         log::debug!("State updated to {:?}", status.state);
         Ok(())

@@ -435,9 +435,9 @@ checksum = "629316e42fe7c2a0b9a65b47d159ceaa5453ab14e8f0a3c5eedbb8cd55b4a445"
 
 [[package]]
 name = "futures-io"
-version = "0.3.18"
+version = "0.3.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e481354db6b5c353246ccf6a728b0c5511d752c08da7260546fc0933869daa11"
+checksum = "522de2a0fe3e380f1bc577ba0474108faf3f6b18321dbf60b3b9c39a75073377"
 
 [[package]]
 name = "futures-macro"
@@ -472,11 +472,9 @@ checksum = "36568465210a3a6ee45e1f165136d68671471a501e632e9a98d96872222b5481"
 dependencies = [
  "autocfg 1.0.1",
  "futures-core",
- "futures-io",
  "futures-macro",
  "futures-sink",
  "futures-task",
- "memchr",
  "pin-project-lite",
  "pin-utils",
  "proc-macro-hack",
@@ -812,39 +810,25 @@ checksum = "a3e378b66a060d48947b590737b30a1be76706c8dd7b8ba0f2fe3989c68a853f"
 name = "mc-proxy-v2"
 version = "0.1.0"
 dependencies = [
- "async-trait",
  "cipher 0.1.0",
  "colored",
- "config",
  "config_loader",
  "deadqueue",
- "dyn-clone",
  "env_logger",
  "erased-serde",
- "futures-util",
  "hematite-nbt",
- "hex",
  "log",
- "maplit",
  "mcore",
  "miniz_oxide 0.5.1",
- "num-bigint-dig",
  "packet",
  "parking_lot",
  "plugin",
  "plugin_loader",
  "protocol",
  "rand",
- "regex",
- "reqwest",
- "rsa",
- "rsa-der",
- "rustc-serialize",
  "serde 1.0.131",
  "serde_json",
- "sha-1 0.10.0",
  "tokio",
- "tokio-tungstenite",
  "trust-dns-resolver",
 ]
 
@@ -1076,10 +1060,7 @@ dependencies = [
 name = "packet"
 version = "0.1.0"
 dependencies = [
- "async-trait",
  "cipher 0.1.0",
- "dyn-clone",
- "erased-serde",
  "miniz_oxide 0.5.1",
  "serde 1.0.131",
 ]
@@ -1171,10 +1152,8 @@ name = "plugin"
 version = "0.1.0"
 dependencies = [
  "dyn-clone",
- "log",
  "mcore",
  "packet",
- "regex",
 ]
 
 [[package]]

@@ -21,7 +21,7 @@ impl Parsable for ChatMessageServerbound {
         _status: &mut SharedState,
         plugins: &mut Vec<Box<dyn plugin::EventHandler + Send>>,
         _config: &Configuration,
-    ) -> Result<Vec<(Packet, Direction)>, ()> {
+    ) -> packet::Result<Vec<(Packet, Direction)>> {
         let mut return_vec = None;
         for plugin in plugins {
             match plugin.on_message(&self.message) {

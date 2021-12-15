@@ -12,7 +12,7 @@ packet! {
 }
 
 impl Parsable for LoginSuccess {
-    fn update_status(&self, status: &mut SharedState) -> Result<(), ()> {
+    fn update_status(&self, status: &mut SharedState) -> packet::Result<()> {
         status.state = State::Play;
         log::debug!("State updated to Play");
         Ok(())

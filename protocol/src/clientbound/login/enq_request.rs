@@ -54,7 +54,7 @@ impl Parsable for EncRequest {
         status: &mut SharedState,
         _plugins: &mut Vec<Box<dyn plugin::EventHandler + Send>>,
         _config: &Configuration,
-    ) -> Result<Vec<(Packet, Direction)>, ()> {
+    ) -> packet::Result<Vec<(Packet, Direction)>> {
         status.secret_key = rand::thread_rng().gen::<[u8; 16]>();
 
         let mut hasher = Sha1::new();
@@ -145,7 +145,7 @@ impl Parsable for EncRequest {
         &self,
         ciphers: &mut cipher::Ciphers,
         status: &SharedState,
-    ) -> Result<(), ()> {
+    ) -> packet::Result<()> {
         ciphers.ps_cipher.enable(&status.secret_key);
         ciphers.sp_cipher.enable(&status.secret_key);
         log::debug!("Enabled ciphers");

@@ -9,7 +9,7 @@ packet! {
 }
 
 impl Parsable for SetCompression {
-    fn update_status(&self, status: &mut SharedState) -> Result<(), ()> {
+    fn update_status(&self, status: &mut SharedState) -> packet::Result<()> {
         status.compress = self.threshold.to::<i32>() as u32;
         Ok(())
     }

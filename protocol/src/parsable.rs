@@ -16,7 +16,7 @@ pub trait Parsable:
     erased_serde::Serialize + DynClone + Display + SizedDefault + ProtoDec + ProtoEnc
 {
     #[allow(unused_variables)]
-    fn update_status(&self, status: &mut SharedState) -> Result<(), ()> {
+    fn update_status(&self, status: &mut SharedState) -> packet::Result<()> {
         Ok(())
     }
 
@@ -30,12 +30,12 @@ pub trait Parsable:
         status: &mut SharedState,
         plugins: &mut Vec<Box<dyn EventHandler + Send>>,
         config: &Configuration,
-    ) -> Result<Vec<(Packet, Direction)>, ()> {
+    ) -> packet::Result<Vec<(Packet, Direction)>> {
         unimplemented!()
     }
 
     #[allow(unused_variables)]
-    fn post_send_update(&self, ciphers: &mut Ciphers, status: &SharedState) -> Result<(), ()> {
+    fn post_send_update(&self, ciphers: &mut Ciphers, status: &SharedState) -> packet::Result<()> {
         Ok(())
     }
 }
