@@ -7,7 +7,7 @@ use std::{
 
 use serde::Serialize;
 
-use crate::parsable::Parsable;
+use protocol::Parsable;
 
 pub type LogQueue = deadqueue::unlimited::Queue<Box<dyn Parsable + Send + Sync>>;
 

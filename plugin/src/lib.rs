@@ -3,9 +3,6 @@ use packet::{Chat, Packet};
 
 use mcore::types::Direction;
 
-mod plugins;
-pub use plugins::get_plugins;
-
 // Need to be remade into a from that dynamically loads the plugins
 // Probably going to be using https://adventures.michaelfbryan.com/posts/plugins-in-rust/
 pub trait EventHandler: DynClone {

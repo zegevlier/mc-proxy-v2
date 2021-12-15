@@ -40,3 +40,4 @@ protocol = {path = "../protocol"}
 mcore = {path = "../maion-core"}
 plugin = {path = "../plugin"}
 config_loader = {path = "../config-loader"}
+plugin_loader = {path = "../plugin-loader"}

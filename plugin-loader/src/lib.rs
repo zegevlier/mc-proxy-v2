@@ -1,4 +1,4 @@
-use crate::EventHandler;
+use plugin::EventHandler;
 
 mod rainbowify;
 

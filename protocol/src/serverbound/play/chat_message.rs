@@ -1,8 +1,8 @@
-use packet::{Chat, ProtoEnc};
+use packet::{Chat, ProtoEnc, SharedState};
 
 use crate::packet;
 use config_loader::Configuration;
-use mcore::types::{Direction, SharedState};
+use mcore::types::Direction;
 
 packet! {
     ChatMessageServerbound, all, {

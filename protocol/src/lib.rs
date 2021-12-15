@@ -9,6 +9,8 @@ pub(crate) mod macros;
 pub(crate) mod parsable;
 pub(crate) mod utils;
 
+pub use parsable::Parsable;
+
 pub use v754 as current_protocol;
 
 #[derive(Hash, Eq, PartialEq, Debug, Clone, Copy)]

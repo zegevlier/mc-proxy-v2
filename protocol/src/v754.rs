@@ -6,7 +6,8 @@ use maplit::hashmap;
 
 use crate::functions_macro;
 use crate::parsable::Parsable;
-use mcore::types::{Direction, State};
+use mcore::types::{Direction};
+use packet::State;
 
 functions_macro! {
     clientbound {

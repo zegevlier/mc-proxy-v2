@@ -1,5 +1,5 @@
 use crate::packet;
-use mcore::types::{SharedState, State};
+use packet::{SharedState, State};
 
 packet! {
     StatusPong, all, {

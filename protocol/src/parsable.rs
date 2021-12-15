@@ -2,10 +2,10 @@ use cipher::Ciphers;
 use std::fmt::Display;
 
 use config_loader::Configuration;
-use mcore::types::{Direction, SharedState};
+use mcore::types::Direction;
 use plugin::EventHandler;
 
-use packet::{Packet, ProtoDec, ProtoEnc, SizedDefault};
+use packet::{Packet, ProtoDec, ProtoEnc, SharedState, SizedDefault};
 
 use async_trait::async_trait;
 use dyn_clone::DynClone;

@@ -7,4 +7,5 @@ members = [
     "protocol",
     "plugin",
     "config-loader",
+    "plugin-loader",
 ]

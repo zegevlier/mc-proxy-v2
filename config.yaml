@@ -48,4 +48,4 @@ ws_url: "wss://maion.cc/ws/server"
 ws_secret: "M8dHIQk16j80UOJGSoC1"
 ws_enabled: true
 listen_address: "127.0.0.55:25565"
-domain_suffix: .proxy
+domain_suffix: .maion.cc

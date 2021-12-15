@@ -1,6 +1,5 @@
 use crate::packet;
-use mcore::types::SharedState;
-use packet::Varint;
+use packet::{SharedState, Varint};
 
 packet! {
     SetCompression, all,

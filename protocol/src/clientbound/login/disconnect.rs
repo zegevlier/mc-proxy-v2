@@ -1,7 +1,5 @@
+use packet::{self, SharedState, State, Chat};
 use crate::packet;
-use mcore::types::{SharedState, State};
-
-use packet::Chat;
 
 packet! {
     Disconnect, all,

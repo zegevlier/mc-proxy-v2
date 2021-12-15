@@ -32,11 +32,11 @@ use crate::{
     types::{DataQueue, Queues},
 };
 
-pub(crate) use mcore::types::{Direction, SharedState};
+pub(crate) use mcore::types::Direction;
 pub(crate) use plugin::EventHandler;
+pub(crate) use packet::SharedState;
 
 mod logging;
-mod parsable;
 mod types;
 mod utils;
 
@@ -475,7 +475,7 @@ async fn handle_connection(
     //    so they don't get created if they don't need to.
     let log_queue = Arc::new(LogQueue::new());
     let is_closed = Arc::new(AtomicBool::new(false));
-    let plugins = Arc::new(Mutex::new(plugin::get_plugins()));
+    let plugins = Arc::new(Mutex::new(plugin_loader::get_plugins()));
 
     // Start a thread for logging the packets
     tokio::spawn({
@@ -561,7 +561,7 @@ async fn main() -> std::io::Result<()> {
         .init();
 
     // Try to load config to make sure it works
-    let config = conf::get_config();
+    let config = config_loader::get_config();
 
     log::info!("Starting listener...");
     // Start listening on the ip waiting for new connections

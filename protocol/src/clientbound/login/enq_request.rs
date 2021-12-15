@@ -1,7 +1,7 @@
 use crate::{packet, utils};
 use config_loader::Configuration;
-use mcore::types::{Direction, SharedState};
-use packet::{LenPrefixedVec, ProtoEnc};
+use mcore::types::Direction;
+use packet::{LenPrefixedVec, ProtoEnc, SharedState};
 
 use std::collections::HashMap;
 
