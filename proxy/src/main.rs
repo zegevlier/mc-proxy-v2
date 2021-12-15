@@ -1,5 +1,4 @@
 #![allow(where_clauses_object_safety)]
-
 use std::{
     io::Write,
     sync::{

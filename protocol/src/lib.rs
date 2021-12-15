@@ -1,3 +1,5 @@
+#![allow(where_clauses_object_safety)]
+
 use std::fmt;
 
 pub mod v754;

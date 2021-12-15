@@ -1,5 +1,5 @@
 use serde::Serialize;
-use std::{fmt, sync::Arc};
+use std::{sync::Arc};
 
 pub type DataQueue = deadqueue::unlimited::Queue<Vec<u8>>;
 
