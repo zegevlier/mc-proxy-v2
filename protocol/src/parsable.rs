@@ -30,7 +30,7 @@ pub trait Parsable:
         status: &mut SharedState,
         plugins: &mut Vec<Box<dyn EventHandler + Send>>,
         config: &Configuration,
-    ) -> packet::Result<Vec<(Packet, Direction)>> {
+    ) -> packet::Result<Option<Vec<(Packet, Direction)>>> {
         unimplemented!()
     }
 

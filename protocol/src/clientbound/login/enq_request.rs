@@ -7,12 +7,12 @@ use std::collections::HashMap;
 
 use hex::encode;
 use rand::Rng;
-use regex::Regex;
 
 use sha1::{Digest, Sha1};
 
+use hyper::{Client, Method, Request, StatusCode};
+use hyper_tls::HttpsConnector;
 use num_bigint_dig::BigUint;
-use reqwest::Client;
 use rsa::{PaddingScheme, PublicKey, RsaPublicKey};
 use rsa_der::public_key_from_der;
 use rustc_serialize::hex::ToHex;
@@ -29,8 +29,6 @@ packet! {
         utils::make_string_fixed_length(encode(this.verify_token.v.clone()), 20))
     }
 }
-
-const LEADING_ZERO_REGEX: &str = r#"^0+"#;
 
 fn two_complement(bytes: &mut Vec<u8>) {
     let mut carry = true;
@@ -54,7 +52,7 @@ impl Parsable for EncRequest {
         status: &mut SharedState,
         _plugins: &mut Vec<Box<dyn plugin::EventHandler + Send>>,
         _config: &Configuration,
-    ) -> packet::Result<Vec<(Packet, Direction)>> {
+    ) -> packet::Result<Option<Vec<(Packet, Direction)>>> {
         status.secret_key = rand::thread_rng().gen::<[u8; 16]>();
 
         let mut hasher = Sha1::new();
@@ -63,23 +61,25 @@ impl Parsable for EncRequest {
         hasher.update(&status.secret_key);
         hasher.update(&self.public_key.v);
 
-        // let mut hex: Vec<u8> = iter::repeat(0).take((hasher.output_bits() + 7) / 8).collect();
         let mut hex: Vec<u8> = hasher.finalize().to_vec();
-
-        let regex = Regex::new(LEADING_ZERO_REGEX).unwrap();
 
         let result_hash = if (hex[0] & 0x80) == 0x80 {
             two_complement(&mut hex);
-            format!(
-                "-{}",
-                regex
-                    .replace(hex.as_slice().to_hex().as_str(), "")
-                    .to_string()
-            )
+            format!("-{}", {
+                let thing = hex.as_slice().to_hex();
+                if thing.starts_with('0') {
+                    thing.strip_prefix('0').unwrap().to_string()
+                } else {
+                    thing
+                }
+            })
         } else {
-            regex
-                .replace(hex.as_slice().to_hex().as_str(), "")
-                .to_string()
+            let thing = hex.as_slice().to_hex();
+            if thing.starts_with('0') {
+                thing.strip_prefix('0').unwrap().to_string()
+            } else {
+                thing.to_string()
+            }
         };
 
         let mut req_map = HashMap::new();
@@ -87,24 +87,20 @@ impl Parsable for EncRequest {
         req_map.insert("selectedProfile", &status.uuid);
         req_map.insert("serverId", &result_hash);
 
-        let client = Client::new();
-        let response = client
-            .post("https://sessionserver.mojang.com/session/minecraft/join")
-            .json(&req_map)
-            .send()
-            .await
-            .unwrap();
-        assert_eq!(response.status(), reqwest::StatusCode::NO_CONTENT);
+        let https = HttpsConnector::new();
 
-        // Send post request to https://sessionserver.mojang.com/session/minecraft/join
-        // with the following data:
-        /*
-        {
-          "accessToken": "<accessToken>",
-          "selectedProfile": "<player's uuid without dashes>",
-          "serverId": "<serverHash>"
-        }
-        */
+        let client = Client::builder().build::<_, hyper::Body>(https);
+
+        let req = Request::builder()
+            .method(Method::POST)
+            .uri("https://sessionserver.mojang.com/session/minecraft/join")
+            .header("Content-Type", "application/json")
+            .body(serde_json::to_string(&req_map).unwrap().into())
+            .unwrap();
+
+        let res = client.request(req).await.unwrap();
+
+        assert_eq!(res.status(), StatusCode::NO_CONTENT);
 
         // Then get a 204 no content back
         let mut rng = rand::rngs::OsRng;
@@ -138,7 +134,7 @@ impl Parsable for EncRequest {
         // Reset the access_token to not keep it in memory needlessly.
         status.access_token = String::new();
 
-        Ok(vec![(response_packet, Direction::Serverbound)])
+        Ok(Some(vec![(response_packet, Direction::Serverbound)]))
     }
 
     fn post_send_update(

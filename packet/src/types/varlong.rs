@@ -6,7 +6,7 @@ macro_rules! varlong {
 }
 
 #[derive(
-    Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize,
+    Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize, Default
 )]
 pub struct Varlong {
     value: i64,
@@ -15,12 +15,6 @@ pub struct Varlong {
 impl Varlong {
     pub fn new(value: i64) -> Self {
         Self { value }
-    }
-}
-
-impl Default for Varlong {
-    fn default() -> Self {
-        Self { value: 0 }
     }
 }
 

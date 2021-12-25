@@ -13,6 +13,8 @@ dyn-clone = "1.0.4"
 erased-serde = "0.3.16"
 futures-util = "0.3.17"
 hex = "0.4.3"
+hyper = {version = "0.14.16", default_features = false, features = ["client"]}
+hyper-tls = "0.5.0"
 log = "0.4.14"
 maplit = "1.0.2"
 mcore = {path = "../maion-core"}
@@ -20,13 +22,11 @@ num-bigint-dig = "0.7.0"
 packet = {path = "../packet"}
 plugin = {path = "../plugin"}
 rand = "0.8.4"
-regex = "1.5.4"
-reqwest = {version = "0.11.7", features = ["json"]}
 rsa = "0.5.0"
 rsa-der = "0.3.0"
 rustc-serialize = "0.3.24"
 serde = {version = "1.0.131", features = ["derive"]}
 serde_json = "1.0.73"
 sha-1 = "0.10.0"
-tokio = {version = "1.14.0", features = ["time"]}
+tokio = {version = "1.14.0", default_features = false, features = []}
 tokio-tungstenite = {version = "0.16.1", features = ["native-tls"]}

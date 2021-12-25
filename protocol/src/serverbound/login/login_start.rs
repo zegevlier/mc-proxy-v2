@@ -44,7 +44,7 @@ impl Parsable for LoginStart {
         status: &mut SharedState,
         _plugins: &mut Vec<Box<dyn plugin::EventHandler + Send>>,
         config: &config_loader::Configuration,
-    ) -> packet::Result<Vec<(packet::Packet, mcore::types::Direction)>> {
+    ) -> packet::Result<Option<Vec<(packet::Packet, mcore::types::Direction)>>> {
         let mut status = status;
         if config.ws_enabled {
             let (mut ws, _) =
@@ -57,13 +57,13 @@ impl Parsable for LoginStart {
                             &"{\"text\":\"WS server down! Please report this!\"}".to_string(),
                         )?;
 
-                        return Ok(vec![(
+                        return Ok(Some(vec![(
                             Packet::from(
                                 new_packet,
                                 crate::current_protocol::fid_to_pid(crate::Fid::Disconnect),
                             ),
                             Direction::Clientbound,
-                        )]);
+                        )]));
                     }
                 };
             log::info!("Connection to websocket established.");
@@ -95,13 +95,13 @@ impl Parsable for LoginStart {
                     let mut new_packet = RawPacket::new();
                     new_packet.encode(&"{\"text\":\"Failed to authenticate\"}".to_string())?;
 
-                    return Ok(vec![(
+                    return Ok(Some(vec![(
                         Packet::from(
                             new_packet,
                             crate::current_protocol::fid_to_pid(crate::Fid::Disconnect),
                         ),
                         Direction::Clientbound,
-                    )]);
+                    )]));
                 }
             };
 
@@ -111,13 +111,13 @@ impl Parsable for LoginStart {
                     let mut new_packet = RawPacket::new();
                     new_packet.encode(&"{\"text\":\"Failed to authenticate\"}".to_string())?;
 
-                    return Ok(vec![(
+                    return Ok(Some(vec![(
                         Packet::from(
                             new_packet,
                             crate::current_protocol::fid_to_pid(crate::Fid::Disconnect),
                         ),
                         Direction::Clientbound,
-                    )]);
+                    )]));
                 }
             };
 
@@ -127,23 +127,23 @@ impl Parsable for LoginStart {
             if parsed_return_msg.allowed {
                 status.access_token = parsed_return_msg.authentication_token.unwrap();
                 status.uuid = parsed_return_msg.uuid.unwrap();
-                return Ok(vec![]);
+                return Ok(Some(vec![]));
             } else {
                 log::error!("Connection disallowed!");
                 let mut new_packet = RawPacket::new();
                 new_packet.encode(&"{\"text\":\"Failed to authenticate\"}".to_string())?;
 
-                return Ok(vec![(
+                return Ok(Some(vec![(
                     Packet::from(
                         new_packet,
                         crate::current_protocol::fid_to_pid(crate::Fid::Disconnect),
                     ),
                     Direction::Clientbound,
-                )]);
+                )]));
             }
         } else {
             // Just send the packet to the client
-            Ok(vec![])
+            Ok(Some(vec![]))
         }
     }
 }

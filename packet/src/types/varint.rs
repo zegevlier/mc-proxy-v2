@@ -6,7 +6,7 @@ macro_rules! varint {
 }
 
 #[derive(
-    Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize,
+    Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize, Default
 )]
 pub struct Varint {
     value: i32,
@@ -15,12 +15,6 @@ pub struct Varint {
 impl Varint {
     pub fn new(value: i32) -> Self {
         Self { value }
-    }
-}
-
-impl Default for Varint {
-    fn default() -> Self {
-        Self { value: 0 }
     }
 }
 

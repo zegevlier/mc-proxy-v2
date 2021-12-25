@@ -21,27 +21,31 @@ impl Parsable for ChatMessageServerbound {
         _status: &mut SharedState,
         plugins: &mut Vec<Box<dyn plugin::EventHandler + Send>>,
         _config: &Configuration,
-    ) -> packet::Result<Vec<(Packet, Direction)>> {
-        let mut return_vec = None;
+    ) -> packet::Result<Option<Vec<(Packet, Direction)>>> {
+        let mut plugin_response = None;
         for plugin in plugins {
-            match plugin.on_message(&self.message) {
-                Some(plugin_vec) => {
-                    return_vec = Some(plugin_vec);
-                    break;
-                }
-                None => continue,
+            if let Some(response) = plugin.on_message(&self.message).await {
+                plugin_response = Some(response);
+                break;
             }
         }
-        if return_vec.is_none() {
-            return_vec = Some(vec![(
-                Self {
-                    message: self.message.clone(),
+        if plugin_response.is_none() {
+            plugin_response = Some(
+                plugin::PluginReponse {
+                    send_original: true,
+                    packets: vec![],
                 }
-                .encode_packet()?,
-                Direction::Serverbound,
-            )]);
+            )
         }
 
-        Ok(return_vec.unwrap())
+        let mut return_vec = if plugin_response.as_ref().unwrap().send_original {
+            vec![(self.clone().encode_packet().unwrap(), Direction::Serverbound)]
+        } else {
+            vec![]
+        };
+            
+        return_vec.append(&mut plugin_response.unwrap().packets);
+
+        Ok(Some(return_vec))
     }
 }

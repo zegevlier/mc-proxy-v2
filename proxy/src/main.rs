@@ -23,6 +23,7 @@ use log::LevelFilter;
 use miniz_oxide::inflate::decompress_to_vec_zlib;
 use parking_lot::{Mutex, RwLock};
 use trust_dns_resolver::{config::*, TokioAsyncResolver};
+// use srv_rs::{resolver::libresolv::LibResolv, Execution, SrvClient};
 
 use packet::{varint, ProtoDec, ProtoEnc, RawPacket, Varint};
 
@@ -32,8 +33,8 @@ use crate::{
 };
 
 pub(crate) use mcore::types::Direction;
-pub(crate) use plugin::EventHandler;
 pub(crate) use packet::SharedState;
+pub(crate) use plugin::EventHandler;
 
 mod logging;
 mod types;
@@ -263,44 +264,56 @@ async fn parser(
                             .await
                         {
                             Ok(packet_vec) => {
-                                if packet_vec.len() > 1 {
-                                    // When multiple packet get sent back
-                                    for (packet, new_direction) in packet_vec {
-                                        let out_d = if shared_status_copy.compress == 0 {
-                                            packet.get_data_uncompressed().unwrap()
+                                match packet_vec {
+                                    Some(packet_vec) => {
+                                        if packet_vec.len() > 1 {
+                                            // When multiple packet get sent back
+                                            for (packet, new_direction) in packet_vec {
+                                                let out_d = if shared_status_copy.compress == 0 {
+                                                    packet.get_data_uncompressed().unwrap()
+                                                } else {
+                                                    packet
+                                                        .get_data_compressed(
+                                                            shared_status_copy.compress as i32,
+                                                        )
+                                                        .unwrap()
+                                                };
+                                                match new_direction {
+                                                    Direction::Serverbound => {
+                                                        let out_d =
+                                                            ciphers.lock().ps_cipher.encrypt(out_d);
+                                                        queues.proxy_server.push(out_d);
+                                                    }
+                                                    Direction::Clientbound => {
+                                                        queues.proxy_client.push(out_d)
+                                                    }
+                                                }
+                                            }
+                                            // Make sure the original data doesn't get sent anymore
+                                            out_data.clear();
+                                        } else if packet_vec.is_empty() {
+                                            // Send the original packet.
                                         } else {
-                                            packet
-                                                .get_data_compressed(
-                                                    shared_status_copy.compress as i32,
-                                                )
-                                                .unwrap()
-                                        };
-                                        match new_direction {
-                                            Direction::Serverbound => {
-                                                let out_d = ciphers.lock().ps_cipher.encrypt(out_d);
-                                                queues.proxy_server.push(out_d);
-                                            }
-                                            Direction::Clientbound => {
-                                                queues.proxy_client.push(out_d)
-                                            }
+                                            // One packet
+                                            let (packet, new_direction) = &packet_vec[0];
+                                            to_direction = new_direction.to_owned();
+                                            out_data = if shared_status_copy.compress == 0 {
+                                                packet.get_data_uncompressed().unwrap()
+                                            } else {
+                                                packet
+                                                    .get_data_compressed(
+                                                        shared_status_copy.compress as i32,
+                                                    )
+                                                    .unwrap()
+                                            };
                                         }
                                     }
-                                    // Make sure the original data doesn't get sent anymore
-                                    out_data.clear();
-                                } else if packet_vec.is_empty() {
-                                    // Send the original packet.
-                                } else {
-                                    // One packet
-                                    let (packet, new_direction) = &packet_vec[0];
-                                    to_direction = new_direction.to_owned();
-                                    out_data = if shared_status_copy.compress == 0 {
-                                        packet.get_data_uncompressed().unwrap()
-                                    } else {
-                                        packet
-                                            .get_data_compressed(shared_status_copy.compress as i32)
-                                            .unwrap()
-                                    };
+                                    None => {
+                                        // Send nothing.
+                                        out_data.clear();
+                                    }
                                 }
+
                                 shared_status.write().set(shared_status_copy);
                                 let mut locked_plugins = plugins.lock();
                                 // This should probably be optimized?
@@ -474,7 +487,7 @@ async fn handle_connection(
     //    so they don't get created if they don't need to.
     let log_queue = Arc::new(LogQueue::new());
     let is_closed = Arc::new(AtomicBool::new(false));
-    let plugins = Arc::new(Mutex::new(plugin_loader::get_plugins()));
+    let plugins = Arc::new(Mutex::new(plugin_loader::get_plugins().await));
 
     // Start a thread for logging the packets
     tokio::spawn({
@@ -562,7 +575,7 @@ async fn main() -> std::io::Result<()> {
     // Try to load config to make sure it works
     let config = config_loader::get_config();
 
-    log::info!("Starting listener...");
+    log::info!("Starting listener.. .");
     // Start listening on the ip waiting for new connections
     let mc_client_listener = match TcpListener::bind(config.listen_address).await {
         Ok(listener) => listener,

@@ -9,3 +9,4 @@ version = "0.1.0"
 dyn-clone = "1.0.4"
 mcore = {path = "../maion-core"}
 packet = {path = "../packet"}
+async-trait = "0.1.52"

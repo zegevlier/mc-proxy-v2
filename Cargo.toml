@@ -1,11 +1,15 @@
 [workspace]
 members = [
-    "maion-core",
-    "cipher",
     "proxy",
+    "maion-core",
     "packet",
     "protocol",
     "plugin",
-    "config-loader",
     "plugin-loader",
+    "plugin-interface",
+    "config-loader",
+    "cipher",
+    "plugins/test-plugin",
 ]
+
+default-members = ["proxy"]

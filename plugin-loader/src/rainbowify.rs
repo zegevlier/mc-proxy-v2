@@ -1,18 +1,19 @@
-use packet::{Chat, Packet, ProtoEnc};
+use packet::{Chat, ProtoEnc};
 use regex::{Captures, Regex};
 
-use protocol::serverbound::play::ChatMessageServerbound;
 use mcore::types::Direction;
+use protocol::serverbound::play::ChatMessageServerbound;
 
 #[derive(Clone)]
 pub struct Rainbowify {}
 
+#[async_trait::async_trait]
 impl plugin::EventHandler for Rainbowify {
-    fn new() -> Self {
+    async fn new() -> Self {
         Self {}
     }
 
-    fn on_message(&mut self, message: &Chat) -> Option<Vec<(Packet, Direction)>> {
+    async fn on_message(&mut self, message: &Chat) -> Option<plugin::PluginReponse> {
         let exp = Regex::new(r"\{([a-zA-Z0-9 _+=]*)\}").unwrap();
         let new_message = exp
             .replace_all(message.get_string(), |caps: &Captures| {
@@ -24,14 +25,17 @@ impl plugin::EventHandler for Rainbowify {
             })
             .to_string();
         if &new_message != message.get_string() {
-            Some(vec![(
-                ChatMessageServerbound {
-                    message: Chat::from(new_message),
-                }
-                .encode_packet()
-                .unwrap(),
-                Direction::Serverbound,
-            )])
+            Some(plugin::PluginReponse {
+                send_original: false,
+                packets: vec![(
+                    ChatMessageServerbound {
+                        message: Chat::from(new_message),
+                    }
+                    .encode_packet()
+                    .unwrap(),
+                    Direction::Serverbound,
+                )],
+            })
         } else {
             None
         }

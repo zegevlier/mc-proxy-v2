@@ -1,0 +1,32 @@
+// version of protocol buffer used
+syntax = "proto3";
+
+// package name for the buffer will be used later
+package plugin_interface;
+
+service Plugin {
+    // Our SayHello rpc accepts HelloRequests and returns HelloReplies
+    rpc onClientSendMessage (ClientSendMessage) returns (PluginResponse);
+}
+
+enum Direction {
+    SERVERBOUND = 0;
+    CLIENTBOUND = 1;
+}
+
+message ClientSendMessage {
+    string message = 1;
+}
+
+message PluginResponse {
+    bool next = 1;
+    bool original = 2;
+    repeated Packet packets = 3;
+}
+
+message Packet {
+    // Reply contains the greeting message
+    int32 pid = 1;
+    Direction direction = 2;
+    bytes data = 3;
+}
