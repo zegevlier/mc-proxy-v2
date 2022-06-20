@@ -15,7 +15,7 @@ config = "0.11.0"
 deadqueue = {version = "0.2.0", features = ["unlimited"]}
 dyn-clone = "1.0.4"
 env_logger = "0.9.0"
-erased-serde = "0.3.16"
+erased-serde = "0.3.21"
 futures-util = "0.3.18"
 hematite-nbt = "0.5.2"
 hex = "0.4.3"
