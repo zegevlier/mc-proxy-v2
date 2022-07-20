@@ -31,7 +31,7 @@ rsa = "0.5.0"
 rsa-der = "0.3.0"
 rust-crypto = "0.2.36"
 rustc-serialize = "0.3.24"
-serde = {version = "1.0.130", features = ["derive"]}
+serde = {version = "1.0.140", features = ["derive"]}
 serde_json = "1.0.72"
 tokio = {version = "1.14.0", features = ["net", "rt-multi-thread", "macros", "io-util", "time"]}
 tokio-tungstenite = {version = "0.16.0", features = ["native-tls"]}
